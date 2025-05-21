@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketFlex | Compra En Linea De Boletas A Credito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/modern.css"> <!-- Nuevo CSS para el diseño moderno -->
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+</head>
+<body>
+    <!-- Header Rediseñado -->
+    <header class="modern-header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="#">Ticket<span>Flex</span></a>
+                </div>
+                
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="#eventosSection"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
+                    <li class="dropdown">
+                        <a href="#"><i class="fas fa-bars"></i> Categorías <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Conciertos</a></li>
+                            <li><a href="#">Teatro</a></li>
+                            <li><a href="#">Deportes</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#footer"><i class="fas fa-envelope"></i> Contacto</a></li>
+                    
+                     <!-- Botones de autenticación -->
+    <!-- Botones de login/register (se ocultan al iniciar sesión) -->
+<li id="loginButtonSection">
+    <button id="showLoginButton">Iniciar Sesión</button>
+    <button id="showRegisterButton">Registrar</button>
+</li>
+
+<!-- Menú de usuario (se muestra al iniciar sesión) -->
+<li id="userSection" class="hidden">
+    <span id="userName"></span>
+    <div id="logoutMenu" class="hidden">
+        <button id="logoutButton">Cerrar Sesión</button>
+    </div>
+</li>
+                </ul>
+                
+                <div class="menu-toggle" id="mobileMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Encuentra los mejores eventos</h1>
+                <p>Compra tus boletos de forma rápida y segura</p>
+                <div class="search-box">
+                    <input type="text" placeholder="Buscar por artista, evento...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Access -->
+    <div class="quick-access">
+        <div class="container">
+            <a href="#" class="quick-link"><i class="fas fa-gift"></i> Bonos Regalo</a>
+            <a href="#" class="quick-link"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="#footer" class="quick-link"><i class="fas fa-phone-alt"></i> Contacto</a>
+        </div>
+    </div>
+
+    <!-- Sección de Eventos (Manteniendo tus filtros funcionales) -->
+    <section id="eventosSection" class="events-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-check"></i> Eventos Disponibles</h2>
+                <button class="filter-toggle" id="filterToggle"><i class="fas fa-filter"></i> Filtros</button>
+            </div>
+            
+            <div class="filters-container" id="filtersContainer">
+                <div class="filter-group">
+                    <label for="lugar"><i class="fas fa-map-marker-alt"></i> Lugar:</label>
+                    <select id="lugar">
+                        <option value="">Todas las ciudades</option>
+                        <option value="Bogotá">Bogotá</option>
+                        <option value="Medellín">Medellín</option>
+                        <option value="Cali">Cali</option>
+                        <option value="Cartagena">Cartagena</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="fecha"><i class="far fa-calendar-alt"></i> Fecha:</label>
+                    <input type="date" id="fecha">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="categoria"><i class="fas fa-tag"></i> Categoría:</label>
+                    <select id="categoria">
+                        <option value="">Todas</option>
+                        <option value="Concierto">Concierto</option>
+                        <option value="Teatro">Teatro</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="artista"><i class="fas fa-user"></i> Artista:</label>
+                    <input type="text" id="artista" placeholder="Nombre del artista">
+                </div>
+                
+                <div class="filter-actions">
+                    <button id="filtrar" class="btn-primary">Aplicar Filtros</button>
+                    <button id="resetFilters" class="btn-outline">Limpiar</button>
+                </div>
+            </div>
+            
+            <div id="eventosList" class="events-grid">
+                <!-- Los eventos se cargarán aquí dinámicamente como antes -->
+            </div>
+        </div>
+    </section>
+
+       <!-- Modal para Inicio de Sesión -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span id="closeLoginModal" class="close">&times;</span>
+        <h2 id="modalTitle">Inicio de Sesión</h2>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox"> Recordar sesión
+                </label>
+                <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+            </div>
+            
+            <button type="submit" class="submit-btn">Iniciar Sesión</button>
+            
+            <div class="divider">
+                <span>o</span>
+            </div>
+            
+            <div class="social-login">
+                <button type="button" class="social-btn google-btn">
+                    <i class="fab fa-google"></i> Continuar con Google
+                </button>
+                <button type="button" class="social-btn facebook-btn">
+                    <i class="fab fa-facebook-f"></i> Continuar con Facebook
+                </button>
+            </div>
+            
+            <p class="switch-modal">¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para Registro -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span id="closeRegisterModal" class="close">&times;</span>
+        <h2 id="modalTitle">Registro de Usuario</h2>
+        
+        <form id="registroForm">
+            <div class="form-row">
+                <div class="form-group half-width">
+                    <label for="nombre">Nombre*:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                
+                <div class="form-group half-width">
+                    <label for="apellido">Apellido*:</label>
+                    <input type="text" id="apellido" name="apellido" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="emailReg">Email*:</label>
+                <input type="email" id="emailReg" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="passwordReg">Contraseña*:</label>
+                <input type="password" id="passwordReg" name="password" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono">
+            </div>
+            
+            <div class="form-group">
+                <label for="direccion">Dirección:</label>
+                <input type="text" id="direccion" name="direccion">
+            </div>
+            
+            <button type="submit" class="submit-btn">Registrarse</button>
+            
+            <p class="switch-modal">¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión aquí</a></p>
+            
+            <p class="required-info">* Campos obligatorios</p>
+        </form>
+    </div>
+</div>
+    <!-- Modal para La compra de los boletos -->
+   <div id="buyTicketModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Selecciona tu método de pago</h2>
+        
+        <!-- Pestañas para elegir método -->
+        <div class="payment-tabs">
+            <button class="tab-btn active" onclick="openPaymentTab('traditional')">Pago Tradicional</button>
+            <button class="tab-btn" onclick="openPaymentTab('ticketflex')">TicketFlex</button>
+        </div>
+        
+        <!-- Contenido de Pago Tradicional -->
+        <div id="traditional-tab" class="payment-tab-content" style="display:block">
+            <label for="ticketCount">Cantidad:</label>
+            <input type="number" id="ticketCount" min="1" max="5" value="1">
+            
+            <label for="graderia">Gradería:</label>
+            <select id="graderia">
+                <option value="general">General</option>
+                <option value="vip">VIP</option>
+            </select>
+            
+            <!-- Campos de tarjeta (solo para pago tradicional) -->
+            <div id="card-fields">
+                <label for="cardNumber">Tarjeta:</label>
+                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
+                
+                <div class="row">
+                    <div class="col">
+                        <label for="expiry">Vencimiento:</label>
+                        <input type="text" id="expiry" placeholder="MM/AA">
+                    </div>
+                    <div class="col">
+                        <label for="cvv">CVV:</label>
+                        <input type="text" id="cvv" placeholder="123">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-pay" onclick="processPayment('traditional')">Pagar Total</button>
+        </div>
+        
+        <!-- Contenido de TicketFlex -->
+        <div id="ticketflex-tab" class="payment-tab-content">
+            <div class="ticketflex-benefits">
+                <p><i class="fas fa-check-circle"></i> Paga solo <strong>1 cuota</strong> y el resto mes con mes.</p>
+                <p><i class="fas fa-check-circle"></i> <strong>Ahorras $10</strong> vs pago tradicional.</p>
+            </div>
+            
+            <label for="tf-ticketCount">Cantidad:</label>
+            <input type="number" id="tf-ticketCount" min="1" max="5" value="1"> <!-- Límite menor para TicketFlex -->
+            
+            <label for="tf-graderia">Gradería:</label>
+            <select id="tf-graderia">
+                <option value="general">General</option>
+                <option value="vip">VIP (+$20)</option>
+            </select>
+            
+            <button class="btn-pay-tf" onclick="processPayment('ticketflex')">
+                Reservar con TicketFlex (Pagar 1 cuota)
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- Footer Rediseñado -->
+    <footer id="footer" class="modern-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>TicketFlex</h3>
+                    <p>La mejor plataforma para compra de boletos de eventos en Colombia.</p>
+                    <div class="social-media">
+                        <a href="https://bit.ly/3YRFvKy" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://x.com/ticketflex1" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/ticketflex1/" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#eventosSection">Eventos</a></li>
+                        <li><a href="#">Cómo comprar</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +57 333 2608 028</li>
+                        <li><i class="fas fa-envelope"></i> info@ticketflex.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 TicketFlex. Todos los derechos reservados.</p>
+                <div class="legal-links">
+                  	<a href="/politica-privacidad.html">Política de Privacidad</a>
+        			<a href="/terminos-servicio.html">Términos de Servicio</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón para subir (manteniendo funcionalidad) -->
+    <div class="scroll-to-top" id="scrollToTopButton">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+    
+    <!--============================================================================================================ -->
+    <!--  CODIGO -->
+    
+    <script>
+   
+    	/*Variables para la animacion
+    	const monster = document.getElementById('monster');
+    	const inputUsuario = document.getElementById('email'); 
+    	const inputClave = document.getElementById('password'); 
+    	const body = document.querySelector('body');
+    	const anchoMitad = window.innerWidth / 2;
+    	const altoMitad = window.innerHeight / 2;
+    	let seguirPunteroMouse = true;*/
+
+    	// Estado de autenticación
+    	let isAuthenticated = false; // Variable para verificar si el usuario está autenticado
+    	let userId = null; // Variable para almacenar el ID del usuario logueado
+
+    	// Funcion para el DOM
+    	document.addEventListener('DOMContentLoaded', function() {
+    		cargarEventos(); // Cargar eventos al inicio
+    		agregarEventosLogin();
+        	agregarEventosFiltros();
+        	});
+
+    	
+    	/* Eventos de interacción con el puntero (Monster)
+    	body.addEventListener('mousemove', (m) => {
+    		if (seguirPunteroMouse) {
+            if (m.clientX < anchoMitad && m.clientY < altoMitad) {
+            	monster.src = "img/idle/2.png";
+            	} else if (m.clientX < anchoMitad && m.clientY > altoMitad) {
+            		monster.src = "img/idle/3.png";
+            		} else if (m.clientX > anchoMitad && m.clientY < altoMitad) {
+            			monster.src = "img/idle/5.png";
+            			} else {
+            				monster.src = "img/idle/4.png";
+            				}
+            }
+    	});
+
+    	// Eventos relacionados input del usuario
+    	inputUsuario.addEventListener('focus', () => {
+    		seguirPunteroMouse = false;
+    		});
+
+    	inputUsuario.addEventListener('blur', () => {
+        	seguirPunteroMouse = true;
+    		});
+
+    	inputUsuario.addEventListener('keyup', () => {
+        	let usuario = inputUsuario.value.length;
+        	if (usuario >= 0 && usuario <= 5) {
+        		monster.src = 'img/read/1.png';
+        		} else if (usuario >= 6 && usuario <= 14) {
+        			monster.src = 'img/read/2.png';
+        			} else if (usuario >= 15 && usuario <= 20) {
+            			monster.src = 'img/read/3.png';
+        				} else {
+        					monster.src = 'img/read/4.png';
+        					}
+        	});
+
+    	 Eventos relacionados con el input de la clave
+    	inputClave.addEventListener('focus', () => {
+    		seguirPunteroMouse = false;
+        	let cont = 1;
+        	const cubrirOjo = setInterval(() => {
+        		monster.src = 'img/cover/' + cont + '.png';
+        		if (cont < 8) {
+        			cont++;
+        			} else {
+        				clearInterval(cubrirOjo);
+        				}
+        		}, 60);
+        	});
+
+    	inputClave.addEventListener('blur', () => {
+    		seguirPunteroMouse = true;
+        	let cont = 7;
+        	const descubrirOjo = setInterval(() => {
+        		monster.src = 'img/cover/' + cont + '.png';
+        		if (cont > 1) {
+        			cont--;
+        			} else {
+        				clearInterval(descubrirOjo);
+        				}
+        		}, 60);
+        	});*/
+
+    // ========================================================
+    	// Manejo de eventos relacionados con la autenticación
+
+    	function agregarEventosLogin() {
+    		// Mostrar el modal de inicio de sesión
+    		document.getElementById('showLoginButton').addEventListener('click', () => {
+            	document.getElementById('loginModal').style.display = 'block';
+            	});
+
+        	// Mostrar el modal de registro
+        	document.getElementById('showRegisterButton').addEventListener('click', () => {
+            	document.getElementById('registerModal').style.display = 'block';
+        		});
+
+        	// Cerrar el modal de inicio de sesión
+        	document.getElementById('closeLoginModal').addEventListener('click', () => {
+            	document.getElementById('loginModal').style.display = 'none';
+        		});
+
+        	// Cerrar el modal de registro
+        	document.getElementById('closeRegisterModal').addEventListener('click', () => {
+            	document.getElementById('registerModal').style.display = 'none';
+        		});
+
+        	// Manejo del formulario de inicio de sesión
+        	document.getElementById('loginForm').addEventListener('submit', login);
+        		document.getElementById('registroForm').addEventListener('submit', registro);
+        }
+
+    // Manejo del formulario de inicio de sesión
+    function login(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData);
+
+        fetch('http://localhost:8080/api/usuarios/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            isAuthenticated = true;
+            userId = data.id;
+            document.getElementById('userName').innerText = data.nombre;
+            document.getElementById('loginButtonSection').classList.add('hidden');
+            document.getElementById('userSection').classList.remove('hidden');
+            alert('¡Bienvenido, ' + data.nombre + '!');
+            document.getElementById('loginModal').style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al iniciar sesión: ' + error.message);
+        });
+    }
+
+ // Manejo del formulario de registro de un usuario
+    function registro(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData);
+        
+        console.log("Datos a enviar:", data); // Para depuración
+
+        fetch('http://localhost:8080/api/usuarios/registrar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(async response => {
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Error al registrar');
+            }
+            alert('Registro exitoso. Puedes iniciar sesión ahora.');
+            document.getElementById('registerModal').style.display = 'none';
+            event.target.reset();
+        })
+        .catch(error => {
+            console.error('Error completo:', error);
+            alert('Error al registrar: ' + error.message);
+        });
+    }
+
+    // Luego asigna los event listeners
+    function agregarEventosLogin() {
+        // Mostrar modales
+        document.getElementById('showLoginButton').addEventListener('click', () => {
+            document.getElementById('loginModal').style.display = 'block';
+        });
+
+        document.getElementById('showRegisterButton').addEventListener('click', () => {
+            document.getElementById('registerModal').style.display = 'block';
+        });
+
+        // Cerrar modales
+        document.getElementById('closeLoginModal').addEventListener('click', () => {
+            document.getElementById('loginModal').style.display = 'none';
+        });
+
+        document.getElementById('closeRegisterModal').addEventListener('click', () => {
+            document.getElementById('registerModal').style.display = 'none';
+        });
+
+        // Asignar manejadores de formularios
+        document.getElementById('loginForm').addEventListener('submit', login);
+        document.getElementById('registroForm').addEventListener('submit', registro);
+    }
+
+    // Inicialización cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarEventos();
+        agregarEventosLogin();
+        agregarEventosFiltros();
+    });
+
+    // Cerrar el modal al hacer clic fuera de él
+    window.onclick = function(event) {
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        if (event.target === loginModal) {
+            loginModal.style.display = 'none';
+        }
+        if (event.target === registerModal) {
+            registerModal.style.display = 'none';
+        }
+    };
+    
+    // Manejo del cierre de sesión
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        fetch('http://localhost:8080/api/usuarios/logout', {
+            method: 'POST'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cerrar sesión');
+            }
+            alert('Sesión cerrada exitosamente');
+            isAuthenticated = false;
+            userId = null;
+            document.getElementById('loginButtonSection').classList.remove('hidden');
+            document.getElementById('userSection').classList.add('hidden');
+            document.getElementById('userName').innerText = '';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cerrar sesión: ' + error.message);
+        });
+    });
+
+    // ========================================================
+    /// Función para cargar y filtrar eventos
+function agregarEventosFiltros() {
+    // Manejadores de eventos para aplicar y resetear filtros
+    document.querySelector('#resetFilters').addEventListener('click', resetearFiltros);
+    document.querySelector('#filtrar').addEventListener('click', aplicarFiltros);
+}
+
+// Resetear filtros y recargar todos los eventos
+function resetearFiltros() {
+    document.querySelector('#lugar').value = '';
+    document.querySelector('#fecha').value = '';
+    document.querySelector('#categoria').value = '';
+    document.querySelector('#artista').value = '';
+    cargarEventos(); // Recargar todos los eventos sin aplicar filtros
+}
+
+// Función para aplicar los filtros
+function aplicarFiltros() {
+    const lugar = document.querySelector('#lugar').value.trim();
+    const fecha = document.querySelector('#fecha').value.trim();
+    const categoria = document.querySelector('#categoria').value.trim();
+    const artista = document.querySelector('#artista').value.trim();
+
+    const filters = { lugar, fecha, categoria, artista };
+
+    // Llamar a la API solo si hay filtros definidos
+    if (Object.values(filters).some(value => value !== '')) {
+        fetch('http://localhost:8080/api/eventos/filtrar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(filters)
+        })
+        .then(response => response.json())
+        .then(data => mostrarEventosFiltrados(data))
+        .catch(error => console.error('Error al obtener los eventos filtrados:', error));
+    } else {
+        // Si no hay filtros, mostrar todos los eventos
+        cargarEventos();
+    }
+}
+
+// Mostrar los eventos filtrados en la interfaz
+function mostrarEventosFiltrados(eventos) {
+    const contenedor = document.querySelector('#eventosList');
+    contenedor.innerHTML = ''; // Limpiar contenedor
+
+    if (eventos.length === 0) {
+        contenedor.innerHTML = '<p>No se encontraron eventos.</p>';
+    } else {
+        eventos.forEach(evento => {
+            const div = document.createElement('div');
+            div.classList.add('evento');
+            div.innerHTML = `
+                <img src="/images/${evento.imagen}" alt="${evento.nombreEvento}" />
+                <h3>${evento.nombreEvento}</h3>
+                <p><strong>Fecha:</strong> ${evento.fecha}</p>
+                <p><strong>Lugar:</strong> ${evento.lugar}</p>
+                <p><strong>Descripción:</strong> ${evento.descripcion}</p>
+                <p><strong>Precio:</strong> $${evento.precioBase}</p>
+                <button onclick="comprarBoleto(${evento.idEvento})">Comprar Boleto</button>
+            `;
+            contenedor.appendChild(div);
+        });
+    }
+}
+
+// Función para cargar todos los eventos (cuando no hay filtros)
+function cargarEventos(ciudad = '', fecha = '', categoria = '', artista = '') {
+    let url = `http://localhost:8080/api/eventos/listar?ciudad=${ciudad}&fecha=${fecha}&categoria=${categoria}&artista=${artista}`;
+
+    fetch(url)
+    .then(response => response.json())
+    .then(eventos => {
+        const eventosList = document.querySelector('#eventosList');
+        eventosList.innerHTML = ''; // Limpiar lista de eventos
+
+        if (eventos.length === 0) {
+            eventosList.innerHTML = '<p>No se encontraron eventos.</p>';
+        } else {
+            eventos.forEach(evento => {
+                const eventoDiv = document.createElement('div');
+                eventoDiv.classList.add('event');
+                eventoDiv.innerHTML = `
+                    <h3>${evento.nombreEvento}</h3>
+                    <img src="http://localhost:8080/images/${evento.imagen}" alt="${evento.nombreEvento}">
+                    <br /><br />
+                    <button onclick="comprarBoleto(${evento.idEvento})">Comprar Boleto</button>
+                `;
+                eventosList.appendChild(eventoDiv);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error al cargar eventos:', error);
+    });
+}
+
+
+    
+    
+    // VARIABLES PARA LA COMPRA DEL BOLETO
+    const buyTicketModal = document.getElementById("buyTicketModal");
+    const closeModalButton = document.getElementById("closeModal");
+    const buyButton = document.getElementById("buyButton");
+    const ticketCountInput = document.getElementById("ticketCount");
+    const graderiaInput = document.getElementById("graderia");
+    let idEventoToBuy = null;
+    
+    // Función para abrir el modal y manejar la compra
+    function comprarBoleto(eventoId) {
+        if (!isAuthenticated) {
+            alert('Por favor, inicie sesión para comprar boletos.');
+            return;
+        }
+
+        // Guardamos el ID del evento para hacer la compra posteriormente
+        idEventoToBuy = eventoId;
+
+        // Mostrar el modal
+        buyTicketModal.style.display = "block";
+    }
+
+    // Función para cerrar el modal
+    closeModalButton.addEventListener("click", function() {
+        buyTicketModal.style.display = "none";
+    });
+
+    // Función para procesar la compra
+    buyButton.addEventListener("click", function() {
+        let cantidad = parseInt(ticketCountInput.value, 10); // Obtenemos la cantidad de boletos
+
+        // Validación de la cantidad
+        if (isNaN(cantidad) || cantidad < 1 || cantidad > 5) {
+            alert('Cantidad no válida. Debe ser un número entre 1 y 5.');
+            return;
+        }
+
+        if (userId === null || userId === undefined) {
+            alert('Error: ID de usuario no definido.');
+            return;
+        }
+
+        // Realizamos la solicitud de compra a la API
+        fetch(`http://localhost:8080/api/eventos/${idEventoToBuy}/comprar?idUsuario=${userId}&cantidad=${cantidad}`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la compra: ' + response.statusText);
+            }
+            return response.text();
+        })
+        .then(data => {
+            alert(data); // Mensaje de éxito
+            buyTicketModal.style.display = "none"; // Cerrar el modal después de la compra
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al realizar la compra: ' + error.message);
+        });
+    });
+
+    // Cierra el modal si el usuario hace clic fuera de él
+    window.addEventListener("click", function(event) {
+        if (event.target === buyTicketModal) {
+            buyTicketModal.style.display = "none";
+        }
+    });
+    
+    
+
+    	// Función para dirigirse hacia la parte superior
+    	document.getElementById("scrollToTopButton").onclick = function() {
+    		window.scrollTo({ top: 0, behavior: 'smooth' });
+    		};
+    		
+    		 // Función para mostrar u ocultar los campos de tarjeta
+            function toggleCardFields() {
+                const bankSelect = document.getElementById('bank');
+                const cardDetails = document.getElementById('cardDetails');
+                
+                // Si se selecciona un banco, mostrar los campos de tarjeta
+                if (bankSelect.value) {
+                    cardDetails.style.display = 'block';
+                } else {
+                    cardDetails.style.display = 'none';
+                }
+            }
+         // Mostrar/ocultar pestañas
+            function openPaymentTab(tabName) {
+                document.querySelectorAll('.payment-tab-content').forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                document.getElementById(`${tabName}-tab`).style.display = 'block';
+                event.currentTarget.classList.add('active');
+            }
+
+            // Procesar pago según método seleccionado
+            function processPayment(method) {
+                const eventoId = idEventoToBuy;
+                const cantidad = (method === 'ticketflex') ? 
+                    parseInt(document.getElementById('tf-ticketCount').value) : 
+                    parseInt(document.getElementById('ticketCount').value);
+
+                if (!isAuthenticated) {
+                    alert("Debes iniciar sesión para comprar boletos");
+                    return;
+                }
+
+                if (method === 'ticketflex') {
+                    // Lógica para TicketFlex
+                    fetch(`/api/boletas/comprar?idEvento=${eventoId}&idUsuario=${userId}&cantidad=${cantidad}&metodoPago=TICKETFLEX`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        showTicketFlexConfirmation(data);
+                        buyTicketModal.style.display = "none";
+                    });
+                } else {
+                    // Lógica para pago tradicional (existente)
+                    fetch(`http://localhost:8080/api/eventos/${eventoId}/comprar?idUsuario=${userId}&cantidad=${cantidad}`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert("Compra exitosa: " + data);
+                        buyTicketModal.style.display = "none";
+                    });
+                }
+            }
+
+            // Mostrar confirmación de TicketFlex
+            function showTicketFlexConfirmation(data) {
+                const confirmationHTML = `
+                    <div class="ticketflex-confirmation">
+                        <h3><i class="fas fa-check-circle text-success"></i> ¡Reserva Exitosa!</h3>
+                        <div class="qr-placeholder">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TEMP-${data.idBoleto}" alt="QR Temporal">
+                            <p class="text-muted">QR temporal - Se activará al completar el pago</p>
+                        </div>
+                        <div class="payment-details">
+                            <p><strong>Total a pagar:</strong> $${data.precioTotal}</p>
+                            <p><strong>Fecha límite:</strong> ${data.fechaLimitePago}</p>
+                            <button onclick="location.href='/completar-pago?id=${data.idBoleto}'" class="btn-pay-now">
+                                Completar Pago Ahora
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Crear un nuevo modal o reemplazar contenido
+                document.body.insertAdjacentHTML('beforeend', confirmationHTML);
+            }
+
+
+    		 
+         // Mostrar el botón de "Scroll to top"
+            window.onscroll = function() {
+                var footer = document.getElementById("footer");
+                var scrollToTopButton = document.getElementById("scrollToTopButton");
+
+                // Comprobar si el usuario está cerca del footer
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - footer.offsetHeight) {
+                    scrollToTopButton.style.display = "block";  // Mostrar el botón cuando esté cerca del footer
+                } else {
+                    scrollToTopButton.style.display = "none";  // Ocultar el botón cuando no esté cerca
+                }
+            };
+    		
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

@@ -1,0 +1,11 @@
+package com.tu_paquete.ticketflex.Repository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import com.tu_paquete.ticketflex.model.Transaccion;
+import java.util.List;
+
+public interface TransaccionRepository extends MongoRepository<Transaccion, String> {
+    List<Transaccion> findByUsuarioId(String usuarioId);
+    List<Transaccion> findByEstadoPago(String estadoPago);
+    // etc.
+}

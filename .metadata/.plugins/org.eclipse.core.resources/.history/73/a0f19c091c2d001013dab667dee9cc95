@@ -1,0 +1,89 @@
+package com.tu_paquete.ticketflex.Controller;
+
+import com.tu_paquete.ticketflex.Model.Boleto;
+import com.tu_paquete.ticketflex.Model.Transaccion;
+import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
+import com.tu_paquete.ticketflex.Repository.Mongo.TransaccionRepository;
+import com.tu_paquete.ticketflex.dto.PagoRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.*;
+
+@RestController
+@RequestMapping("/api/pagos") // Ruta base opcional
+public class PagoController {
+
+    @Autowired
+    private BoletoRepository boletoRepository;
+
+    @Autowired
+    private TransaccionRepository transaccionRepository;
+
+    @Value("${payu.apiKey}")
+    private String apiKey;
+
+    @Value("${payu.merchantId}")
+    private String merchantId;
+
+    @Value("${payu.accountId}")
+    private String accountId;
+
+    @Value("${payu.url}")
+    private String payuUrl;
+
+    @Value("${payu.currency}")
+    private String currency;
+
+    @PostMapping("/pagar")
+    public ResponseEntity<?> procesarPago(@RequestBody PagoRequest pagoRequest, HttpServletResponse response) throws IOException {
+        Optional<Boleto> optionalBoleto = boletoRepository.findById(pagoRequest.getBoletoId());
+        if (!optionalBoleto.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Boleto no encontrado");
+        }
+
+        Boleto boleto = optionalBoleto.get();
+        pagoRequest.setUsuarioId(boleto.getUsuario().getId());
+        pagoRequest.setEventoId(boleto.getEvento().getId());
+        pagoRequest.setCantidadBoletos(boleto.getCantidad());
+        pagoRequest.setTotal(boleto.getPrecioTotal());
+
+        Transaccion transaccion = new Transaccion();
+        transaccion.setBoletoId(boleto.getId());
+        transaccion.setEstado("PENDIENTE");
+        transaccion.setMetodoPago(pagoRequest.getMetodoPago());
+        transaccion.setMonto(pagoRequest.getTotal());
+        transaccion.setFechaCreacion(new Date());
+        transaccion = transaccionRepository.save(transaccion);
+
+        String referencia = "TX-" + transaccion.getId();
+        String montoStr = String.format("%.2f", pagoRequest.getTotal());
+        String cadenaParaFirma = apiKey + "~" + merchantId + "~" + referencia + "~" + montoStr + "~" + currency;
+        String firma = DigestUtils.md5DigestAsHex(cadenaParaFirma.getBytes());
+
+        String formularioPayU = "<html><body onload='document.forms[0].submit()'>" +
+                "<form action='" + payuUrl + "' method='POST'>" +
+                "<input name='merchantId' value='" + merchantId + "'/>" +
+                "<input name='accountId' value='" + accountId + "'/>" +
+                "<input name='description' value='Compra TicketFlex'/>" +
+                "<input name='referenceCode' value='" + referencia + "'/>" +
+                "<input name='amount' value='" + montoStr + "'/>" +
+                "<input name='currency' value='" + currency + "'/>" +
+                "<input name='signature' value='" + firma + "'/>" +
+                "<input name='buyerEmail' value='" + boleto.getUsuario().getCorreo() + "'/>" +
+                "<input name='responseUrl' value='http://localhost:8080/confirmacion-payu'/>" +
+                "<input type='submit' value='Pagar ahora'/>" +
+                "</form></body></html>";
+
+        response.setContentType("text/html");
+        response.getWriter().write(formularioPayU);
+
+        return null;
+    }
+}

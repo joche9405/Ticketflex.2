@@ -1,0 +1,6 @@
+package com.tu_paquete.ticketflex.dto;
+
+public class PagoRequest {
+    private String idBoleto;
+    private String metodoPago; // "pagoTotal" o "ticketFlex"
+}

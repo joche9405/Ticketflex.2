@@ -1,0 +1,63 @@
+package com.tu_paquete.ticketflex.Service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.tu_paquete.ticketflex.Model.Rol;
+import com.tu_paquete.ticketflex.Model.Usuario;
+import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.Repository.Mongo.RolRepository;
+
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Service
+public class UsuarioService {
+
+    private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          RolRepository rolRepository,
+                          PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public Usuario registrarUsuario(Usuario usuario) {
+        usuarioRepository.findByEmail(usuario.getEmail()).ifPresent(u -> {
+            throw new IllegalArgumentException("El usuario ya existe con ese correo electrónico");
+        });
+
+        Rol rolUsuario = rolRepository.findByNombreRol("Usuario")
+        	    .orElseGet(() -> {
+        	        Rol nuevoRol = new Rol();
+        	        nuevoRol.setNombreRol("Usuario");
+        	        return rolRepository.save(nuevoRol);
+        	    });
+
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario iniciarSesion(String email, String password) {
+        return usuarioRepository.findByEmail(email)
+            .filter(usuario -> passwordEncoder.matches(password, usuario.getPassword()))
+            .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean esAdministrador(String idUsuario) {
+        return usuarioRepository.findById(idUsuario)
+            .map(usuario -> {
+                Rol rol = usuario.getRol();
+                return rol != null && "Administrador".equalsIgnoreCase(rol.getNombreRol());
+            })
+            .orElse(false);
+    }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad | TicketFlex</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            padding: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .navbar-brand img {
+            margin-right: 10px;
+            max-height: 50px;
+        }
+
+        .navbar-text {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .navbar-text i {
+            margin-right: 5px;
+            font-size: 18px;
+        }
+
+        h1,
+        h2 {
+            color: #000000;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .logo a {
+            text-decoration: none;
+            font-size: 28px;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+            color: #2b0a3d;
+            transition: all 0.3s ease;
+        }
+
+        .logo a span {
+            color: #ff5e6c;
+        }
+
+        .logo a:hover {
+            opacity: 0.85;
+        }
+
+        .privacy-header {
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Barra de navegacion -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <div class="logo">
+                <a href="#">Ticket<span>Flex</span></a>
+            </div>
+            <div class="ml-auto d-flex align-items-center">
+
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    <span th:text="${nombreUsuario}"></span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <h1>Política de Privacidad</h1>
+
+    <section>
+        <h2>1. Información que recopilamos</h2>
+        <p>En TicketFlex recopilamos información personal como nombre completo, dirección de correo electrónico, número
+            de teléfono, dirección física, y datos de pago con el fin de facilitar la compra de boletas y mejorar tu
+            experiencia en nuestra plataforma.</p>
+    </section>
+
+    <section>
+        <h2>2. Uso de la información</h2>
+        <p>Utilizamos tu información para procesar pagos, enviar notificaciones importantes, personalizar tu experiencia
+            en la plataforma, y ofrecer soporte al cliente. No compartimos tus datos con terceros sin tu consentimiento,
+            salvo que sea requerido por ley o por nuestros proveedores de servicios tecnológicos que cumplen con los
+            estándares de seguridad.</p>
+    </section>
+
+    <section>
+        <h2>3. Seguridad</h2>
+        <p>Todos los datos proporcionados se almacenan de forma segura y son cifrados mediante tecnologías SSL. Puedes
+            optar por guardar los datos de tu tarjeta para facilitar compras futuras, bajo estrictos protocolos de
+            seguridad y en cumplimiento de la normativa vigente.</p>
+    </section>
+
+    <section>
+        <h2>4. Derechos del usuario</h2>
+        <p>En cualquier momento puedes solicitar acceso, rectificación, cancelación o eliminación de tu información
+            personal. Para ejercer estos derechos, por favor comunícate con nuestro equipo de soporte al cliente.</p>
+    </section>
+
+    <section>
+        <h2>5. Cookies y tecnologías similares</h2>
+        <p>TicketFlex puede utilizar cookies para mejorar tu experiencia de navegación, recordar tus preferencias y
+            ofrecer contenido personalizado. Puedes modificar la configuración de cookies en tu navegador en cualquier
+            momento.</p>
+    </section>
+
+    <section>
+        <h2>6. Cambios en esta política</h2>
+        <p>Nos reservamos el derecho de modificar esta Política de Privacidad en cualquier momento. Cualquier cambio
+            será notificado a través de nuestros canales oficiales, incluyendo la aplicación y el sitio web.</p>
+    </section>
+
+    <footer>
+        <p>Última actualización: Abril 2025 &nbsp; | &nbsp; TicketFlex &copy; 2024</p>
+    </footer>
+
+</body>
+
+</html>

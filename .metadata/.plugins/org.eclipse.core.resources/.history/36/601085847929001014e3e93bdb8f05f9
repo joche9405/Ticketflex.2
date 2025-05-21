@@ -1,0 +1,52 @@
+package com.tu_paquete.ticketflex.Config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import jakarta.annotation.PostConstruct;
+
+import com.tu_paquete.ticketflex.Model.Usuario;
+import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.Repository.jpa.RolRepository;
+import com.tu_paquete.ticketflex.Model.Rol;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+@Configuration
+public class Configuracion {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private RolRepository rolRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;  // Asegúrate de que esta línea esté presente
+
+    @PostConstruct
+    public void initAdmin() {
+        try {
+            if (usuarioRepository.findByEmail("Admin@ticketflex.com").isEmpty()) {
+                Rol rolAdmin = rolRepository.findByNombreRol("ADMIN")
+                                            .orElseGet(() -> {
+                                                Rol nuevoRol = new Rol();
+                                                nuevoRol.setNombreRol("ADMIN");
+                                                return rolRepository.save(nuevoRol);
+                                            });
+
+                Usuario admin = new Usuario();
+                admin.setNombre("Admin@ticketflex.com");
+                admin.setApellido("Principal");
+                admin.setEmail("Admin@ticketflex.com");
+                admin.setPassword(passwordEncoder.encode("12345678"));
+                admin.setTelefono("000000000");
+                admin.setDireccion("N/A");
+                admin.setRol(rolAdmin);
+
+                usuarioRepository.save(admin);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Imprime el error para depuración
+        }
+    }
+}

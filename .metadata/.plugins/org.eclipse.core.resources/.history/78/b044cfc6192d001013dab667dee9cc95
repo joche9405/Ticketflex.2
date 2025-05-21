@@ -1,0 +1,20 @@
+# Configuraci�n Principal
+server.port=8080
+server.address=0.0.0.0
+spring.main.allow-bean-definition-overriding=true
+
+# Configuraci�n MongoDB
+spring.data.mongodb.uri=mongodb://localhost:27017/ticketflex
+spring.data.mongodb.auto-index-creation=true
+spring.data.mongodb.auto-create-collections=true
+
+# Configuraci�n de Subida de Archivos
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+spring.servlet.multipart.enabled=true
+
+# Configuraci�n Thymeleaf
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.cache=false
+spring.thymeleaf.enabled=true

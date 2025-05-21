@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Evento</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Botón del dashboard -->
+        <a th:href="@{/admin/dashboard}" class="btn btn-primary mb-3">Volver al Dashboard</a>
+
+        <h1>Editar Evento</h1>
+        <form th:action="@{/admin/eventos/editar/{id}(id=${evento.id})}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nombreEvento">Nombre del Evento</label>
+                <input type="text" class="form-control" id="nombreEvento" name="nombreEvento"
+                    th:value="${evento.nombreEvento}" required>
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" th:value="${evento.fecha}" required>
+            </div>
+            <div class="form-group">
+                <label for="lugar">Lugar</label>
+                <input type="text" class="form-control" id="lugar" name="lugar" th:value="${evento.lugar}" required>
+            </div>
+            <div class="form-group">
+                <label for="precioBase">Precio Base</label>
+                <input type="number" step="0.01" class="form-control" id="precioBase" name="precioBase"
+                    th:value="${evento.precioBase}" required>
+            </div>
+            <div class="form-group">
+                <label for="disponibilidad">Disponibilidad</label>
+                <input type="number" class="form-control" id="disponibilidad" name="disponibilidad"
+                    th:value="${evento.disponibilidad}" required>
+            </div>
+            <div class="form-group">
+                <label for="categoria">Categoría</label>
+                <select class="form-control" id="categoria" name="categoria" required>
+                    <option value="">Seleccione una categoría</option>
+                    <option th:each="cat : ${categorias}" th:value="${cat}" th:text="${cat}"
+                        th:selected="${cat == evento.categoria}">
+                    </option>
+                </select>
+            </div>
+
+
+            <!-- Nuevo campo Descripción -->
+            <div class="form-group">
+                <label for="descripcion">Descripción</label>
+                <textarea class="form-control input-amplio" id="descripcion" name="descripcion" rows="3" required
+                    th:text="${evento.descripcion}"></textarea>
+            </div>
+
+            <!-- Campo Artista -->
+            <div class="form-group">
+                <label for="artista">Artista</label>
+                <input type="text" class="form-control input-mitad" id="artista" name="artista"
+                    th:value="${evento.artista}">
+                <small class="form-text text-muted">Nombre del artista o grupo principal.</small>
+            </div>
+
+            <!-- Nuevo campo Imagen -->
+            <div class="form-group">
+                <label for="imagen">Imagen</label>
+                <input type="file" class="form-control input-mitad" id="imagen" name="nuevaImagen" accept="image/*">
+                <small class="form-text text-muted">Sube una nueva imagen si deseas reemplazar la actual.</small>
+
+                <div th:if="${evento.imagen != null}">
+                    <p>Imagen actual:</p>
+                    <img th:src="@{/api/imagen/{id}(id=${evento.imagen})}" alt="Imagen actual"
+                        style="max-width: 200px;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+    </div>
+
+    <script>
+        // El mismo JS del dashboard para manejar el tema
+        document.getElementById('themeToggle')?.addEventListener('click', function () {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (body.classList.contains('theme-dark')) {
+                body.classList.remove('theme-dark');
+                body.classList.add('theme-light');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                body.classList.remove('theme-light');
+                body.classList.add('theme-dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            const currentTheme = body.classList.contains('theme-dark') ? 'dark' : 'light';
+            localStorage.setItem('themePreference', currentTheme);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTheme = localStorage.getItem('themePreference') || 'dark';
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (savedTheme === 'light') {
+                body.classList.remove('theme-dark');
+                body.classList.add('theme-light');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,110 @@
+/* Sección de perfil */
+/* Variables base para modo claro */
+:root {
+    --primary: #1f6feb;
+    --background: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #212529;
+    --text-muted: #6c757d;
+    --border-radius: 12px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Contenedor principal */
+body {
+    background-color: var(--background);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+}
+/* Navbar o caja que contiene la info */
+.navbar {
+    background-color: #2c2f36;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    /* Ocupa todo el ancho */
+    box-sizing: border-box;
+}
+
+/* Botón */
+button {
+    background-color: transparent;
+    border: 1px solid #fff;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+h2 {
+    font-weight: 600;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--primary);
+}
+
+/* Sección del perfil */
+.profile-section {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    max-width: 800px;
+    margin: 2rem auto;
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Tarjeta de información */
+.profile-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.profile-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+
+.profile-form .card-text {
+    font-size: 1rem;
+    color: var(--text);
+    padding: 0.75rem;
+    background-color: #f1f3f5;
+    border-radius: 8px;
+}
+
+/* Botón de retorno */
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    background-color: var(--primary);
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #174db5;
+}
+
+/* Animación */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-section {
+        padding: 1.5rem 1rem;
+        margin: 1rem;
+    }
+}

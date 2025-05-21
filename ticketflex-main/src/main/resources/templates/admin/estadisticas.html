@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas | TicketFlex Admin</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- ApexCharts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.css">
+    <!-- Daterangepicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css">
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #564fc9;
+            --secondary: #ff6584;
+            --dark: #2b0a3d;
+            --light: #f8f9fa;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            height: 110px;
+            overflow: hidden;
+        }
+
+        .navbar-brand {
+            background: rgba(41, 41, 41, 0.1);
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 90px;
+            margin-right: 10px;
+
+        }
+
+        .brand-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .user-info i {
+            font-size: 20px;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .btn-glass {
+            background: var(--glass);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-primary-glass {
+            background: var(--gradient);
+            border: none;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .dashboard-header h1 i {
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        /* Filter Card */
+        .filter-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+        }
+
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+            color: white;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+        }
+
+        .stat-card h5 {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .stat-trend.up {
+            color: #2ed573;
+        }
+
+        .stat-trend.down {
+            color: #ff4757;
+        }
+
+        .progress-thin {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+
+        .progress-bar-thin {
+            border-radius: 3px;
+        }
+
+        /* Power BI Report */
+        .report-container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .report-header h5 {
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .report-header h5 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        /* Events Table */
+        .table-container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-header h5 {
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .table-header h5 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .table {
+            color: white;
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: rgba(108, 99, 255, 0.2);
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
+            padding: 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            border-bottom: 1px solid var(--glass-border);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .badge-active {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.4);
+        }
+
+        .badge-upcoming {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+            border: 1px solid rgba(255, 165, 0, 0.4);
+        }
+
+        .badge-completed {
+            background: rgba(108, 99, 255, 0.2);
+            color: #6c63ff;
+            border: 1px solid rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-action {
+            background: rgba(0, 0, 0, 0.377);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-action i {
+            margin-right: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-brand img {
+                height: 30px;
+            }
+
+            .filter-card,
+            .stat-card,
+            .report-container,
+            .table-container {
+                padding: 20px;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="#">
+                <img src="/images/ticketflex.png" alt="TicketFlex">
+                <span class="brand-text">TicketFlex Admin</span>
+            </a>
+
+            <!-- Espaciador para empujar todo lo demás a la derecha -->
+            <div class="ms-auto d-flex align-items-center">
+                <div class="user-info me-3">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="user-name" th:text="${nombreUsuario}"></span>
+                </div>
+
+                <!-- BOTÓN PERFIL -->
+                <a th:href="@{/admin/perfil}" class="btn btn-glass me-2">
+                    <i class="fas fa-user me-1"></i>
+                    <span class="d-none d-md-inline">Perfil</span>
+                </a>
+
+                <!-- CERRAR SESIÓN -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-glass">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        <span class="d-none d-md-inline">Salir</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="dashboard-header animate__animated animate__fadeIn">
+            <div>
+                <h1><i class="fas fa-chart-line"></i> Estadísticas Avanzadas</h1>
+                <p class="opacity-75">Visualización de datos y métricas clave</p>
+            </div>
+            <a th:href="@{/admin/dashboard}" class="btn btn-glass animate__animated animate__fadeIn">
+                <i class="fas fa-arrow-left mr-2"></i> Volver al Dashboard
+            </a>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-card animate__animated animate__fadeIn">
+            <form id="filtroEstadisticas">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="rangoFechas" class="filter-label">Rango de fechas</label>
+                        <input type="text" class="form-control" id="rangoFechas" name="rangoFechas"
+                            placeholder="Seleccionar rango">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="tipoEvento" class="filter-label">Tipo de evento</label>
+                        <select class="form-select" id="tipoEvento" name="tipoEvento">
+                            <option value="0">Todos los eventos</option>
+                            <option value="1">Concierto</option>
+                            <option value="2">Festival</option>
+                            <option value="3">Teatro</option>
+                            <option value="4">Feria</option>
+                            <option th:each="tipo : ${tiposEvento}" th:value="${tipo.id}" th:text="${tipo.nombre}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary-glass w-100">
+                            <i class="fas fa-filter mr-2"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid animate__animated animate__fadeIn">
+            <div class="stat-card">
+                <h5>Boletas Vendidas</h5>
+                <div class="stat-value" id="totalBoletas" th:text="${totalBoletosVendidos}">0</div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up mr-2"></i>
+                    <span>+15% mes anterior</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h5>Ingresos Totales</h5>
+                <div class="stat-value" id="totalIngresos"
+                    th:text="'$' + ${#numbers.formatDecimal(ingresosTotales, 1, 2, 'COMMA')}">$0</div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up mr-2"></i>
+                    <span>+22% mes anterior</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h5>Ocupación Promedio</h5>
+                <div class="stat-value" id="ocupacionPromedio" th:text="${ocupacionPromedio} + '%'">0%</div>
+                <div class="progress-thin">
+                    <div class="progress-bar-thin bg-success" th:classappend="${ocupacionPromedio} > 80 ? 'bg-success' : 
+                                        (${ocupacionPromedio} > 50 ? 'bg-warning' : 'bg-danger')"
+                        th:style="'width:' + ${ocupacionPromedio} + '%'"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte de Power BI -->
+        <div class="report-container animate__animated animate__fadeIn">
+            <div class="report-header">
+                <h5><i class="fas fa-chart-pie"></i> Reporte Interactivo</h5>
+            </div>
+            <div class="ratio ratio-16x9">
+                <iframe title="Ticketflex1" width="600" height="373.5"
+                    src="https://app.powerbi.com/view?r=eyJrIjoiMWZmZmZhNDctZTA0My00NWM3LWI0NTAtNzE0YTA1ZWM5NzU5IiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
+                    frameborder="0" allowFullScreen="true"></iframe>
+                frameborder="0" allowFullScreen="true"></iframe>
+            </div>
+        </div>
+
+        <!-- Tabla de Eventos -->
+        <div class="table-container animate__animated animate__fadeIn">
+            <div class="table-header">
+                <h5><i class="fas fa-table"></i> Desempeño por Evento</h5>
+                <button class="btn btn-glass">
+                    <i class="fas fa-file-export mr-2"></i> Exportar
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table" id="tablaEventos">
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Fecha</th>
+                            <th>Boletas</th>
+                            <th>Ocupación</th>
+                            <th>Ingresos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="evento : ${eventos}">
+                            <td th:text="${evento.nombreEvento}">Nombre Evento</td>
+                            <td th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy')}">Fecha</td>
+                            <td th:text="${evento.boletosVendidos} + '/' + ${evento.capacidad}">0/100</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress-thin flex-grow-1 me-2">
+                                        <div class="progress-bar-thin"
+                                            th:classappend="${evento.porcentajeOcupacion} > 80 ? 'bg-success' : 
+                                                            (${evento.porcentajeOcupacion} > 50 ? 'bg-warning' : 'bg-danger')"
+                                            th:style="'width:' + ${evento.porcentajeOcupacion} + '%'"></div>
+                                    </div>
+                                    <span th:text="${evento.porcentajeOcupacion} + '%'">0%</span>
+                                </div>
+                            </td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(evento.ingresos, 1, 2, 'COMMA')}">$0</td>
+                            <td>
+                                <a th:href="@{/admin/eventos/{id}/detalles(id=${evento.idEvento})}"
+                                    class="btn btn-action btn-glass">
+                                    <i class="fas fa-chart-bar"></i> Detalles
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+
+    <script>
+        // Inicializar daterangepicker
+        $(document).ready(function () {
+            $('#rangoFechas').daterangepicker({
+                opens: 'left',
+                locale: {
+                    format: 'DD/MM/YYYY',
+                    applyLabel: 'Aplicar',
+                    cancelLabel: 'Cancelar',
+                    daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                    monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    firstDay: 1
+                }
+            });
+
+            // Manejar el envío del formulario de filtros
+            $('#filtroEstadisticas').submit(function (e) {
+                e.preventDefault();
+
+                // Mostrar estado de carga
+                $('.stat-card').addClass('loading');
+
+                // Obtener datos del formulario
+                const rangoFechas = $('#rangoFechas').val();
+                const tipoEvento = $('#tipoEvento').val();
+
+                // Enviar petición AJAX
+                $.ajax({
+                    url: '/admin/estadisticas/filtrar',
+                    type: 'POST',
+                    data: {
+                        rangoFechas: rangoFechas,
+                        tipoEvento: tipoEvento
+                    },
+                    success: function (response) {
+                        // Actualizar las estadísticas
+                        $('#totalBoletas').text(response.totalBoletosVendidos);
+                        $('#totalIngresos').text('$' + response.ingresosTotales.toLocaleString('es-ES'));
+                        $('#ocupacionPromedio').text(response.ocupacionPromedio + '%');
+
+                        // Actualizar la barra de progreso
+                        $('.progress-bar-thin').css('width', response.ocupacionPromedio + '%')
+                            .removeClass('bg-success bg-warning bg-danger')
+                            .addClass(response.ocupacionPromedio > 80 ? 'bg-success' :
+                                (response.ocupacionPromedio > 50 ? 'bg-warning' : 'bg-danger'));
+
+                        // Actualizar la tabla de eventos
+                        const tbody = $('#tablaEventos tbody');
+                        tbody.empty();
+
+                        response.eventos.forEach(function (evento) {
+                            const row = `
+                                <tr>
+                                    <td>${evento.nombreEvento}</td>
+                                    <td>${new Date(evento.fecha).toLocaleDateString('es-ES')}</td>
+                                    <td>${evento.boletosVendidos}/${evento.capacidad}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress-thin flex-grow-1 me-2">
+                                                <div class="progress-bar-thin ${evento.porcentajeOcupacion > 80 ? 'bg-success' :
+                                    (evento.porcentajeOcupacion > 50 ? 'bg-warning' : 'bg-danger')}" 
+                                                    style="width: ${evento.porcentajeOcupacion}%"></div>
+                                            </div>
+                                            <span>${evento.porcentajeOcupacion}%</span>
+                                        </div>
+                                    </td>
+                                    <td>$${evento.ingresos.toLocaleString('es-ES')}</td>
+                                    <td>
+                                        <a href="/admin/eventos/${evento.idEvento}/detalles" class="btn btn-action btn-glass">
+                                            <i class="fas fa-chart-bar"></i> Detalles
+                                        </a>
+                                    </td>
+                                </tr>
+                            `;
+                            tbody.append(row);
+                        });
+                    },
+                    error: function (xhr) {
+                        alert('Error al aplicar filtros: ' + xhr.responseText);
+                    },
+                    complete: function () {
+                        $('.stat-card').removeClass('loading');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

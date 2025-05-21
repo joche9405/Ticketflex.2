@@ -1,0 +1,5 @@
+package com.tu_paquete.ticketflex.Reposotory.jpa;
+
+public class Rol {
+
+}

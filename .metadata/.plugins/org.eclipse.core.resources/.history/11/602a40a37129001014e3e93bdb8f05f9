@@ -1,0 +1,27 @@
+package com.tu_paquete.ticketflex.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.tu_paquete.ticketflex.Model.Evento;
+
+public interface EventoRepository extends MongoRepository<Evento, String> {
+
+    List<Evento> findByLugar(String lugar);
+    List<Evento> findByFecha(LocalDate fecha);
+    List<Evento> findByCategoria(String categoria);
+    List<Evento> findByArtista(String artista);
+
+    List<Evento> findByLugarAndFechaAndCategoriaAndArtista(String lugar, LocalDate fecha, String categoria, String artista);
+
+    // Ya que Usuario es embebido, debes acceder al campo directamente por nombre
+    List<Evento> findByCreador_IdUsuario(Integer idUsuario);
+
+    Page<Evento> findByCreador_IdUsuario(Integer idUsuario, Pageable pageable);
+}
+
+

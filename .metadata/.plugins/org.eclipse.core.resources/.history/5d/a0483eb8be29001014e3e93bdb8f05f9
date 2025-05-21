@@ -1,0 +1,14 @@
+public interface EventoRepository extends MongoRepository<Evento, String> {
+    // Consulta por ID del creador (usando el campo 'id' del objeto Usuario embebido)
+    List<Evento> findByCreadorId(String id);
+    
+    // Versión paginada
+    Page<Evento> findByCreadorId(String id, Pageable pageable);
+    
+    // Otras consultas que tenías...
+    List<Evento> findByLugar(String lugar);
+    List<Evento> findByFecha(LocalDate fecha);
+    List<Evento> findByCategoria(String categoria);
+    List<Evento> findByArtista(String artista);
+    List<Evento> findByLugarAndFechaAndCategoriaAndArtista(String lugar, LocalDate fecha, String categoria, String artista);
+}

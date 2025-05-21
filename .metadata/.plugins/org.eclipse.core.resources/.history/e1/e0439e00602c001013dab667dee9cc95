@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Evento Seleccionado - TicketFlex</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <section class="evento-detalle">
+        <h2 th:text="${evento.nombre}">Nombre del Evento</h2>
+        <p th:text="${evento.descripcion}">Descripción del evento...</p>
+        
+        <div class="opciones-pago">
+            <h3>Opciones de Pago</h3>
+            <form id="form-compra">
+                <input type="hidden" id="id_evento" th:value="${evento.id}">
+                
+                <div>
+                    <label for="cantidad">Cantidad de Boletos (máx. 5):</label>
+                    <input type="number" id="cantidad" name="cantidad" min="1" max="5" value="1">
+                </div>
+                
+                <div>
+                    <label for="idUsuario">ID de Usuario:</label>
+                    <input type="text" id="idUsuario" name="idUsuario" required>
+                </div>
+                
+                <button type="button" onclick="comprarBoleto()">Confirmar Compra</button>
+            </form>
+            
+            <div id="mensaje-compra" style="margin-top: 15px;"></div>
+        </div>
+    </section>
+
+    <script>
+    function comprarBoleto() {
+        const idEvento = document.getElementById('id_evento').value;
+        const cantidad = document.getElementById('cantidad').value;
+        const idUsuario = document.getElementById('idUsuario').value;
+        
+        $.ajax({
+            type: "POST",
+            url: `/eventos/${idEvento}/comprar`,
+            data: {
+                cantidad: cantidad,
+                idUsuario: idUsuario
+            },
+            success: function(response) {
+                $('#mensaje-compra').html(`<p style="color: green;">${response}</p>`);
+                // Opcional: redirigir después de éxito
+                // setTimeout(() => window.location.href = '/exito', 2000);
+            },
+            error: function(xhr) {
+                $('#mensaje-compra').html(`<p style="color: red;">${xhr.responseText}</p>`);
+            }
+        });
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+package com.tu_paquete.ticketflex.Service;
+
+public class PayUService {
+
+    public String generarFormularioRedireccion(Boleto boleto) {
+        // Aquí colocas los datos requeridos por PayU
+        String merchantId = "123456";
+        String accountId = "654321";
+        String referenceCode = "BOLETO-" + boleto.getId();
+        String amount = boleto.getPrecioTotal().toString();
+        String currency = "COP";
+
+        return "<form method='post' action='https://sandbox.checkout.payu.com/ppp-web-gateway-payu/' target='_blank'>" +
+                "<input name='merchantId'    type='hidden'  value='" + merchantId + "'>" +
+                "<input name='accountId'     type='hidden'  value='" + accountId + "'>" +
+                "<input name='description'   type='hidden'  value='Compra de boleto'>" +
+                "<input name='referenceCode' type='hidden'  value='" + referenceCode + "'>" +
+                "<input name='amount'        type='hidden'  value='" + amount + "'>" +
+                "<input name='tax'           type='hidden'  value='0'>" +
+                "<input name='currency'      type='hidden'  value='" + currency + "'>" +
+                "<input name='signature'     type='hidden'  value='AQUI_VA_TU_SIGNATURE'>" + // generar hash MD5 con llave secreta
+                "<input name='test'          type='hidden'  value='1'>" +
+                "<input name='buyerEmail'    type='hidden'  value='comprador@email.com'>" +
+                "<input name='responseUrl'   type='hidden'  value='http://localhost:8080/api/payu/respuesta'>" +
+                "<input name='confirmationUrl' type='hidden' value='http://localhost:8080/api/payu/webhook'>" +
+                "<input name='Submit'        type='submit'  value='Pagar ahora'>" +
+                "</form>";
+    }
+}

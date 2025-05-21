@@ -1,0 +1,5 @@
+package com.tu_paquete.ticketflex.Repository.Mongo;
+
+public class RolRepository {
+
+}

@@ -1,0 +1,130 @@
+package com.tu_paquete.ticketflex.Controller;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import com.tu_paquete.ticketflex.Model.Evento;
+import com.tu_paquete.ticketflex.Model.Usuario;
+import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.Service.EventoService;
+
+import org.springframework.security.core.Authentication;
+
+@Controller
+@RequestMapping("/admin")
+public class AdminController {
+    
+    @Autowired
+    private EventoService eventoService;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    @GetMapping("/dashboard")
+    public String dashboard(Model model, Authentication authentication) {
+        // Obtener el usuario autenticado
+        String email = authentication.getName();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                              .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        // Obtener solo los eventos del usuario autenticado (ID como String)
+        List<Evento> eventos = eventoService.obtenerEventosPorCreador(usuario.getId());
+        
+        model.addAttribute("eventos", eventos);
+        return "admin/dashboard";
+    }
+
+    @GetMapping("/eventos/crear")
+    public String mostrarFormularioCrearEvento(Model model) {
+        model.addAttribute("evento", new Evento());
+        
+        List<String> categorias = Arrays.asList("Concierto", "Festival", "Teatro", "Conferencia", "Feria");
+        model.addAttribute("categorias", categorias);
+        
+        return "admin/crear-evento";
+    }
+
+    @PostMapping("/eventos/crear")
+    public String crearEvento(@ModelAttribute Evento evento, 
+                              Authentication authentication) {
+        String email = authentication.getName();
+        Usuario creador = usuarioRepository.findByEmail(email)
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        evento.setCreador(creador);
+        eventoService.crearEvento(evento, email);
+        return "redirect:/admin/eventos/listar";
+    }
+
+    @GetMapping("/eventos/listar")
+    public String listarEventos(Model model, Authentication authentication) {
+        // Mostrar eventos del creador para mayor consistencia
+        String email = authentication.getName();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                              .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        model.addAttribute("eventos", eventoService.obtenerEventosPorCreador(usuario.getId()));
+        return "admin/listar-eventos";
+    }
+
+    @GetMapping("/eventos/editar/{id}")
+    public String mostrarFormularioEditarEvento(@PathVariable String id, Model model) {
+        Evento evento = eventoService.obtenerEventoPorId(id);
+        if (evento == null) {
+            return "redirect:/admin/eventos/listar";
+        }
+        model.addAttribute("evento", evento);
+        return "admin/editar-evento";
+    }
+    
+    @PostMapping("/eventos/editar/{id}")
+    public String actualizarEvento(@PathVariable String id, 
+                                   @ModelAttribute Evento eventoActualizado,
+                                   Authentication authentication) {
+        Evento eventoExistente = eventoService.obtenerEventoPorId(id);
+        if (eventoExistente == null) {
+            return "redirect:/admin/dashboard?error=evento_no_existe";
+        }
+        
+        // Mantener creador
+        eventoActualizado.setCreador(eventoExistente.getCreador());
+        
+        // Actualizar campos
+        eventoExistente.setNombreEvento(eventoActualizado.getNombreEvento());
+        eventoExistente.setFecha(eventoActualizado.getFecha());
+        eventoExistente.setLugar(eventoActualizado.getLugar());
+        eventoExistente.setDescripcion(eventoActualizado.getDescripcion());
+        eventoExistente.setPrecioBase(eventoActualizado.getPrecioBase());
+        eventoExistente.setDisponibilidad(eventoActualizado.getDisponibilidad());
+        eventoExistente.setCategoria(eventoActualizado.getCategoria());
+        eventoExistente.setArtista(eventoActualizado.getArtista());
+        if (eventoActualizado.getImagen() != null && !eventoActualizado.getImagen().isEmpty()) {
+            eventoExistente.setImagen(eventoActualizado.getImagen());
+        }
+        
+        eventoService.actualizarEvento(eventoExistente);
+        return "redirect:/admin/dashboard?success=evento_actualizado";
+    }
+
+    @GetMapping("/eventos/eliminar/{id}")
+    public String eliminarEvento(@PathVariable String id) {
+        Evento evento = eventoService.obtenerEventoPorId(id);
+        if (evento != null) {
+            eventoService.eliminarEvento(id);
+        }
+        return "redirect:/admin/eventos/listar";
+    }
+
+    @GetMapping("/estadisticas")
+    public String mostrarEstadisticas(Model model) {
+        // Agrega datos de estadísticas al modelo si los tienes
+        return "admin/estadisticas";
+    }
+}

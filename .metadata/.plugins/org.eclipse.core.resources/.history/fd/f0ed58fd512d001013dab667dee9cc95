@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Administrador | TicketFlex</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body class="theme-dark">
+    <!-- Botón de cambio de tema -->
+    <button class="theme-switcher" id="themeToggle">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+
+    <!-- Barra de navegacion -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="/images/ticketflex.png" alt="Logo TicketFlex" class="img-fluid" style="max-height: 60px;">
+                
+                TicketFlex Admin
+            </a>
+            <div class="ml-auto d-flex align-items-center">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    <span sec:authentication="name"></span>
+                </span>
+                <form th:action="@{/logout}" method="post" class="form-inline">
+                    <button type="submit" class="btn btn-outline-light">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1>Dashboard del Administrador</h1>
+                <p class="lead mb-0">Bienvenido al panel de control de TicketFlex</p>
+                <div class="date-display">
+                    <i class="far fa-calendar-alt mr-2"></i>
+                    <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+                </div>
+            </div>
+            <div class="text-right">
+                <small class="text-muted">Última actualización: <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}"></span></small>
+            </div>
+        </div>
+
+        <!-- Botones de Acción Principal -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-3">
+                <a th:href="@{/admin/eventos/crear}" class="btn btn-primary btn-block">
+                    <i class="fas fa-plus-circle mr-2"></i>Crear Nuevo Evento
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a th:href="@{/admin/eventos/listar}" class="btn btn-success btn-block">
+                    <i class="fas fa-list mr-2"></i>Listar Eventos
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a th:href="@{/admin/estadisticas}" class="btn btn-info btn-block">
+                    <i class="fas fa-chart-line mr-2"></i>Ver Estadísticas
+                </a>
+            </div>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-4">
+                <div class="card events-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-check fa-3x mb-3" style="color: #3a7bd5;"></i>
+                        <h5 class="card-title">Eventos Activos</h5>
+                        <p class="card-text" th:text="${eventos.size()}">0</p>
+                        <small class="text-muted">+2% respecto a la semana pasada</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card tickets-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-ticket-alt fa-3x mb-3" style="color: #00b09b;"></i>
+                        <h5 class="card-title">Boletos Vendidos</h5>
+                        <p class="card-text">Aqui iran los boletos vendidos directo desde la BD</p>
+                        <small class="text-muted">+15% respecto al mes pasado</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card users-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x mb-3" style="color: #8E54E9;"></i>
+                        <h5 class="card-title">Usuarios Registrados</h5>
+                        <p class="card-text"></p>
+                        <small class="text-muted">+5% nuevos usuarios</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Eventos Recientes -->
+        <h2><i class="fas fa-clock mr-2"></i>Eventos Recientes</h2>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-heading mr-2"></i>Nombre</th>
+                        <th><i class="fas fa-calendar-day mr-2"></i>Fecha</th>
+                        <th><i class="fas fa-map-marker-alt mr-2"></i>Lugar</th>
+                        <th><i class="fas fa-cogs mr-2"></i>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="evento : ${eventos}">
+                        <td th:text="${evento.nombreEvento}">Nombre del Evento</td>
+                        <td th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy')}">Fecha</td>
+                        <td th:text="${evento.lugar}">Lugar</td>
+                        <td>
+                            <a th:href="@{/admin/eventos/editar/{id}(id=${evento.id})}" 
+                               class="btn btn-warning btn-sm">
+                               <i class="fas fa-edit mr-1"></i>Editar
+                            </a>
+                            <a th:href="@{/admin/eventos/eliminar/{id}(id=${evento.id})}" 
+                               class="btn btn-danger btn-sm">
+                               <i class="fas fa-trash-alt mr-1"></i>Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Función para cambiar el tema
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (body.classList.contains('theme-dark')) {
+                body.classList.remove('theme-dark');
+                body.classList.add('theme-light');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                body.classList.remove('theme-light');
+                body.classList.add('theme-dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            
+            // Guardar preferencia en localStorage
+            const currentTheme = body.classList.contains('theme-dark') ? 'dark' : 'light';
+            localStorage.setItem('themePreference', currentTheme);
+        });
+        
+        // Cargar tema guardado al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('themePreference') || 'dark';
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (savedTheme === 'light') {
+                body.classList.remove('theme-dark');
+                body.classList.add('theme-light');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                body.classList.remove('theme-light');
+                body.classList.add('theme-dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        });
+    </script>
+</body>
+</html>

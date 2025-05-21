@@ -1,0 +1,8 @@
+package com.tu_paquete.ticketflex.Repository.Mongo;
+
+import com.tu_paquete.ticketflex.Model.Rol;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface RolRepository extends MongoRepository<Rol, String> {
+    Rol findByNombreRol(String nombreRol);
+}

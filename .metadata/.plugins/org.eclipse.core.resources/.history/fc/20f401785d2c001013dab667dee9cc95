@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Evento Seleccionado - TicketFlex</title>
+    <!-- Incluye tus estilos CSS aquí -->
+</head>
+<body>
+    <header>
+        <h1>TicketFlex</h1>
+    </header>
+    
+    <main>
+        <section class="evento-detalle">
+            <h2 th:text="${evento.nombre}">Nombre del Evento</h2>
+            <p th:text="${evento.descripcion}">Descripción del evento...</p>
+            <p th:text="${evento.fecha}">Fecha del evento</p>
+            <p th:text="${evento.lugar}">Lugar del evento</p>
+            
+            <div class="opciones-pago">
+                <h3>Opciones de Pago</h3>
+                <form action="/procesar-pago" method="post">
+                    <div>
+                        <label>Cantidad de Boletos:</label>
+                        <input type="number" name="cantidad" min="1" value="1">
+                    </div>
+                    
+                    <div>
+                        <label>Método de Pago:</label>
+                        <select name="metodoPago">
+                            <option value="tarjeta">Tarjeta de Crédito/Débito</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="transferencia">Transferencia Bancaria</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit">Confirmar Compra</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <!-- Pie de página -->
+    </footer>
+</body>
+</html>

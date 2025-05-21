@@ -1,0 +1,51 @@
+package com.tu_paquete.ticketflex.Config;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+
+import com.tu_paquete.ticketflex.Model.Usuario;
+import com.tu_paquete.ticketflex.Model.Rol;
+import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.Repository.Mongo.RolRepository;
+
+@Configuration
+public class configuracion {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private RolRepository rolRepository;
+
+    @PostConstruct
+    public void initAdmin() {
+        try {
+            if (usuarioRepository.findByEmail("Admin@ticketflex.com").isEmpty()) {
+
+                Rol rolAdmin = rolRepository.findByNombreRol("ADMIN");
+                if (rolAdmin == null) {
+                    rolAdmin = new Rol();
+                    rolAdmin.setNombreRol("ADMIN");
+                    rolAdmin = rolRepository.save(rolAdmin);
+                }
+
+                Usuario admin = new Usuario();
+                admin.setNombre("Admin@ticketflex.com");
+                admin.setApellido("Principal");
+                admin.setEmail("Admin@ticketflex.com");
+                admin.setPassword("12345678");
+                admin.setTelefono("000000000");
+                admin.setDireccion("N/A");
+                admin.setRol(rolAdmin);
+
+                usuarioRepository.save(admin);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+           
+}

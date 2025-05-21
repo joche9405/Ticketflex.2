@@ -1,0 +1,18 @@
+package com.tu_paquete.ticketflex.dto;
+
+import com.tu_paquete.ticketflex.PagoRequest;
+
+public class PagoRequest {
+    private String idBoleto;
+    private String metodoPago;
+
+    public String getIdBoleto() {
+        return idBoleto;
+    }
+    public void setIdBoleto(String idBoleto) {
+        this.idBoleto = idBoleto;
+    }
+    
+
+   
+}

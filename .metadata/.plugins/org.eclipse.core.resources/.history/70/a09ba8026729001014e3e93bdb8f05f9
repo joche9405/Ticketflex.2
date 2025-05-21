@@ -1,0 +1,18 @@
+package com.tu_paquete.ticketflex.Repository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import com.tu_paquete.ticketflex.model.Boleto;
+
+public interface BoletoRepository extends MongoRepository<Boleto, String> {
+    // Puedes agregar métodos personalizados aquí, por ejemplo:
+
+    // Buscar boletos por ID del usuario embebido
+    List<Boleto> findByUsuario_Id(String usuarioId);
+
+    // Buscar boletos por estado
+    List<Boleto> findByEstado(Boleto.EstadoBoleto estado);
+
+    // Buscar por QR
+    Boleto findByQrCode(String qrCode);
+}
+

@@ -1,0 +1,98 @@
+package com.tu_paquete.ticketflex.Controller;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.tu_paquete.ticketflex.PagoRequest;
+import com.tu_paquete.ticketflex.Model.Boleto;
+import com.tu_paquete.ticketflex.Model.Boleto.EstadoBoleto;
+import com.tu_paquete.ticketflex.Model.Transaccion;
+import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
+import com.tu_paquete.ticketflex.Repository.Mongo.TransaccionRepository;
+import com.tu_paquete.ticketflex.Service.BoletoService;
+import com.tu_paquete.ticketflex.Service.PayUService;
+
+@RestController
+@RequestMapping("/api/boletas")
+public class BoletoController {
+    @Autowired
+    private BoletoService boletoService;
+    @Autowired
+    private BoletoRepository boletoRepository;
+
+    @Autowired
+    private TransaccionRepository transaccionRepository;
+
+    @Autowired
+    private PayUService payUService;
+    @PostMapping("/comprar")
+    public ResponseEntity<?> comprarBoleto(
+            @RequestParam String idEvento,
+            @RequestParam String idUsuario,
+            @RequestParam Integer cantidad) {
+        try {
+            Boleto boleto = boletoService.comprarBoleto(idEvento, idUsuario, cantidad);
+            return ResponseEntity.ok(boleto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    
+    @PostMapping("/pagar")
+    public ResponseEntity<?> pagarBoleto(@RequestBody PagoRequest request) {
+    	Optional<Boleto> optionalBoleto = boletoRepository.findById(request.getIdBoleto());
+
+        if (optionalBoleto.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Boleto no encontrado");
+        }
+
+        Boleto boleto = optionalBoleto.get();
+
+        if (boleto.getEstado() != EstadoBoleto.PENDIENTE) {
+            return ResponseEntity.badRequest().body("Este boleto ya fue pagado");
+        }
+
+        if (metodoPago == MetodoPago.PAGO_TOTAL) {
+            // Crear transacción preliminar
+            Transaccion transaccion = new Transaccion();
+            transaccion.setBoleto(boleto);
+            transaccion.setEstado("PENDIENTE");
+            transaccion.setMetodoPago("pagoTotal");
+            transaccion.setFecha(LocalDateTime.now());
+            transaccionRepository.save(transaccion);
+
+            // Generar formulario de redirección
+            String formulario = payUService.generarFormularioRedireccion(boleto);
+            return ResponseEntity.ok().body(formulario);
+
+        } else if ("ticketFlex".equalsIgnoreCase(request.getMetodoPago())) {
+            // Supongamos 3 cuotas
+            BigDecimal cuota = boleto.getPrecioTotal().divide(BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
+            boleto.setSaldoPendiente(boleto.getPrecioTotal().subtract(cuota));
+            boleto.setFechaLimitePago(LocalDate.now().plusMonths(3));
+            boletoRepository.save(boleto);
+
+            Transaccion transaccion = new Transaccion();
+            transaccion.setBoleto(boleto);
+            transaccion.setEstadoPago("EXITOSA"); // primera cuota pagada internamente
+            transaccion.setMetodoPago("ticketFlex");
+            transaccion.setFecha(LocalDateTime.now());
+            transaccion.setMontoPagado(cuota);
+            transaccion.setSaldoRestante(boleto.getSaldoPendiente());
+            transaccionRepository.save(transaccion);
+
+            return ResponseEntity.ok("Pago inicial con TicketFlex registrado. Saldo restante: $" + boleto.getSaldoPendiente());
+        }
+
+        return ResponseEntity.badRequest().body("Método de pago no válido");
+    }
+}
+
