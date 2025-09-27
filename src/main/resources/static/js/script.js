@@ -530,9 +530,7 @@ function processPayment(method) {
 
         fetch(`/api/boletas/comprar?idEvento=${eventoId}&idUsuario=${userId}&cantidad=${cantidad}&metodoPago=TICKETFLEX&cuotas=${cuotas}&graderia=${graderia}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            
         })
             .then(response => {
                 if (!response.ok) {
