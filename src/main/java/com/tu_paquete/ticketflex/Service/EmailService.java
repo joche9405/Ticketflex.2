@@ -2,6 +2,7 @@ package com.tu_paquete.ticketflex.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException; // Importar específicamente MailException
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,18 @@ public class EmailService {
 
             mailSender.send(message);
             log.info("Correo enviado exitosamente a: {}", to);
+
+        } catch (MailException e) {
+            // **MANEJO DE FALLOS DE CONEXIÓN SMTP (CRUCIAL)**
+            // Captura el fallo de envío, lo registra, y PERMITE que el programa continúe.
+            log.error("Error de conexión/envío de correo a {}. La compra se completó, pero el correo falló: {}",
+                    to, e.getMessage());
+            // No se lanza ninguna excepción (no 'throw'), permitiendo que el controlador
+            // devuelva 200 OK.
+
         } catch (Exception e) {
-            log.error("Error al enviar el correo a {}: {}", to, e.getMessage());
-            throw new RuntimeException("Error al enviar el correo", e);
+            // Manejo de cualquier otro fallo (p.ej., problemas con MimeMessageHelper)
+            log.error("Error inesperado al construir/enviar el correo a {}: {}", to, e.getMessage());
         }
     }
 }
