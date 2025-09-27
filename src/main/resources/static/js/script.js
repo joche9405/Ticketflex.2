@@ -32,7 +32,7 @@ function login(event) {
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
 
-    fetch('http://localhost:8080/api/usuarios/login', {
+    fetch('/api/usuarios/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data),
@@ -73,7 +73,7 @@ function registro(event) {
 
     console.log("Datos a enviar:", data); // Para depuración
 
-    fetch('http://localhost:8080/api/usuarios/registrar', {
+    fetch('/api/usuarios/registrar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -158,7 +158,7 @@ function agregarEventosLogin() {
             e.preventDefault();
             const email = document.getElementById('forgotEmail').value;
 
-            fetch('http://localhost:8080/api/usuarios/reset-password-request', {
+            fetch('/api/usuarios/reset-password-request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email })
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logoutBtn.onclick = function (e) {
             e.preventDefault(); // Evita que el <a href="#"> recargue la página
 
-            fetch('http://localhost:8080/api/usuarios/logout', {
+            fetch('/api/usuarios/logout', {
                 method: 'POST'
             })
                 .then(response => {
@@ -278,7 +278,7 @@ function aplicarFiltros() {
         artista: document.querySelector('#artista').value.trim()
     };
 
-    fetch('http://localhost:8080/api/eventos/filtrar', {
+    fetch('/api/eventos/filtrar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filters),
@@ -352,7 +352,7 @@ function mostrarEventos(eventos) {
 
 
 function cargarEventos() {
-    fetch('http://localhost:8080/api/eventos/listar', {
+    fetch('/api/eventos/listar', {
         credentials: 'include'
     })
         .then(response => {
@@ -1406,7 +1406,7 @@ function initializeBuyTicketModal() {
             }
 
             // Realizamos la solicitud de compra a la API
-            fetch(`http://localhost:8080/api/eventos/${idEventoToBuy}/comprar?idUsuario=${userId}&cantidad=${cantidad}`, {
+            fetch(`/api/eventos/${idEventoToBuy}/comprar?idUsuario=${userId}&cantidad=${cantidad}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
