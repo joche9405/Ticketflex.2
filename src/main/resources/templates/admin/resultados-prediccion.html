@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Predicción | TicketFlex Admin</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #564fc9;
+            --secondary: #ff6584;
+            --dark: #2b0a3d;
+            --light: #f8f9fa;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --success: #2ed573;
+            --danger: #ff4757;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            height: 110px;
+            overflow: hidden;
+        }
+
+        .navbar-brand {
+            background: rgba(41, 41, 41, 0.1);
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 90px;
+            margin-right: 10px;
+
+        }
+
+        .brand-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .user-info i {
+            font-size: 20px;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .btn-glass {
+            background: var(--glass);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-primary-glass {
+            background: var(--gradient);
+            border: none;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Header Section */
+        .header-section {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .header-section h1 {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .header-section h1 i {
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        .header-section p {
+            opacity: 0.8;
+            margin-bottom: 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-export {
+            background: var(--success);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .btn-export:hover {
+            background: #25c063;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-export i {
+            margin-right: 8px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Results Table */
+        .table-container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+        }
+
+        .table {
+            color: white;
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .table thead th {
+            background: rgba(108, 99, 255, 0.2);
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+        }
+
+        .table tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--glass-border);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .badge-prediction {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .badge-success {
+            background: rgba(46, 213, 115, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(46, 213, 115, 0.4);
+        }
+
+        .badge-danger {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+        }
+
+        .confidence-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .confidence-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            flex-grow: 1;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+
+        .confidence-level {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .header-section {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                margin-top: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-brand img {
+                height: 30px;
+            }
+
+            .table-container {
+                padding: 15px;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="#">
+                <img src="/images/ticketflex.png" alt="TicketFlex">
+                <span class="brand-text">TicketFlex Admin</span>
+            </a>
+
+            <!-- Espaciador para empujar todo lo demás a la derecha -->
+            <div class="ms-auto d-flex align-items-center">
+                <div class="user-info me-3">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="user-name" th:text="${nombreUsuario}"></span>
+                </div>
+
+                <!-- BOTÓN PERFIL -->
+                <a th:href="@{/admin/perfil}" class="btn btn-glass me-2">
+                    <i class="fas fa-user me-1"></i>
+                    <span class="d-none d-md-inline">Perfil</span>
+                </a>
+
+                <!-- CERRAR SESIÓN -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-glass">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        <span class="d-none d-md-inline">Salir</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section animate__animated animate__fadeIn">
+            <div>
+                <h1><i class="fas fa-chart-bar"></i> Resultados de Predicción</h1>
+                <p>Análisis de asistencia para: <strong th:text="${evento?.nombreFuncion}"></strong></p>
+            </div>
+
+            <div class="action-buttons">
+                <a th:href="@{/admin/dashboard}" class="btn btn-glass">
+                    <i class="fas fa-arrow-left mr-2"></i> Dashboard
+                </a>
+                <form th:action="@{/exportar-excel}" method="post" class="d-inline">
+                    <input type="hidden" name="idEvento" th:value="${evento?.idFuncion}" />
+                    <button type="submit" class="btn btn-export">
+                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                    </button>
+                </form>
+                <a th:href="@{/admin/predecir-evento}" class="btn btn-glass">
+                    <i class="fas fa-calendar-alt mr-2"></i> Otro Evento
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section animate__animated animate__fadeIn">
+            <span class="filter-label">Filtros:</span>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="mostrarSoloAsistiran" onchange="filtrarAsistiran()">
+                <label class="form-check-label" for="mostrarSoloAsistiran">
+                    Mostrar solo los que asistirán
+                </label>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="table-container animate__animated animate__fadeInUp"
+            th:if="${resultados != null and !#lists.isEmpty(resultados)}">
+            <table class="table" id="tablaPredicciones">
+                <thead>
+                    <tr>
+                        <th>ID Usuario</th>
+                        <th>Edad</th>
+                        <th>Género</th>
+                        <th>Historial Compras</th>
+                        <th>Interés Principal</th>
+                        <th>Predicción</th>
+                        <th>Confianza</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="resultado : ${resultados}">
+                        <td th:text="${resultado.idUsuario}"></td>
+                        <td th:text="${resultado.edadUsuario}"></td>
+                        <td th:text="${resultado.generoUsuario}"></td>
+                        <td th:text="${resultado.historialCompras}"></td>
+                        <td th:text="${resultado.interesCategoria}"></td>
+                        <td th:text="${resultado.prediccion == '1' ? 'Asistirá' : 'No Asistirá'}"></td>
+                        <td th:text="${resultado.confianza}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger animate__animated animate__fadeIn">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function filtrarAsistiran() {
+            const mostrarSoloAsistiran = document.getElementById('mostrarSoloAsistiran').checked;
+            const filas = document.querySelectorAll('#tablaPredicciones tbody tr');
+
+            filas.forEach(fila => {
+                const prediccionCell = fila.querySelector('td:nth-child(6)');
+                if (prediccionCell) {
+                    const prediccion = prediccionCell.textContent.trim();
+                    fila.style.display = mostrarSoloAsistiran && prediccion !== 'Asistirá' ? 'none' : '';
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,195 @@
+/* -----------------------------------------------
+   Estilos Generales del Login.html - Versión Profesional
+----------------------------------------------- */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1a2a6c 0%, #0a3d62 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px; /* o el ancho que prefieras */
+    margin: 0 auto; /* Esto centra el contenedor */
+    padding: 0 15px; /* Padding para dispositivos móviles */
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    min-height: 100vh; /* Ocupa toda la altura visible */
+}
+
+.login-container {
+    max-width: 450px;
+    width: 100%;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #4776E6, #8E54E9);
+}
+
+.brand-logo {
+    height: 350px;
+    width: 350px;
+    background: url("/images/ticketflex.png") no-repeat center;
+    background-size: contain;
+    margin: 0 auto 20px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+h1 {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #4776E6, #8E54E9);
+    border-radius: 3px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #34495e;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control {
+    height: 50px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    padding-left: 45px;
+    transition: all 0.3s;
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    border-color: #4776E6;
+    box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.15);
+}
+
+.input-icon {
+    position: relative;
+    left: 15px;
+    top: 38px;
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 38px;
+    color: #7f8c8d;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4776E6, #8E54E9);
+    border: none;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(71, 118, 230, 0.3);
+    text-transform: uppercase;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(71, 118, 230, 0.4);
+    background: linear-gradient(135deg, #3a66d5, #7d4bd9);
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: none;
+}
+
+.text-center a {
+    color: #4776E6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    font-size: 0.95rem;
+}
+
+.text-center a:hover {
+    color: #3a5bc7;
+    text-decoration: underline;
+}
+
+/* Efecto de carga para el botón */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+       
+       

@@ -1,0 +1,742 @@
+/* -----------------------------------------------
+   Estilos Generales
+----------------------------------------------- */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url('https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2');
+
+
+    background-blend-mode: overlay;
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    color: #f0f0f0;
+}
+
+/* -----------------------------------------------
+historial de cuotas
+----------------------------------------------- */
+.installment-item .paid {
+    color: green;
+    font-weight: bold;
+}
+
+.installment-item .pending {
+    color: red;
+    font-weight: bold;
+}
+
+
+
+/* -----------------------------------------------
+Header
+----------------------------------------------- */
+header {
+    background-color: #fff;
+    color: #fff;
+    padding: 10px 0;
+}
+
+/* -----------------------------------------------
+   Navegación
+----------------------------------------------- */
+nav {
+    background-color: #fff;
+    color: #fff;
+    padding: 10px 0;
+    display: flex;
+    justify-content: flex-end;
+    /* Alinear a la derecha */
+    align-items: center;
+    margin: 0 20px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav button {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    cursor: pointer;
+    margin: 0 8px;
+    transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+    background-color: #d9534f;
+    border: 1px solid #d9534f;
+}
+
+nav button:active {
+    background-color: #c9302c;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    padding: 10px 15px;
+    transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+    border-radius: 5px;
+}
+
+nav ul li a:hover {
+    background-color: #d9534f;
+    color: white;
+    border-radius: 5px;
+}
+
+/* -----------------------------------------------
+   Banner
+----------------------------------------------- */
+.banner {
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 50px 0;
+}
+
+/* -----------------------------------------------
+   Eventos
+----------------------------------------------- */
+.eventos {
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.evento-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    /* Fondo semitransparente */
+    backdrop-filter: blur(10px);
+    /* Difumina el fondo detrás */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+    width: 300px;
+    color: #f0f0f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.evento-card:hover {
+    transform: translateY(-8px);
+}
+
+/* -----------------------------------------------
+   Lista de eventos
+----------------------------------------------- */
+#eventosList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    margin: 0 auto; /* Centrado horizontal */
+    max-width: 1200px;
+    justify-items: center; /* Centra las tarjetas dentro del grid */
+    box-sizing: border-box;
+}
+
+.evento-imagen {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #3a3a3a 0%, #1e1e1e 100%);
+    overflow: hidden;
+    border-radius: 0; /* Elimina bordes redondeados aquí */
+    padding: 10px; /* Para evitar que imagenes pequeñas se vean flotando */
+}
+
+.evento-imagen img {
+    max-height: 115%;
+    max-width: 125%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+}
+
+
+.evento-info {
+    padding: 15px;
+}
+
+.evento-info h3 {
+    margin-top: 0;
+    color: #ffffff;
+    font-size: 1.2em;
+}
+
+.evento-artista,
+.evento-fecha,
+.evento-lugar,
+.evento-descripcion {
+    margin: 5px 0;
+    color: #cccccc;
+    font-size: 0.95em;
+}
+
+.evento-precio {
+    font-weight: bold;
+    color: #6ec1e4;
+    /* Azul brillante */
+    margin: 10px 0;
+}
+
+.btn-comprar {
+    background-color: #ff4c60;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-comprar:hover {
+    background-color: #e43b50;
+}
+
+.no-events-message,
+.error-message {
+    text-align: center;
+    padding: 30px;
+    color: #ddd;
+    font-size: 1.1em;
+}
+
+h1,
+h2 {
+    margin: 10px 0;
+    color: #ffffff;
+}
+
+
+/* -----------------------------------------------
+   Filtros (Formulario de búsqueda o filtros)
+----------------------------------------------- */
+.filtros {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filtros label {
+    margin-right: 10px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #8080ff;
+}
+
+/* -----------------------------------------------
+   Footer
+----------------------------------------------- */
+footer {
+    text-align: center;
+    padding: 25px 0;
+    background-color: #333;
+    color: #fff;
+}
+
+/* -----------------------------------------------
+   Bienvenida (Texto de bienvenida)
+----------------------------------------------- */
+.bienvenido-container {
+    font-size: 1.5rem;
+    color: #000000;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+
+/* -----------------------------------------------
+   Modal (Ventana emergente)
+----------------------------------------------- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease;
+    position: relative;
+}
+
+.elegant-modal .modal-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    color: #333;
+}
+
+.close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #888;
+}
+
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modalTitle {
+    text-align: center;
+    color: #2b1055;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.half-width {
+    flex: 1;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    background: #0052cc;
+    color: white;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #003d99;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.forgot-password {
+    color: #7597de;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider span {
+    background: #fff;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+    color: #888;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: #ccc;
+    left: 0;
+    z-index: 0;
+}
+
+.divider::after {
+    margin-left: 10px;
+}
+
+.social-login {
+    margin-bottom: 20px;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.google-btn {
+    color: #db4437;
+    border-color: #db4437;
+}
+
+.facebook-btn {
+    color: #3b5998;
+    border-color: #3b5998;
+}
+
+.switch-modal {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.switch-modal a {
+    color: #7597de;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.switch-modal a:hover {
+    text-decoration: underline;
+}
+
+.required-info {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 15px;
+}
+
+@media (max-width: 992px) {
+    .evento-card {
+        width: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    .evento-card {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .evento-imagen {
+        height: auto;
+    }
+
+    .evento-imagen img {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* -----------------------------------------------
+   Entrada de numeros y selectores
+----------------------------------------------- */
+input[type="number"] {
+    width: 50px;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+select {
+    width: 150px;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+#purchaseTitle,
+#modalTitle {
+    margin: 10px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+/* -----------------------------------------------
+   Estilos para los eventos
+----------------------------------------------- */
+.event {
+    width: 300px;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* -----------------------------------------------
+   Redes Sociales
+----------------------------------------------- */
+.social-media {
+    margin-top: 10px;
+}
+
+.social-media a {
+    margin: 0 15px;
+    color: #007BFF;
+    font-size: 26px;
+    transition: color 0.3s;
+}
+
+.social-media a:hover {
+    color: #0056b3;
+}
+
+/* -----------------------------------------------
+   Menu de usuario (Logout)
+----------------------------------------------- */
+#userSection {
+    position: relative;
+    cursor: pointer;
+    color: black;
+    /* Asegura que todo el texto en userSection sea negro */
+}
+
+#userName {
+    color: #111;
+    /* Color negro específico para el nombre de usuario */
+    padding: 0.5rem;
+    display: inline-block;
+}
+
+
+#logoutMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    min-width: 150px;
+    display: none;
+    z-index: 1000;
+}
+
+#userSection:hover #logoutMenu {
+    display: block;
+}
+
+#logoutButton {
+    background: none;
+    border: none;
+    color: #333;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#logoutButton:hover {
+    color: #d9534f;
+}
+
+/* -----------------------------------------------
+   Enlaces en el footer
+----------------------------------------------- */
+#footer a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+#footer a:hover {
+    color: #f7c600;
+    text-decoration: none;
+}
+
+
+/* -----------------------------------------------
+   Boton de desplazamiento hacia arriba (scroll-to-top)
+----------------------------------------------- */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 30px;
+    color: #fff;
+    border-radius: 50%;
+    padding: 15px;
+    display: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+}
+
+.scroll-to-top:hover {
+    background-color: #d9534f;
+    transform: scale(1.1);
+}
+
+.scroll-to-top i {
+    font-size: 20px;
+}
+
+
+
+/* ------------------------
+   Formulario de pago
+--------------------------- */
+#buyTicketModal .modal-content {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    width: 400px;
+    margin: auto;
+}
+
+#buyTicketModal input,
+#buyTicketModal select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#buyTicketModal button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#buyTicketModal button:hover {
+    background-color: #45a049;
+}
+
+#buyTicketModal .modal-content label {
+    font-weight: bold;
+}

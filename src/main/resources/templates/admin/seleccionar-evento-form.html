@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción Masiva | TicketFlex Admin</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #564fc9;
+            --secondary: #ff6584;
+            --dark: #2b0a3d;
+            --light: #f8f9fa;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            height: 110px;
+            overflow: hidden;
+        }
+
+        .navbar-brand {
+            background: rgba(41, 41, 41, 0.1);
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 90px;
+            margin-right: 10px;
+
+        }
+
+        .brand-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .user-info i {
+            font-size: 20px;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .btn-glass {
+            background: var(--glass);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-primary-glass {
+            background: var(--gradient);
+            border: none;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .dashboard-header h1 i {
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        .dashboard-header p {
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        /* Prediction Card */
+        .prediction-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+        }
+
+        .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: rgb(0, 0, 0);
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .form-select option {
+            background-color: white;
+            color: black;
+        }
+
+
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+            color: white;
+        }
+
+        .btn-predict {
+            background: var(--gradient);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-predict i {
+            margin-right: 10px;
+        }
+
+        /* Instructions Panel */
+        .instructions-panel {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .instructions-panel h2 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .instructions-panel h2 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .instructions-panel ol {
+            padding-left: 20px;
+        }
+
+        .instructions-panel li {
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-brand img {
+                height: 30px;
+            }
+
+            .prediction-card,
+            .instructions-panel {
+                padding: 20px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="#">
+                <img src="/images/ticketflex.png" alt="TicketFlex">
+                <span class="brand-text">TicketFlex Admin</span>
+            </a>
+
+            <!-- Espaciador para empujar todo lo demás a la derecha -->
+            <div class="ms-auto d-flex align-items-center">
+                <div class="user-info me-3">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="user-name" th:text="${nombreUsuario}"></span>
+                </div>
+
+                <!-- BOTÓN PERFIL -->
+                <a th:href="@{/admin/perfil}" class="btn btn-glass me-2">
+                    <i class="fas fa-user me-1"></i>
+                    <span class="d-none d-md-inline">Perfil</span>
+                </a>
+
+                <!-- CERRAR SESIÓN -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-glass">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        <span class="d-none d-md-inline">Salir</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="dashboard-header animate__animated animate__fadeIn">
+            <div>
+                <h1><i class="fas fa-users"></i> Predicción Masiva</h1>
+                <p>Analiza la asistencia potencial de todos tus clientes para un evento</p>
+            </div>
+            <a th:href="@{/admin/dashboard}" class="btn btn-glass animate__animated animate__fadeIn">
+                <i class="fas fa-arrow-left mr-2"></i> Volver al Dashboard
+            </a>
+        </div>
+
+        <!-- Panel de Predicción -->
+        <div class="prediction-card animate__animated animate__fadeInUp">
+            <form th:action="@{/admin/predecir-asistencia-masiva}" method="post">
+                <div class="mb-4">
+                    <label for="idEvento" class="form-label">Seleccionar Evento</label>
+                    <select id="idEvento" name="idEvento" class="form-select" required>
+                        <option value="" disabled selected>Selecciona un evento</option>
+                        <option th:each="evento : ${eventos}" th:value="${evento.idFuncion}"
+                            th:text="${evento.nombreFuncion}"></option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-predict w-100">
+                    <i class="fas fa-chart-line"></i> Generar Predicción Masiva
+                </button>
+            </form>
+        </div>
+
+        <!-- Panel de Instrucciones -->
+        <div class="instructions-panel animate__animated animate__fadeInUp">
+            <h2><i class="fas fa-info-circle"></i> Instrucciones</h2>
+            <ol>
+                <li><strong>Selecciona el evento</strong> de la lista desplegable</li>
+                <li>Haz clic en <strong>"Generar Predicción Masiva"</strong> para procesar los datos</li>
+                <li>Los resultados se mostrarán en una tabla con el análisis completo</li>
+                <li>Puedes exportar los resultados para su análisis posterior</li>
+            </ol>
+        </div>
+
+        <!-- Enlace a predicción individual -->
+        <div class="text-center animate__animated animate__fadeIn">
+            <a th:href="@{/admin/predecir-individual-form}" class="btn btn-glass">
+                <i class="fas fa-user-plus mr-2"></i> Realizar Predicción Individual
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

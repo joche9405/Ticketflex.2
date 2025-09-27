@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketFlex | Compra En Linea De Boletas A Credito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/modern.css">
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+</head>
+
+<body>
+    <!-- Header Rediseñado -->
+    <header class="modern-header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="#">Ticket<span>Flex</span></a>
+                </div>
+
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="#eventosSection"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
+                    <li class="dropdown">
+                        <a href="#"><i class="fas fa-bars"></i> Categorías <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Conciertos</a></li>
+                            <li><a href="#">Festival</a></li>
+                            <li><a href="#">Teatro</a></li>
+                            <li><a href="#">Deportes</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#footer"><i class="fas fa-envelope"></i> Contacto</a></li>
+
+                    <!-- Botones de login/register (se ocultan al iniciar sesión) -->
+                    <li id="loginButtonSection">
+                        <button id="showLoginButton">Iniciar Sesión</button>
+                        <button id="showRegisterButton">Registrar</button>
+                    </li>
+
+                    <!-- Menú de usuario (se muestra al iniciar sesión) -->
+                    <li id="userSection" class="hidden">
+                        <div class="user-menu-wrapper">
+                            <div class="user-avatar"></div>
+                            <span id="userName" class="user-name"></span>
+                            <i class="fas fa-chevron-down user-dropdown-arrow"></i>
+
+                            <div class="user-dropdown-menu">
+                                <div class="dropdown-header">
+                                    <div class="dropdown-user-info">
+                                        <span id="dropdownUserName" class="user-name-full"></span>
+                                        <span id="dropdownUserEmail" class="user-email"></span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" id="viewProfileBtn">
+                                    <i class="fas fa-user-edit"></i>
+                                    <span>Mi Perfil</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Cerrar Sesión</span>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <!-- Botón de menú hamburguesa -->
+                <div class="menu-toggle" id="mobileMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Modal del Perfil (fuera del <ul>, correcto) -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content profile-modal">
+                <span class="close-modal" id="closeProfileModal">&times;</span>
+
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                        <button class="edit-avatar-btn">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <h2>Mi Perfil</h2>
+                </div>
+
+                <div class="profile-tabs">
+                    <button class="tab-btn active" data-tab="personal-info">Información Personal</button>
+                    <button class="tab-btn" data-tab="security">Seguridad</button>
+                    <button class="tab-btn" data-tab="purchases">Mis Compras</button>
+                </div>
+
+                <div class="tab-content active" id="personal-info">
+                    <form id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileFirstName">Nombre</label>
+                                <input type="text" id="profileFirstName" required readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileLastName">Apellido</label>
+                                <input type="text" id="profileLastName" required readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profileEmail">Correo electrónico</label>
+                            <input type="email" id="profileEmail" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profilePhone">Teléfono</label>
+                            <input type="tel" id="profilePhone" placeholder="+57 300 123 4567">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profileAddress">Dirección</label>
+                            <textarea id="profileAddress" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="save-btn">Guardar cambios</button>
+                    </form>
+                </div>
+
+                <div class="tab-content" id="security">
+                    <form id="securityForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Contraseña actual</label>
+                            <input type="password" id="currentPassword">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">Nueva contraseña</label>
+                            <input type="password" id="newPassword">
+                            <div class="password-strength">
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                                <span class="strength-text">Seguridad: baja</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmar nueva contraseña</label>
+                            <input type="password" id="confirmPassword">
+                        </div>
+
+                        <button type="submit" class="save-btn">Actualizar contraseña</button>
+                    </form>
+                </div>
+
+                <div class="tab-content" id="purchases">
+                    <div class="purchases-filter">
+                        <select id="purchaseFilter">
+                            <option value="all">Todas las compras</option>
+                            <option value="last30">Últimos 30 días</option>
+                            <option value="last6">Últimos 6 meses</option>
+                            <option value="year">Este año</option>
+                        </select>
+                    </div>
+
+                    <div class="purchases-list" id="purchasesList">
+                        <!-- Las compras se cargarán aquí -->
+                        <div class="no-purchases">
+                            <i class="fas fa-ticket-alt"></i>
+                            <p>No has realizado ninguna compra aún</p>
+                            <button class="btn-primary">Explorar eventos</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Encuentra los mejores eventos</h1>
+                <p>Compra tus boletos de forma rápida y segura</p>
+                <div class="search-box">
+                    <input type="text" placeholder="Buscar por artista, evento...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Access -->
+    <div class="quick-access">
+        <div class="container">
+            <a href="#" class="quick-link"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="#footer" class="quick-link"><i class="fas fa-phone-alt"></i> Contacto</a>
+        </div>
+    </div>
+
+    <!-- Sección de Eventos (Manteniendo tus filtros funcionales) -->
+    <section id="eventosSection" class="events-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-check"></i> Eventos Disponibles</h2>
+                <button class="filter-toggle" id="filterToggle"><i class="fas fa-filter"></i> Filtros</button>
+            </div>
+
+            <div class="filters-container" id="filtersContainer">
+                <div class="filter-group">
+                    <label for="lugar"><i class="fas fa-map-marker-alt"></i> Lugar:</label>
+                    <select id="lugar">
+                        <option value="">Todas las ciudades</option>
+                        <option value="Bogotá">Bogota</option>
+                        <option value="Medellin">Medellin</option>
+                        <option value="Cali">Cali</option>
+                        <option value="Cartagena">Cartagena</option>
+                        <option value="Cucuta">Cucuta</option>
+                        <option value="Barranquilla">Barranquilla</option>
+                        <option value="Valledupar">Valledupar</option>
+                        <option value="Santa Marta">Santa Marta</option>
+                        <option value="Buscaramanga">Buscaramanga</option>
+                        <option value="Monteria">Monteria</option>
+                        <option value="Sincelejo">Sincelejo</option>
+                        <option value="Manizales">Manizales</option>
+                        <option value="Pereira">Pereira</option>
+                        <option value="Villavicencio">Villavicencio</option>
+                        <option value="Riohacha">Riohacha</option>
+                        <option value="Ibague">Ibague</option>
+
+
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="fecha"><i class="far fa-calendar-alt"></i> Fecha:</label>
+                    <input type="date" id="fecha">
+                </div>
+
+                <div class="filter-group">
+                    <label for="categoria"><i class="fas fa-tag"></i> Categoría:</label>
+                    <select id="categoria">
+                        <option value="">Todas</option>
+                        <option value="Concierto">Concierto</option>
+                        <option value="Festival">Festival</option>
+                        <option value="Teatro">Teatro</option>
+                        <option value="Feria">Feria</option>
+                        <option value="Deportes">Deportes</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="artista"><i class="fas fa-user"></i> Artista:</label>
+                    <input type="text" id="artista" placeholder="Nombre del artista">
+                </div>
+
+                <div class="filter-actions">
+                    <button id="filtrar" class="btn-primary">Aplicar Filtros</button>
+                    <button id="resetFilters" class="btn-outline">Limpiar</button>
+                </div>
+            </div>
+
+            <div id="eventosList" class="events-grid">
+                <!-- Los eventos se cargarán aquí dinámicamente como antes -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para Inicio de Sesión -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span id="closeLoginModal" class="close">&times;</span>
+            <h2 id="modalTitle">Inicio de Sesión</h2>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox"> <span style="color: black;">Recordar sesión</span>
+                    </label>
+                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+                <button type="submit" class="submit-btn">Iniciar Sesión</button>
+
+                <div class="divider">
+                    <span>o</span>
+                </div>
+
+                <p class="switch-modal">¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span id="closeForgotPasswordModal" class="close">&times;</span>
+            <h2 id="forgotPasswordTitle">Restablecer Contraseña</h2>
+            <p>Ingresa tu correo electrónico para recibir un enlace de recuperación.</p>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="forgotEmail">Email:</label>
+                    <input type="email" id="forgotEmail" name="email" required>
+                </div>
+                <button type="submit" class="submit-btn">Enviar Enlace</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Registro -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span id="closeRegisterModal" class="close">&times;</span>
+            <h2 id="modalTitle">Registro de Usuario</h2>
+
+            <form id="registroForm">
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="nombre">Nombre*:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label for="apellido">Apellido*:</label>
+                        <input type="text" id="apellido" name="apellido" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailReg">Email*:</label>
+                    <input type="email" id="emailReg" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="passwordReg">Contraseña*:</label>
+                    <input type="password" id="passwordReg" name="password" required minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono">
+                </div>
+
+                <div class="form-group">
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion" name="direccion">
+                </div>
+
+                <button type="submit" class="submit-btn">Registrarse</button>
+
+                <p class="switch-modal">¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión aquí</a></p>
+
+                <p class="required-info">* Campos obligatorios</p>
+            </form>
+        </div>
+    </div>
+
+    
+    <!-- Modal para seleccionar cantidad de boletos -->
+    <div id="buyTicketModal" class="modal" data-event-date="">
+        <div class="modal-content custom-modal">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Selecciona tu método de pago</h2>
+
+            <!-- Pestañas de pago -->
+            <div class="payment-tabs">
+                <button type="button" class="tab-btn active" data-tab="traditional">Pago Tradicional</button>
+                <button type="button" class="tab-btn" data-tab="ticketflex">TicketFlex</button>
+            </div>
+
+            <!-- Contenido de pago tradicional -->
+            <div id="traditional-tab" class="payment-tab-content" style="display: block;">
+                <h3>Pago Tradicional</h3>
+                <div class="form-group">
+                    <label for="ticketCount">Cantidad de boletos:</label>
+                    <input type="number" id="ticketCount" name="ticketCount" min="1" max="5" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="graderia">Gradería:</label>
+                    <select id="graderia" name="graderia">
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bank">Selecciona tu banco:</label>
+                    <select id="bank" onchange="toggleCardFields()">
+                        <option value="" disabled selected>Seleccione el banco</option>
+                        <option value="Bancolombia">Bancolombia</option>
+                        <option value="Davivienda">Davivienda</option>
+                        <option value="BBVA">BBVA</option>
+                        <option value="Banco de Bogotá">Banco de Bogotá</option>
+                        <option value="Caja Social">Caja Social</option>
+                        <option value="Nequi">Nequi</option>
+                        <option value="Movii">Movii</option>
+                    </select>
+                </div>
+                <div id="cardDetails" style="display: none;">
+                    <div class="form-group">
+                        <label for="traditionalCardNumber">Número de tarjeta:</label>
+                        <input type="text" id="traditionalCardNumber" placeholder="Número de tarjeta" maxlength="19"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="traditionalExpiryDate">Fecha de vencimiento:</label>
+                        <input type="text" id="traditionalExpiryDate" placeholder="MM/AA" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="traditionalCvv">CVV:</label>
+                        <input type="text" id="traditionalCvv" placeholder="CVV" maxlength="3" required>
+                    </div>
+                </div>
+                <button type="button" class="btn-primary" onclick="processPayment('traditional')">Confirmar
+                    compra</button>
+            </div>
+
+            <!-- Contenido de TicketFlex -->
+            <div id="ticketflex-tab" class="payment-tab-content" style="display: none;">
+                <h3>TicketFlex - Pago en Cuotas</h3>
+                <div class="form-group">
+                    <label for="tf-ticketCount">Cantidad de boletos:</label>
+                    <input type="number" id="tf-ticketCount" name="tf-ticketCount" min="1" max="5" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="tf-graderia">Gradería:</label>
+                    <select id="tf-graderia" name="tf-graderia">
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tf-cuotas">Número de cuotas:</label>
+                    <select id="tf-cuotas" name="tf-cuotas">
+                        <option value="2">2 cuotas</option>
+                        <option value="3">3 cuotas</option>
+                        <option value="4">4 cuotas</option>
+                        <option value="5">5 cuotas</option>
+                        <option value="6">6 cuotas</option>
+                    </select>
+                </div>
+                <div class="installment-details">
+                    <p><strong>Valor por cuota:</strong> <span id="valorCuota">$0</span></p>
+                    <p><strong>Total a pagar:</strong> <span id="totalTicketFlex">$0</span></p>
+                    <p><small>* Tasa de interés del 0.5% mensual</small></p>
+                </div>
+                <button type="button" class="btn-primary" onclick="processPayment('ticketflex')">Confirmar compra con
+                    TicketFlex</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Compra -->
+    <div id="purchaseModal" class="modal" data-event-date="">
+        <div class="modal-content purchase-modal custom-modal">
+            <span class="close-modal" id="closePurchaseModal">&times;</span>
+
+            <div class="event-details">
+                <div class="event-image">
+                    <img id="modalEventImage" src="" alt="Evento">
+                </div>
+                <div class="event-info">
+                    <h2 id="modalEventName"></h2>
+                    <div class="event-meta">
+                        <p><i class="fas fa-calendar"></i> <span id="modalEventDate"></span></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <span id="modalEventLocation"></span></p>
+                        <p><i class="fas fa-clock"></i> <span id="modalEventTime"></span></p>
+                    </div>
+                    <p class="event-description" id="modalEventDescription"></p>
+                    <div class="event-price">
+                        <h3>Precio: <span id="modalEventPrice"></span></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-options">
+                <h3>Selecciona tu método de pago</h3>
+
+                <div class="payment-tabs">
+                    <button class="payment-tab active" data-payment="traditional">
+                        <i class="fas fa-credit-card"></i> Pago Tradicional
+                    </button>
+                    <button class="payment-tab" data-payment="ticketflex">
+                        <i class="fas fa-ticket-alt"></i> TicketFlex (Pago a Cuotas)
+                    </button>
+                </div>
+
+                <!-- Formulario de Pago Tradicional -->
+                <div class="payment-form active" id="traditionalPayment">
+                    <form id="traditionalPaymentForm">
+                        <div class="form-group">
+                            <label for="traditionalCardNumber2">Número de Tarjeta</label>
+                            <input type="text" id="traditionalCardNumber2" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="traditionalExpiryDate2">Fecha de Expiración</label>
+                                <input type="text" id="traditionalExpiryDate2" placeholder="MM/AA" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="traditionalCvv2">CVV</label>
+                                <input type="text" id="traditionalCvv2" placeholder="123" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="traditionalCardName">Nombre en la Tarjeta</label>
+                            <input type="text" id="traditionalCardName" placeholder="Jhon Ariza" required>
+                        </div>
+                        <button type="submit" class="pay-button">Pagar Ahora</button>
+                    </form>
+                </div>
+
+                <!-- Formulario de Pago TicketFlex -->
+                <div class="payment-form" id="ticketflexPayment">
+                    <form id="ticketflexPaymentForm">
+                        <div class="form-group">
+                            <label for="installments">Número de Cuotas</label>
+                            <select id="installments" required>
+                                <option value="">Selecciona el número de cuotas</option>
+                                <option value="2">2 cuotas</option>
+                                <option value="3">3 cuotas</option>
+                                <option value="4">4 cuotas</option>
+                                <option value="6">6 cuotas</option>
+                            </select>
+                            <div class="installment-details">
+                                <p>Valor por cuota: <span id="installmentValue"></span></p>
+                                <p>Fecha de pago: <span id="paymentDate"></span></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketflexName">Nombre Completo</label>
+                            <input type="text" id="ticketflexName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketflexEmail">Correo Electrónico</label>
+                            <input type="email" id="ticketflexEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketflexPhone">Teléfono</label>
+                            <input type="tel" id="ticketflexPhone" required>
+                        </div>
+                        <button type="submit" class="pay-button">Confirmar Compra</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Rediseñado -->
+    <footer id="footer" class="modern-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>TicketFlex</h3>
+                    <p>La mejor plataforma para compra de boletos de eventos en Colombia.</p>
+                    <div class="social-media">
+                        <a href="https://bit.ly/3YRFvKy" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://x.com/ticketflex1" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/ticketflex1/" target="_blank"><i
+                                class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#eventosSection">Eventos</a></li>
+                        <li><a href="#">Cómo comprar</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +57 333 2608 028</li>
+                        <li><i class="fas fa-envelope"></i> info@ticketflex.com</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 TicketFlex. Todos los derechos reservados.</p>
+                <div class="legal-links">
+                    <a href="/politica-privacidad.html">Política de Privacidad</a>
+                    <a href="/terminos-servicio.html">Términos de Servicio</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón para subir -->
+    <div class="scroll-to-top" id="scrollToTopButton">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+
+    <!--============================================================================================================ -->
+    <!--  CODIGO -->
+    <script src="/js/script.js"></script>
+    <script src="/js/purchase.js"></script>
+</body>
+
+</html>

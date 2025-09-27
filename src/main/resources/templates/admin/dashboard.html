@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin | TicketFlex</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- ApexCharts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="#">
+                <img src="/images/ticketflex.png" alt="TicketFlex">
+                <span class="brand-text">TicketFlex Admin</span>
+            </a>
+
+            <!-- Espaciador para empujar todo lo demás a la derecha -->
+            <div class="ms-auto d-flex align-items-center">
+                <div class="user-info me-3">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="user-name" th:text="${nombreUsuario}"></span>
+                </div>
+
+                <!-- BOTÓN PERFIL -->
+                <a th:href="@{/admin/perfil}" class="btn btn-glass me-2">
+                    <i class="fas fa-user me-1"></i>
+                    <span class="d-none d-md-inline">Perfil</span>
+                </a>
+
+                <!-- CERRAR SESIÓN -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-glass">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        <span class="d-none d-md-inline">Salir</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header animate__animated animate__fadeIn">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div>
+                    <h1><i class="fas fa-tachometer-alt"></i> Panel de Control</h1>
+                    <p>Bienvenido al centro de administración de TicketFlex</p>
+                    <div class="date-display">
+                        <i class="far fa-calendar-alt"></i>
+                        <span th:text="${#temporals.format(#temporals.createNow(), 'EEEE, d MMMM yyyy')}"></span>
+                    </div>
+                </div>
+                <div class="text-end mt-3 mt-md-0">
+                    <small class="text-muted">Última actualización:
+                        <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}"></span>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción Principal -->
+        <div class="row mb-5 g-4">
+            <div class="col-md-4">
+                <div class="action-card animate__animated animate__fadeInUp animate__delay-1s">
+                    <i class="fas fa-plus-circle"></i>
+                    <h5>Crear Nuevo Evento</h5>
+                    <p>Gestiona y publica nuevos eventos en la plataforma</p>
+                    <a th:href="@{/admin/eventos/crear}" class="btn btn-primary-glass btn-sm mt-3">
+                        <i class="fas fa-arrow-right mr-2"></i>Acceder
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="action-card animate__animated animate__fadeInUp animate__delay-2s">
+                    <i class="fas fa-chart-line"></i>
+                    <h5>Estadísticas Avanzadas</h5>
+                    <p>Analiza el rendimiento de tus eventos</p>
+                    <a th:href="@{/admin/estadisticas}" class="btn btn-primary-glass btn-sm mt-3">
+                        <i class="fas fa-arrow-right mr-2"></i>Ver Dashboard
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="action-card animate__animated animate__fadeInUp animate__delay-3s">
+                    <i class="fas fa-lightbulb"></i>
+                    <h5>Predicciones Inteligentes</h5>
+                    <p>Descubre tendencias y oportunidades</p>
+                    <a th:href="@{/admin/predecir-evento}" class="btn btn-primary-glass btn-sm mt-3">
+                        <i class="fas fa-arrow-right mr-2"></i>Explorar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="row mb-5 g-4">
+            <div class="col-md-6">
+                <div class="stats-card animate__animated animate__fadeIn">
+                    <i class="fas fa-calendar-check"></i>
+                    <h5>Eventos Activos</h5>
+                    <div class="stat-number" th:text="${eventos.size()}"></div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up mr-2"></i>
+                        <span>+2% respecto a la semana pasada</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stats-card animate__animated animate__fadeIn">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h5>Boletos Vendidos</h5>
+                    <div class="stat-number boletos-vendidos">0</div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up mr-2"></i>
+                        <span>+15% respecto al mes pasado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Rendimiento -->
+        <div class="chart-container animate__animated animate__fadeIn">
+            <div class="section-title">
+                <h2><i class="fas fa-chart-bar"></i> Rendimiento de Eventos</h2>
+            </div>
+            <div id="performanceChart"></div>
+        </div>
+
+        <!-- Lista de Eventos Recientes -->
+        <div class="events-section animate__animated animate__fadeIn">
+            <div class="section-title">
+                <h2><i class="fas fa-clock"></i> Eventos Recientes</h2>
+                <a th:href="@{/admin/eventos}" class="btn btn-glass ms-auto">
+                    <i class="fas fa-list mr-2"></i>Ver Todos
+                </a>
+            </div>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-heading mr-2"></i>Nombre</th>
+                                <th><i class="fas fa-calendar-day mr-2"></i>Fecha</th>
+                                <th><i class="fas fa-map-marker-alt mr-2"></i>Lugar</th>
+                                <th><i class="fas fa-ticket-alt mr-2"></i>Tickets</th>
+                                <th><i class="fas fa-cogs mr-2"></i>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="evento : ${eventos}">
+                                <td th:text="${evento.nombreEvento}">Nombre del Evento</td>
+                                <td th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy')}">Fecha</td>
+                                <td th:text="${evento.lugar}">Lugar</td>
+                                <td>
+                                    <span class="badge-status"
+                                        th:classappend="${evento.disponibilidad > 50} ? 'badge-active' : 
+                                                          (${evento.disponibilidad > 20} ? 'badge-upcoming' : 'badge-completed')">
+                                        <span th:text="${evento.disponibilidad}"></span> disponibles
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/eventos/editar/{id}(id=${evento.id})}"
+                                        class="btn btn-action btn-glass">
+                                        <i class="fas fa-edit"></i>
+                                        <span class="d-none d-md-inline">Editar</span>
+                                    </a>
+                                    <a th:href="@{/admin/eventos/eliminar/{id}(id=${evento.id})}"
+                                        class="btn btn-action btn-glass">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span class="d-none d-md-inline">Eliminar</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            function actualizarBoletosVendidos() {
+                fetch("/admin/estadisticas-data")
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al obtener las estadísticas');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const boletosElement = document.querySelector('.boletos-vendidos');
+                        if (boletosElement) {
+                            boletosElement.textContent = data.totalBoletosVendidos;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al actualizar boletos vendidos:', error);
+                    });
+            }
+
+            actualizarBoletosVendidos(); // carga inicial
+            setInterval(actualizarBoletosVendidos, 5000); // cada 5 segundos
+        });
+
+
+
+        // Gráfico de rendimiento
+        document.addEventListener('DOMContentLoaded', function () {
+            var options = {
+                series: [{
+                    name: 'Boletos Vendidos',
+                    data: [30, 40, 35, 50, 49, 60, 70, 91, 125, 150, 180, 200]
+                }],
+                chart: {
+                    height: 350,
+                    type: 'area',
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: true,
+                            selection: false,
+                            zoom: false,
+                            zoomin: false,
+                            zoomout: false,
+                            pan: false,
+                            reset: false
+                        }
+                    },
+                    foreColor: '#fff'
+                },
+                colors: ['#6c63ff'],
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.3,
+                        stops: [0, 90, 100]
+                    }
+                },
+                xaxis: {
+                    categories: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                    labels: {
+                        style: {
+                            colors: '#fff'
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: '#fff'
+                        }
+                    }
+                },
+                tooltip: {
+                    theme: 'dark'
+                },
+                grid: {
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    strokeDashArray: 4,
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#performanceChart"), options);
+            chart.render();
+
+            // Actualizar boletos vendidos periódicamente
+            function actualizarBoletosVendidos() {
+                fetch("/admin/estadisticas-data")
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al obtener las estadísticas del dashboard');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const totalBoletosElement = document.querySelector('.stats-card:nth-child(2) .stat-number');
+                        if (totalBoletosElement) {
+                            totalBoletosElement.textContent = data.totalBoletosVendidos;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al actualizar boletos vendidos:', error);
+                    });
+            }
+
+            setInterval(actualizarBoletosVendidos, 5000);
+            actualizarBoletosVendidos();
+        });
+    </script>
+</body>
+
+</html>

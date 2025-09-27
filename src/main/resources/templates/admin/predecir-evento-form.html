@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción Individual | TicketFlex Admin</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- ApexCharts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.css">
+
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #564fc9;
+            --secondary: #ff6584;
+            --dark: #2b0a3d;
+            --light: #f8f9fa;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            height: 110px;
+            overflow: hidden;
+        }
+
+        .navbar-brand {
+            background: rgba(41, 41, 41, 0.1);
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 90px;
+            margin-right: 10px;
+
+        }
+
+        .brand-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .user-info i {
+            font-size: 20px;
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .btn-glass {
+            background: var(--glass);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-primary-glass {
+            background: var(--gradient);
+            border: none;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-header h2 {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .dashboard-header h2 i {
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        /* Prediction Cards */
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .prediction-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+        }
+
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+            color: white;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-select option {
+            background-color: white;
+            color: black;
+        }
+
+
+        /* Result Card */
+        .result-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .result-title {
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-title i {
+            margin-right: 10px;
+        }
+
+        .prediction-result {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .confidence-meter {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .confidence-level {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            border-radius: 5px;
+            transition: width 1s ease;
+        }
+
+        .confidence-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-predict {
+            background: var(--gradient);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-predict i {
+            margin-right: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .prediction-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-brand img {
+                height: 30px;
+            }
+
+            .prediction-card,
+            .result-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container d-flex align-items-center">
+            <a class="navbar-brand" href="#">
+                <img src="/images/ticketflex.png" alt="TicketFlex">
+                <span class="brand-text">TicketFlex Admin</span>
+            </a>
+
+            <!-- Espaciador para empujar todo lo demás a la derecha -->
+            <div class="ms-auto d-flex align-items-center">
+                <div class="user-info me-3">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="user-name" th:text="${nombreUsuario}"></span>
+                </div>
+
+                <!-- BOTÓN PERFIL -->
+                <a th:href="@{/admin/perfil}" class="btn btn-glass me-2">
+                    <i class="fas fa-user me-1"></i>
+                    <span class="d-none d-md-inline">Perfil</span>
+                </a>
+
+                <!-- CERRAR SESIÓN -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-glass">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        <span class="d-none d-md-inline">Salir</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="dashboard-header animate__animated animate__fadeIn">
+            <div>
+                <h2><i class="fas fa-user-plus"></i> Predicción Individual</h2>
+                <p class="opacity-75">Analiza la probabilidad de asistencia para un nuevo usuario</p>
+            </div>
+            <a th:href="@{/admin/dashboard}" class="btn btn-glass animate__animated animate__fadeIn">
+                <i class="fas fa-arrow-left mr-2"></i> Volver al Dashboard
+            </a>
+        </div>
+
+        <div class="prediction-grid animate__animated animate__fadeInUp">
+            <!-- Formulario de Predicción -->
+            <div class="prediction-card">
+                <form id="formNuevaPersona">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edadNueva" class="form-label">Edad</label>
+                            <input type="number" class="form-control" id="edadNueva" name="edadUsuario" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="generoNueva" class="form-label">Género</label>
+                            <select class="form-select" id="generoNueva" name="generoUsuario" required>
+                                <option value="Femenino">Femenino</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="historialNueva" class="form-label">Historial Compras ($)</label>
+                            <input type="number" class="form-control" id="historialNueva" name="historialComprasTotal"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="frecuenciaNueva" class="form-label">Frecuencia Visitas</label>
+                            <input type="number" class="form-control" id="frecuenciaNueva" name="frecuenciaVisitas"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tiempoNueva" class="form-label">Tiempo Navegación (min)</label>
+                            <input type="number" class="form-control" id="tiempoNueva" name="tiempoNavegacion"
+                                step="0.1" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="interesNueva" class="form-label">Interés Principal</label>
+                            <select class="form-select" id="interesNueva" name="interesPrincipal" required>
+                                <option value="Conciertos">Conciertos</option>
+                                <option value="Deportes">Deportes</option>
+                                <option value="Teatro">Teatro</option>
+                                <option value="Cine">Cine</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dispositivoNueva" class="form-label">Dispositivo</label>
+                            <select class="form-select" id="dispositivoNueva" name="dispositivoPredilecto" required>
+                                <option value="Desktop">Desktop</option>
+                                <option value="Mobile">Mobile</option>
+                                <option value="Tablet">Tablet</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="notificacionesNueva" class="form-label">Recibe Notificaciones</label>
+                            <select class="form-select" id="notificacionesNueva" name="recibeNotificaciones" required>
+                                <option value="0">No</option>
+                                <option value="1">Sí</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="descuentoNueva" class="form-label">Usó Descuento</label>
+                            <select class="form-select" id="descuentoNueva" name="usoDescuentoPrevio" required>
+                                <option value="0">No</option>
+                                <option value="1">Sí</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="eventoNueva" class="form-label">Evento</label>
+                            <select class="form-select" id="eventoNueva" name="idFuncionEvento" required>
+                                <option value="" disabled selected>Selecciona un evento</option>
+                                <option th:each="evento : ${eventos}" th:value="${evento.idFuncion}"
+                                    th:text="${evento.nombreFuncion}"></option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-predict w-100" onclick="predecirNuevaPersona()">
+                                <i class="fas fa-chart-line"></i> Predecir Asistencia
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Resultado de Predicción -->
+            <div class="result-card">
+                <h3 class="result-title"><i class="fas fa-chart-pie"></i> Resultado de Predicción</h3>
+                <div id="resultadoNuevaPrediccion" class="prediction-result" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-spinner fa-spin me-3"></i>
+                        <span>Procesando predicción...</span>
+                    </div>
+                </div>
+                <div class="confidence-meter">
+                    <div class="confidence-level"></div>
+                </div>
+                <div class="confidence-labels">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                </div>
+                <a th:href="@{/admin/predecir-evento}" class="btn btn-glass mt-4">
+                    <i class="fas fa-users me-2"></i> Predicción Masiva
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function predecirNuevaPersona() {
+            const formData = new FormData(document.getElementById('formNuevaPersona'));
+            const data = {};
+            formData.forEach((value, key) => (data[key] = value));
+
+            // Validar campos
+            if (!data.edadUsuario || !data.historialComprasTotal || !data.frecuenciaVisitas || !data.tiempoNavegacion || !data.idFuncionEvento) {
+                alert('Por favor complete todos los campos requeridos');
+                return;
+            }
+
+            // Mostrar estado de carga
+            const resultadoDiv = document.getElementById('resultadoNuevaPrediccion');
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-spinner fa-spin me-3"></i>
+                    <span>Procesando predicción...</span>
+                </div>
+            `;
+
+            fetch('/admin/predecir-persona-nueva', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    const confidenceBar = document.querySelector('.confidence-level');
+
+                    // Mostrar resultado
+                    resultadoDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-check-circle me-3"></i>
+                            <strong>Probabilidad de asistencia:</strong>
+                        </div>
+                        <div class="ps-4">
+                            ${result.prediccion}<br>
+                            <small class="text-muted">Nivel de confianza: ${result.confianza}%</small>
+                        </div>
+                    </div>
+                `;
+
+                    // Animar barra de confianza
+                    confidenceBar.style.width = `${result.confianza}%`;
+                })
+                .catch(error => {
+                    console.error('Error al predecir:', error);
+                    resultadoDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al realizar la predicción
+                    </div>
+                `;
+                });
+        }
+    </script>
+</body>
+
+</html>
