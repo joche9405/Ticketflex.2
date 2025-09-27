@@ -5,7 +5,6 @@ target/
 !**/src/test/**/target/
 # .gitignore
 .env
-application.properties
 application.yml
 target/
 build/
