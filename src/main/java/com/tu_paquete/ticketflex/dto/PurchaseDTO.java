@@ -39,16 +39,28 @@ public class PurchaseDTO {
             this.precioTotal = this.precioUnitario.multiply(new BigDecimal(this.cantidad));
         }
 
-        public Integer getCantidad() { return cantidad; }
-        public String getGraderia() { return graderia; }
-        public BigDecimal getPrecioUnitario() { return precioUnitario; }
-        public BigDecimal getPrecioTotal() { return precioTotal; }
+        public Integer getCantidad() {
+            return cantidad;
+        }
+
+        public String getGraderia() {
+            return graderia;
+        }
+
+        public BigDecimal getPrecioUnitario() {
+            return precioUnitario;
+        }
+
+        public BigDecimal getPrecioTotal() {
+            return precioTotal;
+        }
     }
 
     public PurchaseDTO(Transaccion transaccion, Boleto boleto, Evento evento) {
-        this.idTransaccion = transaccion.getId() != null ? transaccion.getId().toHexString() : null;
+        this.idTransaccion = transaccion.getId() != null ? transaccion.getId().toString() : null;
         this.idBoleto = boleto != null ? boleto.getId() : null;
-        this.nombreEvento = evento != null && evento.getNombreEvento() != null ? evento.getNombreEvento() : "Evento desconocido";
+        this.nombreEvento = evento != null && evento.getNombreEvento() != null ? evento.getNombreEvento()
+                : "Evento desconocido";
         this.fechaCompra = transaccion.getFechaPago();
         this.total = transaccion.getTotal() != null ? transaccion.getTotal() : BigDecimal.ZERO;
         this.estado = boleto != null && boleto.getEstado() != null
@@ -67,26 +79,72 @@ public class PurchaseDTO {
             this.boletos.add(new BoletoDetalleDTO(
                     boleto.getCantidad(),
                     "General",
-                    boleto.getPrecio()
-            ));
+                    boleto.getPrecio()));
         }
     }
 
     // Getters
-    public String getIdTransaccion() { return idTransaccion; }
-    public String getIdBoleto() { return idBoleto; }
-    public String getNombreEvento() { return nombreEvento; }
-    public Date getFechaCompra() { return fechaCompra; }
-    public BigDecimal getTotal() { return total; }
-    public String getEstado() { return estado; }
-    public String getQrCode() { return qrCode; }
-    public LocalDate getFechaEvento() { return fechaEvento; }
-    public String getLugarEvento() { return lugarEvento; }
-    public List<BoletoDetalleDTO> getBoletos() { return boletos; }
-    public String getMetodoPago() { return metodoPago; }
-    public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
-    public LocalDate getFechaLimitePago() { return fechaLimitePago; }
-    public void setFechaLimitePago(LocalDate fechaLimitePago) { this.fechaLimitePago = fechaLimitePago; }
-    public LocalDate getFechaProximoPago() { return fechaProximoPago; }
-    public void setFechaProximoPago(LocalDate fechaProximoPago) { this.fechaProximoPago = fechaProximoPago; }
+    public String getIdTransaccion() {
+        return idTransaccion;
+    }
+
+    public String getIdBoleto() {
+        return idBoleto;
+    }
+
+    public String getNombreEvento() {
+        return nombreEvento;
+    }
+
+    public Date getFechaCompra() {
+        return fechaCompra;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public LocalDate getFechaEvento() {
+        return fechaEvento;
+    }
+
+    public String getLugarEvento() {
+        return lugarEvento;
+    }
+
+    public List<BoletoDetalleDTO> getBoletos() {
+        return boletos;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public LocalDate getFechaLimitePago() {
+        return fechaLimitePago;
+    }
+
+    public void setFechaLimitePago(LocalDate fechaLimitePago) {
+        this.fechaLimitePago = fechaLimitePago;
+    }
+
+    public LocalDate getFechaProximoPago() {
+        return fechaProximoPago;
+    }
+
+    public void setFechaProximoPago(LocalDate fechaProximoPago) {
+        this.fechaProximoPago = fechaProximoPago;
+    }
 }

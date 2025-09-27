@@ -6,7 +6,6 @@ import com.tu_paquete.ticketflex.dto.PagoRequest;
 import com.tu_paquete.ticketflex.repository.mongo.BoletoRepository;
 import com.tu_paquete.ticketflex.repository.mongo.TransaccionRepository;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -102,15 +101,15 @@ public class PagoController {
 
         String idTransaccion = referencia.replace("TX-", "");
 
-        String objId;
+        String Id;
         try {
-            objId = new ObjectId(idTransaccion);
+            Id = new String(idTransaccion);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("ID inválido: " + idTransaccion);
         }
 
-        Optional<Transaccion> optTx = transaccionRepository.findById(objId);
+        Optional<Transaccion> optTx = transaccionRepository.findById(toString());
 
         if (!optTx.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
