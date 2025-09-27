@@ -530,7 +530,9 @@ function processPayment(method) {
 
         fetch(`/api/boletas/comprar?idEvento=${eventoId}&idUsuario=${userId}&cantidad=${cantidad}&metodoPago=TICKETFLEX&cuotas=${cuotas}&graderia=${graderia}`, {
             method: 'POST',
-            
+              headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}) // 👈 body vacío requerido
+
         })
             .then(response => {
                 if (!response.ok) {
@@ -1427,8 +1429,15 @@ function initializeBuyTicketModal() {
                     alert('Error al realizar la compra: ' + error.message);
                 });
         });
+        
     }
 }
+const mobileMenu = document.getElementById("mobileMenu");
+const navLinks = document.getElementById("navLinks");
+
+mobileMenu.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
 
 
 
