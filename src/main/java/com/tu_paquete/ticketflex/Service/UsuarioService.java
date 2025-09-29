@@ -254,7 +254,7 @@ public class UsuarioService {
         if (esAdmin) {
             resetLink = "https://ticketflex-2.onrender.com/admin/reset-password/" + token;
         } else {
-            resetLink = "https://ticketflex-2.onrender.com//reset-password/" + token;
+            resetLink = "https://ticketflex-2.onrender.com/reset-password/" + token;
         }
 
         // Preparar y enviar correo
