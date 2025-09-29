@@ -39,11 +39,11 @@ public class SecurityConfig {
                                                                 "/admin/reset-password/**",
                                                                 "/admin/reset-password-request")
                                                 .permitAll()
-                                                
+
                                                 .requestMatchers("/admin/**").hasRole("Administrador")
                                                 .requestMatchers("/login-superadmin", "/login-superadmin.html",
                                                                 "superadmin-panel.html", "/politica-privacidad.html",
-                                                                "/terminos-servicio.html")
+                                                                "/terminos-servicio.html", "/como-comprar.html")
                                                 .permitAll()
                                                 .requestMatchers("/api/eventos/listar").permitAll()
                                                 .requestMatchers("/api/eventos/**").permitAll()

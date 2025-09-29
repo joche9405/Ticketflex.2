@@ -5,191 +5,221 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Términos de Servicio | TicketFlex</title>
+    <!-- Incluir Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluir Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        // Configuración de colores personalizados para Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tf-dark': '#2b0a3d', // Morado oscuro
+                        'tf-accent': '#ff5e6c', // Rojo/Naranja brillante
+                    },
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f5f5f5;
-            line-height: 1.6;
+        /* Estilo personalizado para usar la fuente Inter */
+        html {
+            font-family: 'Inter', sans-serif;
         }
 
-        .navbar {
-            background-color: #ffffff;
-            padding: 15px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            font-size: 22px;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .navbar-brand img {
-            margin-right: 10px;
-            max-height: 50px;
-        }
-
-        .navbar-text {
-            display: flex;
-            align-items: center;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .navbar-text i {
-            margin-right: 5px;
-            font-size: 18px;
-        }
-
-        h1,
-        h2 {
-            color: #000000;
-        }
-
-        section {
-            margin-bottom: 30px;
-        }
-
-        footer {
-            margin-top: 50px;
-            text-align: center;
-            font-size: 14px;
-            color: #777;
-        }
-
-        .logo a {
-            text-decoration: none;
-            font-size: 28px;
-            font-weight: bold;
-            font-family: 'Arial', sans-serif;
-            color: #2b0a3d;
-            transition: all 0.3s ease;
-        }
-
-        .logo a span {
+        /* ESTILO: Logo con colores separados */
+        .logo-split span {
             color: #ff5e6c;
+            /* tf-accent */
         }
 
-        .logo a:hover {
-            opacity: 0.85;
-        }
-
-        .privacy-header {
-            background-color: #ffffff;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        .gradient-button {
+            /* Aplicar el degradado al botón para mantener consistencia */
+            background-image: linear-gradient(to right, #2b0a3d, #ff5e6c);
+            @apply hover:opacity-90 transition duration-300;
         }
     </style>
-
 </head>
 
-<body>
-    <!-- Barra de navegacion -->
-    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
-        <div class="container">
-            <div class="logo">
-                <a href="#">Ticket<span>Flex</span></a>
-            </div>
-            <div class="ml-auto d-flex align-items-center">
+<body class="bg-gray-50 flex flex-col min-h-screen">
 
-                <span class="navbar-text mr-3">
-                    <i class="fas fa-user-circle mr-2"></i>
-                    <span th:text="${nombreUsuario}"></span>
-                </span>
+    <!-- HEADER / Navbar -->
+    <header class="bg-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- LOGOTIPO CON COLORES SEPARADOS -->
+            <a href="#"
+                class="logo-split text-3xl font-extrabold tracking-wider text-tf-dark">Ticket<span>Flex</span></a>
+        </div>
+    </header>
+
+    <!-- SECCIÓN PRINCIPAL: Términos de Servicio -->
+    <main class="flex-grow">
+        <div class="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+
+            <header class="text-center mb-12 bg-white p-8 rounded-xl shadow-lg border-t-4 border-tf-accent">
+                <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Términos de Servicio</h1>
+                <p class="text-sm text-gray-500">
+                    Fecha de vigencia: Abril 2025.
+                    <br>
+                    El uso de la plataforma TicketFlex está sujeto a la aceptación total de los siguientes términos y
+                    condiciones.
+                </p>
+            </header>
+
+            <!-- Contenido de los Términos (Estructura de tarjetas) -->
+            <div class="space-y-6">
+
+                <!-- 1. Aceptación de los términos -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-handshake mr-3 text-tf-dark/80"></i> 1. Aceptación de los términos
+                    </h2>
+                    <p class="text-gray-700">Al acceder y utilizar la plataforma TicketFlex, el usuario acepta
+                        cumplir con los presentes Términos de Servicio y con todas las leyes y regulaciones aplicables.
+                        Si no está de acuerdo con alguno de estos términos, debe abstenerse de usar la plataforma.</p>
+                </section>
+
+                <!-- 2. Métodos de Pago -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-money-check-alt mr-3 text-tf-dark/80"></i> 2. Métodos de Pago
+                    </h2>
+                    <p class="text-gray-700">TicketFlex acepta tarjetas de crédito y una opción de pago flexible propia
+                        con menor porcentaje de recargo. Todos los pagos son procesados de manera segura mediante
+                        pasarelas certificadas.</p>
+                </section>
+
+                <!-- 3. Plazos y condiciones de pago -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-calendar-alt mr-3 text-tf-dark/80"></i> 3. Plazos y condiciones de pago
+                    </h2>
+                    <p class="text-gray-700 mb-4">El usuario puede optar por pagar el total de inmediato o en cuotas,
+                        siempre y cuando el valor total esté completamente saldado con al menos cuatro (4) semanas
+                        de antelación a la fecha del evento. Si el pago no se ha completado en este plazo, TicketFlex
+                        podrá cancelar parcial o totalmente la compra.</p>
+                    <p class="text-gray-700">En compras múltiples, las boletas se asignarán proporcionalmente según el
+                        porcentaje abonado. Por ejemplo, si el usuario adquiere tres (3) boletas y ha pagado el
+                        equivalente a dos (2), se considerarán confirmadas únicamente esas dos (2), y la tercera podrá
+                        ser liberada para su reventa.</p>
+                </section>
+
+                <!-- 4. Incumplimiento de pago -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-3 text-tf-dark/80"></i> 4. Incumplimiento de pago
+                    </h2>
+                    <p class="text-gray-700 mb-4">En caso de incumplimiento, TicketFlex podrá retener un porcentaje del
+                        monto abonado como penalización y liberar las boletas no pagadas para su reventa. Si el usuario
+                        ha abonado parcialmente, se calcularán cuántas boletas han sido cubiertas en su totalidad, y
+                        únicamente esas se entregarán. Cualquier saldo sobrante será reembolsado, aplicando la
+                        penalización correspondiente.</p>
+
+                    <p class="font-semibold text-tf-accent mb-2">Condiciones específicas para planes de pago:</p>
+                    <ul class="list-disc list-inside text-gray-700 ml-4 space-y-2">
+                        <li>Si el usuario no realiza ningún pago dentro del primer mes desde la compra, la orden será
+                            cancelada automáticamente y no se entregarán boletas. No se aplicará reembolso.</li>
+                        <li>Si el usuario incumple con alguno de los pagos mensuales, se
+                            realizará una devolución parcial del dinero abonado, aplicando una retención del treinta
+                            por ciento (30%) del total pagado como penalización por incumplimiento.</li>
+                        <li>TicketFlex ofrecerá un plazo de gracia de cinco (5) días calendario posterior a cada
+                            fecha límite mensual para regularizar el pago antes de aplicar las penalizaciones.</li>
+                    </ul>
+                </section>
+
+                <!-- 5. Cancelaciones y reembolsos -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-undo mr-3 text-tf-dark/80"></i> 5. Cancelaciones y reembolsos
+                    </h2>
+                    <ul class="list-disc list-inside text-gray-700 ml-4 space-y-2">
+                        <li>Dentro de los primeros 8 días posteriores a la compra: Reembolso total sin
+                            penalización.</li>
+                        <li>Después de 8 días: Reembolso con penalización de un porcentaje del valor total.</li>
+                        <li>Si el evento es cancelado: El usuario podrá elegir entre un reembolso total o un
+                            crédito en la pagina para futuros eventos.</li>
+                    </ul>
+                </section>
+
+                <!-- 6. Seguridad en los pagos -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-credit-card mr-3 text-tf-dark/80"></i> 6. Seguridad en los pagos
+                    </h2>
+                    <p class="text-gray-700">TicketFlex utiliza sistemas de cifrado avanzados para garantizar la
+                        seguridad de los datos personales y financieros. El usuario puede optar por guardar su tarjeta
+                        para facilitar futuras compras, bajo su consentimiento explícito.</p>
+                </section>
+
+                <!-- 7. Notificaciones y soporte -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-bell mr-3 text-tf-dark/80"></i> 7. Notificaciones y soporte
+                    </h2>
+                    <p class="text-gray-700">El usuario recibirá notificaciones por correo electrónico, SMS y dentro de
+                        la aplicación en caso de pagos pendientes, cambios en eventos o problemas con sus transacciones.
+                        TicketFlex ofrece soporte al cliente a través de canales oficiales para resolver cualquier
+                        inquietud.</p>
+                </section>
+
+                <!-- 8. Modificaciones -->
+                <section class="p-6 bg-white rounded-xl shadow-lg border-l-4 border-tf-dark">
+                    <h2 class="text-2xl font-bold text-tf-dark mb-3 flex items-center">
+                        <i class="fas fa-code-branch mr-3 text-tf-dark/80"></i> 8. Modificaciones
+                    </h2>
+                    <p class="text-gray-700">TicketFlex se reserva el derecho de modificar estos Términos de Servicio en
+                        cualquier momento. Las modificaciones se publicarán en la plataforma y se notificarán a los
+                        usuarios registrados.</p>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#1c1c1c] text-white mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8 mb-8">
+
+                <div class="footer-section">
+                    <h3 class="text-xl font-bold mb-4 text-tf-accent">TicketFlex</h3>
+                    <p class="text-gray-400 text-sm">Tu plataforma definitiva para los mejores eventos. Compra, vende y
+                        disfruta con flexibilidad y seguridad.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="text-xl font-bold mb-4">Ayuda</h3>
+                    <ul>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-150">Contáctanos</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="text-xl font-bold mb-4">Síguenos</h3>
+                    <div class="flex space-x-4 text-2xl">
+                        <a href="#" class="text-gray-400 hover:text-blue-500 transition duration-150"><i
+                                class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-pink-500 transition duration-150"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-150"><i
+                                class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom text-center md:flex justify-between items-center text-sm">
+                <p class="mb-2 md:mb-0 text-gray-400">&copy; 2025 <span class="font-bold text-white">Ticket</span><span
+                        class="font-bold text-tf-accent">Flex</span>. Todos los derechos reservados.</p>
+                <div class="legal-links space-x-4">
+                    <a href="/politica-privacidad.html"
+                        class="text-gray-400 hover:text-white transition duration-150">Política de Privacidad</a>
+                    <a href="/terminos-servicio.html"
+                        class="text-gray-400 hover:text-white transition duration-150">Términos de Servicio</a>
+                </div>
             </div>
         </div>
-    </nav>
-
-
-    <h1>Términos de Servicio</h1>
-
-    <section>
-        <h2>1. Aceptación de los términos</h2>
-        <p>Al acceder y utilizar la plataforma TicketFlex, el usuario acepta cumplir con los presentes Términos de
-            Servicio y con todas las leyes y regulaciones aplicables. Si no está de acuerdo con alguno de estos
-            términos, debe abstenerse de usar la plataforma.</p>
-    </section>
-
-    <section>
-        <h2>2. Métodos de Pago</h2>
-        <p>TicketFlex acepta tarjetas de crédito y una opción de pago flexible propia con menor porcentaje de recargo.
-            Todos los pagos son procesados de manera segura mediante pasarelas certificadas.</p>
-    </section>
-
-    <section>
-        <h2>3. Plazos y condiciones de pago</h2>
-        <p>El usuario puede optar por pagar el total de inmediato o en cuotas, siempre y cuando el valor total esté
-            completamente saldado con al menos cuatro (4) semanas de antelación a la fecha del evento. Si el pago no se
-            ha completado en este plazo, TicketFlex podrá cancelar parcial o totalmente la compra.</p>
-        <p>En compras múltiples, las boletas se asignarán proporcionalmente según el porcentaje abonado. Por ejemplo, si
-            el usuario adquiere tres (3) boletas y ha pagado el equivalente a dos (2), se considerarán confirmadas
-            únicamente esas dos (2), y la tercera podrá ser liberada para su reventa.</p>
-    </section>
-
-    <section>
-        <h2>4. Incumplimiento de pago</h2>
-        <p>En caso de incumplimiento, TicketFlex podrá retener un porcentaje del monto abonado como penalización y
-            liberar las boletas no pagadas para su reventa. Si el usuario ha abonado parcialmente, se calcularán cuántas
-            boletas han sido cubiertas en su totalidad, y únicamente esas se entregarán. Cualquier saldo sobrante será
-            reembolsado, aplicando la penalización correspondiente.</p>
-
-        <p><strong>Condiciones específicas para planes de pago:</strong></p>
-        <ul>
-            <li>Si el usuario no realiza ningún pago dentro del primer mes desde la compra, la orden será cancelada
-                automáticamente y no se entregarán boletas. No se aplicará reembolso.</li>
-            <li>En planes de seis (6) meses, si el usuario incumple con alguno de los pagos mensuales, se realizará una
-                devolución parcial del dinero abonado, aplicando una retención del treinta por ciento (30%) del total
-                pagado como penalización por incumplimiento.</li>
-            <li>TicketFlex ofrecerá un plazo de gracia de cinco (5) días calendario posterior a cada fecha límite
-                mensual para regularizar el pago antes de aplicar las penalizaciones.</li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>5. Cancelaciones y reembolsos</h2>
-        <ul>
-            <li>Dentro de los primeros 15 días posteriores a la compra: Reembolso total sin penalización.</li>
-            <li>Después de 15 días: Reembolso con penalización de un porcentaje del valor total.</li>
-            <li>Si el usuario aún no ha pagado ninguna cuota, la cancelación en este periodo será gratuita.</li>
-            <li>Si el evento es cancelado: El usuario podrá elegir entre un reembolso total o un crédito para futuros
-                eventos.</li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>6. Seguridad en los pagos</h2>
-        <p>TicketFlex utiliza sistemas de cifrado avanzados para garantizar la seguridad de los datos personales y
-            financieros. El usuario puede optar por guardar su tarjeta para facilitar futuras compras, bajo su
-            consentimiento explícito.</p>
-    </section>
-
-    <section>
-        <h2>7. Notificaciones y soporte</h2>
-        <p>El usuario recibirá notificaciones por correo electrónico, SMS y dentro de la aplicación en caso de pagos
-            pendientes, cambios en eventos o problemas con sus transacciones. TicketFlex ofrece soporte al cliente a
-            través de canales oficiales para resolver cualquier inquietud.</p>
-    </section>
-
-    <section>
-        <h2>8. Modificaciones</h2>
-        <p>TicketFlex se reserva el derecho de modificar estos Términos de Servicio en cualquier momento. Las
-            modificaciones se publicarán en la plataforma y se notificarán a los usuarios registrados.</p>
-    </section>
-    <footer>
-        <p>Última actualización: Abril 2025 &nbsp; | &nbsp; TicketFlex &copy; 2024</p>
     </footer>
 
 </body>

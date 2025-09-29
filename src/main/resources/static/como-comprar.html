@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cómo Comprar Boletos | TicketFlex</title>
+    <!-- Incluir Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluir Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        // Configuración de colores personalizados para Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tf-dark': '#2b0a3d', // Morado oscuro
+                        'tf-accent': '#ff5e6c', // Rojo/Naranja brillante
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilo personalizado para usar la fuente Inter */
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .step-icon {
+            /* Mantiene el color base del icono */
+            @apply text-4xl p-4 rounded-full shadow-md;
+            background-color: #fce7f3;
+            /* Rosa pálido para fondo */
+            color: #2b0a3d;
+            /* Morado oscuro para icono */
+        }
+
+        .gradient-button {
+            /* Aplicar el degradado al botón */
+            background-image: linear-gradient(to right, #2b0a3d, #ff5e6c);
+            @apply hover:opacity-90 transition duration-300;
+        }
+
+        /* ESTILO AÑADIDO: Logo con colores separados */
+        .logo-split span {
+            color: #ff5e6c;
+            /* tf-accent */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- HEADER / Navbar simulada -->
+    <header class="bg-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- LOGOTIPO CON COLORES SEPARADOS (Header) -->
+            <a href="#"
+                class="logo-split text-3xl font-extrabold tracking-wider text-tf-dark">Ticket<span>Flex</span></a>
+        </div>
+    </header>
+
+    <!-- SECCIÓN PRINCIPAL: Guía de Compra -->
+    <main class="flex-grow">
+        <div class="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+
+            <header class="text-center mb-12">
+                <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Guía Rápida: Cómo Comprar Boletos</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Comprar tus entradas es rápido, fácil y seguro. Sigue estos sencillos pasos para asegurar tu lugar
+                    en los mejores eventos.
+                </p>
+            </header>
+
+            <!-- Pasos de Compra (Responsive Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                <!-- Paso 1 -->
+                <div
+                    class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 text-center border-t-4 border-tf-dark">
+                    <div class="step-icon mx-auto mb-4">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">1. Explora Eventos</h4>
+                    <p class="text-gray-500">Navega por categorías para encontrar el evento que te apasione.</p>
+                </div>
+
+                <!-- Paso 2 -->
+                <div
+                    class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 text-center border-t-4 border-tf-dark">
+                    <div class="step-icon mx-auto mb-4">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">2. Selecciona Boletos</h4>
+                    <p class="text-gray-500">Elige la cantidad, la ubicación (gradería) y verifica el precio total de tu
+                        selección.</p>
+                </div>
+
+                <!-- Paso 3 -->
+                <div
+                    class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 text-center border-t-4 border-tf-dark">
+                    <div class="step-icon mx-auto mb-4">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">3. Elige el Pago</h4>
+                    <p class="text-gray-500">Paga de forma tradicional con tarjeta o usa <b>TicketFlex</b> para pagar a
+                        plazos (cuotas).</p>
+                </div>
+
+                <!-- Paso 4 -->
+                <div
+                    class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1 text-center border-t-4 border-tf-dark">
+                    <div class="step-icon mx-auto mb-4">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800 mb-2">4. Recibe tu QR</h4>
+                    <p class="text-gray-500">Recibe tu boleto digital (QR) al instante por email o en tu sección de mis
+                        compras de la App.</p>
+                </div>
+            </div>
+
+            <!-- Sección de Métodos de Pago -->
+            <section class="mt-16 p-8 bg-white rounded-xl shadow-xl border border-gray-200">
+                <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Métodos de Pago Aceptados</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                    <!-- Pago Tradicional -->
+                    <div class="p-5 border-l-4 border-green-500 bg-green-50 rounded-lg">
+                        <h4 class="text-2xl font-semibold text-green-700 mb-2 flex items-center">
+                            <i class="fas fa-dollar-sign mr-2"></i> Pago Único (TRADICIONAL)
+                        </h4>
+                        <p class="text-gray-600 mb-3">Realiza el pago completo de tus boletos de inmediato. Ideal para
+                            asegurar tu entrada sin compromisos futuros.</p>
+                        <ul class="list-disc list-inside text-gray-600 ml-4">
+                            <li><i class="fas fa-check-circle text-green-500 mr-1"></i> Acepta todas las tarjetas
+                                principales (Visa, Mastercard, AExpress).</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-1"></i> Acceso inmediato al código <b>QR
+                                    de tu entrada</b>.</li>
+                        </ul>
+                    </div>
+
+                    <!-- TicketFlex (Pago a Plazos) - Usa el nuevo color de acento -->
+                    <div class="p-5 border-l-4 border-tf-accent bg-tf-accent/10 rounded-lg">
+                        <h4 class="text-2xl font-semibold text-tf-dark mb-2 flex items-center">
+                            <i class="fas fa-clock mr-2" style="color: #ff5e6c;"></i> TicketFlex (A Plazos)
+                        </h4>
+                        <p class="text-gray-600 mb-3">¡Reserva tu entrada ahora y paga en cómodas cuotas! Te da
+                            flexibilidad financiera.</p>
+                        <ul class="list-disc list-inside text-gray-600 ml-4">
+                            <li><i class="fas fa-check-circle text-tf-accent mr-1"></i> Elige el número de cuotas que
+                                mejor se ajuste a tu presupuesto.</li>
+                            <li><i class="fas fa-check-circle text-tf-accent mr-1"></i> Recibes un <b>QR PENDIENTE</b>
+                                hasta completar el pago total.</li>
+                            <li><i class="fas fa-check-circle text-tf-accent mr-1"></i> Paga online y seguro.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#1c1c1c] text-white mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8 mb-8">
+
+                <div class="footer-section">
+                    <h3 class="text-xl font-bold mb-4 text-tf-accent">TicketFlex</h3>
+                    <p class="text-gray-400 text-sm">Tu plataforma definitiva para los mejores eventos. Compra, vende y
+                        disfruta con flexibilidad y seguridad.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="text-xl font-bold mb-4">Ayuda</h3>
+                    <ul>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-150">Contáctanos</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="text-xl font-bold mb-4">Síguenos</h3>
+                    <div class="flex space-x-4 text-2xl">
+                        <a href="#" class="text-gray-400 hover:text-blue-500 transition duration-150"><i
+                                class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-pink-500 transition duration-150"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-150"><i
+                                class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom text-center md:flex justify-between items-center text-sm">
+                <p class="mb-2 md:mb-0 text-gray-400">&copy; 2025 <span class="font-bold text-white">Ticket</span><span
+                        class="font-bold text-tf-accent">Flex</span>. Todos los derechos reservados.</p>
+                <div class="legal-links space-x-4">
+                    <a href="/politica-privacidad.html"
+                        class="text-gray-400 hover:text-white transition duration-150">Política de Privacidad</a>
+                    <a href="/terminos-servicio.html"
+                        class="text-gray-400 hover:text-white transition duration-150">Términos de Servicio</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+</body>
+
+</html>
