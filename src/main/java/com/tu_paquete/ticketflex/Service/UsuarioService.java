@@ -252,9 +252,9 @@ public class UsuarioService {
         // Construir link según tipo de usuario
         String resetLink;
         if (esAdmin) {
-            resetLink = "http://localhost:8080/admin/reset-password/" + token;
+            resetLink = "https://ticketflex-2.onrender.com/admin/reset-password/" + token;
         } else {
-            resetLink = "http://localhost:8080/reset-password/" + token;
+            resetLink = "https://ticketflex-2.onrender.com//reset-password/" + token;
         }
 
         // Preparar y enviar correo
