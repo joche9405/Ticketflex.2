@@ -40,7 +40,7 @@ public class EmailService {
         } catch (MailException e) {
             // **MANEJO SEGURO DE EXCEPCIONES DE CONEXIÓN/AUTENTICACIÓN**
             // Registra el error (para que sepas que falló), pero NO RELANZA la excepción.
-            log.error("Error de conexión/envío de correo a {}. La compra se completó, pero el correo falló: {}",
+            log.error("Error de conexión/envío de correo a  {}",
                     to, e.getMessage());
 
         } catch (Exception e) {
