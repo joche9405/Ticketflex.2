@@ -794,9 +794,7 @@ ESTADO: ACTIVA - VÁLIDA PARA ENTRADA`;
                 <p style="color: black;"><strong>Fecha límite:</strong> ${fechaLimite}</p>
                 <p style="color: black;"><strong>Próximo pago:</strong> ${fechaProximoPago}</p>
                 ${estado === 'PENDIENTE' ? `
-                    <button onclick="location.href='/completar-pago?id=${boletoId}'" class="btn-pay-now">
-                        Completar Pago Ahora
-                    </button>
+                    
                 ` : `<p style="color: green; font-weight: bold;">✔ Boleta cancelada totalmente</p>`}
             </div>
         </div>
