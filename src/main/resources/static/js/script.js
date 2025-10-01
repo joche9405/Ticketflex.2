@@ -432,60 +432,39 @@ function comprarBoleto(eventoId, precio) {
     }
 }
 
-// Función para procesar pago según método seleccionado
 function validarTarjetaFrontend(cardNumber, expiryDate, cvv) {
-    // --- Validar número de tarjeta ---
-    if (!cardNumber || !/^\d{10,19}$/.test(cardNumber)) {
-        return "Número de tarjeta inválido. Debe tener entre 10 y 19 dígitos";
-    }
+  // --- Validar número de tarjeta: aceptar solo dígitos, sin espacios ni guiones ---
+  if (!cardNumber || !/^\d{10,19}$/.test(cardNumber)) {
+    return "Número de tarjeta inválido. Debe contener solo dígitos y tener entre 10 y 19 dígitos";
+  }
 
-    // Validación algoritmo de Luhn
-    if (!validarLuhn(cardNumber)) {
-        return "Número de tarjeta inválido (falló validación de seguridad)";
-    }
 
-    // --- Validar fecha (formato MM/AA) ---
-    if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
-        return "Fecha de vencimiento inválida. Use formato MM/AA";
-    }
 
-    const [mes, año] = expiryDate.split('/').map(v => parseInt(v, 10));
-    if (mes < 1 || mes > 12) {
-        return "Mes de vencimiento inválido";
-    }
+  // --- Validar fecha (formato MM/AA) ---
+  if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
+    return "Fecha de vencimiento inválida. Use formato MM/AA";
+  }
 
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear() % 100; // Tomamos solo 2 dígitos del año
+  const [mes, año] = expiryDate.split('/').map(v => parseInt(v, 10));
+  if (mes < 1 || mes > 12) {
+    return "Mes de vencimiento inválido";
+  }
 
-    if (año < currentYear || (año === currentYear && mes < currentMonth)) {
-        return "La tarjeta está vencida";
-    }
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear() % 100; // Tomamos solo 2 dígitos del año
 
-    // --- Validar CVV ---
-    if (!cvv || !/^\d{3,4}$/.test(cvv)) {
-        return "CVV inválido. Debe tener 3 o 4 dígitos";
-    }
+  if (año < currentYear || (año === currentYear && mes < currentMonth)) {
+    return "La tarjeta está vencida";
+  }
 
-    return null; // ✅ Sin errores
+  // --- Validar CVV ---
+  if (!cvv || !/^\d{3,4}$/.test(cvv)) {
+    return "CVV inválido. Debe tener 3 o 4 dígitos";
+  }
+
+  return null; // ✅ Sin errores
 }
-
-// Función auxiliar: Algoritmo de Luhn
-function validarLuhn(cardNumber) {
-    let sum = 0;
-    let alternate = false;
-    for (let i = cardNumber.length - 1; i >= 0; i--) {
-        let n = parseInt(cardNumber[i], 10);
-        if (alternate) {
-            n *= 2;
-            if (n > 9) n -= 9;
-        }
-        sum += n;
-        alternate = !alternate;
-    }
-    return (sum % 10 === 0);
-}
-
 
 function processPayment(method) {
     console.log('Procesando pago - ID del evento:', idEventoToBuy, typeof idEventoToBuy);
