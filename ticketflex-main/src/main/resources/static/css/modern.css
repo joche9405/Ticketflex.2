@@ -1158,6 +1158,25 @@ body {
 }
 
 /* Estilos para el listado de compras */
+.purchases-list {
+  max-height: 400px; /* O el valor que prefieras */
+  overflow-y: auto;
+  min-height: 300px;
+}
+
+.qr-placeholder img {
+  width: 120px; /* Reduce el tamaño de la imagen */
+  height: auto;
+}
+
+#forgotPasswordModal p {
+    color: black;
+}
+
+#forgotPasswordModal h2 {
+    color: black;
+}
+
 .purchases-filter {
   margin-bottom: 20px;
 }
@@ -1555,3 +1574,57 @@ body {
 .custom-modal .btn-pay:hover {
   background: #219150;
 }
+
+/*
+ * ESTILOS PARA FORZAR EL APILAMIENTO VERTICAL
+ * Coloca este bloque al final de tu archivo CSS
+ */
+
+/* Este es el contenedor principal de los ítems */
+.purchases-list {
+  /* ¡Importante! Asegura que el contenedor se comporte como un bloque */
+  display: block; 
+}
+
+/* Este es cada ítem de compra individual */
+.purchase-item {
+  /* ¡Importante! Esto fuerza a cada ítem a una nueva línea */
+  display: block;
+  width: 100%; /* Asegura que cada ítem ocupe todo el ancho */
+  margin-bottom: 20px; /* Añade espacio entre cada compra */
+}
+
+/* Si tu HTML usa .purchase-card, aplica lo mismo */
+.purchase-card {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* También debes asegurarte de que el contenido interno se apile */
+.purchase-header {
+  /* El "flex" original causa un diseño horizontal. Cámbialo. */
+  display: block;
+  margin-bottom: 12px;
+}
+
+.purchase-details {
+  /* El "flex" original también causa un diseño horizontal. Cámbialo. */
+  display: block;
+}
+
+/* Ajustes para los sub-elementos si persisten los problemas */
+.ticket-info,
+.ticket-price {
+  /* Asegura que los sub-elementos también se apilen si están en flex */
+  display: block;
+  width: 100%;
+  margin-bottom: 8px; /* Añade un pequeño espacio vertical */
+}
+
+.purchase-title,
+.purchase-date,
+.purchase-amount {
+  display: block;
+}
+

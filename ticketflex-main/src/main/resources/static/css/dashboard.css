@@ -282,6 +282,7 @@
             border-bottom: 1px solid var(--glass-border);
             font-weight: 600;
             padding: 15px;
+            color: white; 
         }
 
         .table tbody td {

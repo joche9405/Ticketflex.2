@@ -7,12 +7,11 @@ import org.springframework.stereotype.Service;
 import com.tu_paquete.ticketflex.Model.FuncionEvento;
 import com.tu_paquete.ticketflex.Model.PerfilUsuario;
 import com.tu_paquete.ticketflex.Model.PrediccionResultado;
-import com.tu_paquete.ticketflex.Repository.jpa.FuncionEventoRepository;
-import com.tu_paquete.ticketflex.Repository.jpa.PerfilUsuarioRepository;
 import com.tu_paquete.ticketflex.Service.dto.NuevaPersonaRequest;
 import com.tu_paquete.ticketflex.Service.dto.PrediccionMasivaResultado;
 import com.tu_paquete.ticketflex.Service.dto.ResultadoPrediccion;
-
+import com.tu_paquete.ticketflex.repository.jpa.FuncionEventoRepository;
+import com.tu_paquete.ticketflex.repository.jpa.PerfilUsuarioRepository;
 
 import weka.classifiers.Classifier;
 import weka.core.DenseInstance;
@@ -113,7 +112,8 @@ public class PrediccionEventoService {
         String clasePredicha = dataStructure.classAttribute().value((int) resultadoPrediccion);
         double confianza = probabilidades[(int) resultadoPrediccion] * 100;
 
-        return new PrediccionResultado(clasePredicha.equals("1") ? "Asistirá" : "No Asistirá", String.format("%.1f%%", confianza));
+        return new PrediccionResultado(clasePredicha.equals("1") ? "Asistirá" : "No Asistirá",
+                String.format("%.1f%%", confianza));
     }
 
     private Instance crearInstanciaWeka(PerfilUsuario usuario) {
@@ -123,12 +123,14 @@ public class PrediccionEventoService {
         instance.setValue(dataStructure.attribute("ID_Usuario"), usuario.getIdPerfil().doubleValue());
         instance.setValue(dataStructure.attribute("Edad"), usuario.getEdadUsuario());
         instance.setValue(dataStructure.attribute("Genero"), usuario.getGeneroUsuario());
-        instance.setValue(dataStructure.attribute("Historial_Compras"), categorizarHistorial(usuario.getHistorialComprasTotal()));
+        instance.setValue(dataStructure.attribute("Historial_Compras"),
+                categorizarHistorial(usuario.getHistorialComprasTotal()));
         instance.setValue(dataStructure.attribute("Frecuencia_Visitas_Sitio"), usuario.getFrecuenciaVisitas());
         instance.setValue(dataStructure.attribute("Tiempo_Navegacion_Promedio"), usuario.getTiempoPromedioNavegacion());
         instance.setValue(dataStructure.attribute("Interes_Categoria"), usuario.getInteresPrincipal());
         instance.setValue(dataStructure.attribute("Dispositivo_Acceso"), usuario.getDispositivoPredilecto());
-        instance.setValue(dataStructure.attribute("Recibio_Notificacion"), usuario.getRecibeNotificaciones() ? "1" : "0");
+        instance.setValue(dataStructure.attribute("Recibio_Notificacion"),
+                usuario.getRecibeNotificaciones() ? "1" : "0");
         instance.setValue(dataStructure.attribute("Uso_Descuento_Previo"), usuario.getUsoDescuentoPrevio() ? "1" : "0");
 
         return instance;
@@ -141,13 +143,16 @@ public class PrediccionEventoService {
         instance.setValue(dataStructure.attribute("ID_Usuario"), 0); // Valor dummy
         instance.setValue(dataStructure.attribute("Edad"), personaRequest.getEdadUsuario());
         instance.setValue(dataStructure.attribute("Genero"), personaRequest.getGeneroUsuario());
-        instance.setValue(dataStructure.attribute("Historial_Compras"), categorizarHistorial(personaRequest.getHistorialComprasTotal()));
+        instance.setValue(dataStructure.attribute("Historial_Compras"),
+                categorizarHistorial(personaRequest.getHistorialComprasTotal()));
         instance.setValue(dataStructure.attribute("Frecuencia_Visitas_Sitio"), personaRequest.getFrecuenciaVisitas());
         instance.setValue(dataStructure.attribute("Tiempo_Navegacion_Promedio"), personaRequest.getTiempoNavegacion());
         instance.setValue(dataStructure.attribute("Interes_Categoria"), personaRequest.getInteresPrincipal());
         instance.setValue(dataStructure.attribute("Dispositivo_Acceso"), personaRequest.getDispositivoPredilecto());
-        instance.setValue(dataStructure.attribute("Recibio_Notificacion"), String.valueOf(personaRequest.getRecibeNotificaciones()));
-        instance.setValue(dataStructure.attribute("Uso_Descuento_Previo"), String.valueOf(personaRequest.getUsoDescuentoPrevio()));
+        instance.setValue(dataStructure.attribute("Recibio_Notificacion"),
+                String.valueOf(personaRequest.getRecibeNotificaciones()));
+        instance.setValue(dataStructure.attribute("Uso_Descuento_Previo"),
+                String.valueOf(personaRequest.getUsoDescuentoPrevio()));
 
         return instance;
     }

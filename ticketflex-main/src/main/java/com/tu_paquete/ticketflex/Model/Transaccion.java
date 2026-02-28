@@ -1,10 +1,10 @@
 package com.tu_paquete.ticketflex.Model;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -12,7 +12,7 @@ import java.util.Date;
 public class Transaccion {
 
     @Id
-    private  ObjectId id; // reemplaza idTransaccion (ObjectId de MongoDB)
+    private String id;
 
     private String boletoId; // referencia al id de Boleto (String)
     private String usuarioId; // referencia al id de Usuario (String)
@@ -22,7 +22,7 @@ public class Transaccion {
     private BigDecimal total;
     private Integer numeroCuotas;
     private String estadoPago; // PENDIENTE, EXITOSO, CANCELADO, etc.
-    private Date fechaPago; // usa java.util.Date
+    private Date fechaPago;
     private String payuTransactionId; // ID que devuelve PayU
     private String metodoPago; // “debito”, “credito”, “ticketflex”
     private String tipo; // "PagoTotal", "PagoTicketFlexCuota", etc.
@@ -31,6 +31,8 @@ public class Transaccion {
     private LocalDateTime fecha;
     private String referenceCode;
     private String emailComprador;
+    private LocalDate fechaLimitePago;
+    private LocalDate fechaProximoPago;
 
     public LocalDateTime getFecha() {
         return fecha;
@@ -69,11 +71,11 @@ public class Transaccion {
 
     // ==== Getters & Setters ====
 
-    public  ObjectId getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId( ObjectId id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -173,7 +175,23 @@ public class Transaccion {
         this.emailComprador = emailComprador;
     }
 
-    public Transaccion( ObjectId id, String boletoId, String usuarioId, String eventoId, Integer cantidadBoletos,
+    public LocalDate getFechaLimitePago() {
+        return fechaLimitePago;
+    }
+
+    public void setFechaLimitePago(LocalDate fechaLimitePago) {
+        this.fechaLimitePago = fechaLimitePago;
+    }
+
+    public LocalDate getFechaProximoPago() {
+        return fechaProximoPago;
+    }
+
+    public void setFechaProximoPago(LocalDate fechaProximoPago) {
+        this.fechaProximoPago = fechaProximoPago;
+    }
+
+    public Transaccion(String id, String boletoId, String usuarioId, String eventoId, Integer cantidadBoletos,
             BigDecimal total, Integer numeroCuotas, String estadoPago, Date fechaPago, String payuTransactionId,
             String metodoPago) {
         super();

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/modern.css"> 
+    <link rel="stylesheet" href="/css/modern.css">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -60,10 +60,6 @@
                                     <i class="fas fa-user-edit"></i>
                                     <span>Mi Perfil</span>
                                 </a>
-                                <a href="#" class="dropdown-item" id="viewPurchasesBtn">
-                                    <i class="fas fa-receipt"></i>
-                                    <span>Mis Compras</span>
-                                </a>
                                 <div class="dropdown-divider"></div>
                                 <a href="#" class="dropdown-item" id="logoutBtn">
                                     <i class="fas fa-sign-out-alt"></i>
@@ -95,7 +91,7 @@
                             <i class="fas fa-camera"></i>
                         </button>
                     </div>
-                    <h2>Mi Cuenta</h2>
+                    <h2>Mi Perfil</h2>
                 </div>
 
                 <div class="profile-tabs">
@@ -109,17 +105,17 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="profileFirstName">Nombre</label>
-                                <input type="text" id="profileFirstName" required>
+                                <input type="text" id="profileFirstName" required readonly>
                             </div>
                             <div class="form-group">
                                 <label for="profileLastName">Apellido</label>
-                                <input type="text" id="profileLastName" required>
+                                <input type="text" id="profileLastName" required readonly>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="profileEmail">Correo electrónico</label>
-                            <input type="email" id="profileEmail" readonly>
+                            <input type="email" id="profileEmail" required>
                         </div>
 
                         <div class="form-group">
@@ -297,11 +293,10 @@
 
                 <div class="form-options">
                     <label class="remember-me">
-                        <input type="checkbox"> Recordar sesión
+                        <input type="checkbox"> <span style="color: black;">Recordar sesión</span>
                     </label>
                     <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
                 </div>
-
                 <button type="submit" class="submit-btn">Iniciar Sesión</button>
 
                 <div class="divider">
@@ -309,6 +304,21 @@
                 </div>
 
                 <p class="switch-modal">¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span id="closeForgotPasswordModal" class="close">&times;</span>
+            <h2 id="forgotPasswordTitle">Restablecer Contraseña</h2>
+            <p>Ingresa tu correo electrónico para recibir un enlace de recuperación.</p>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="forgotEmail">Email:</label>
+                    <input type="email" id="forgotEmail" name="email" required>
+                </div>
+                <button type="submit" class="submit-btn">Enviar Enlace</button>
             </form>
         </div>
     </div>
@@ -360,8 +370,10 @@
             </form>
         </div>
     </div>
+
+    
     <!-- Modal para seleccionar cantidad de boletos -->
-    <div id="buyTicketModal" class="modal">
+    <div id="buyTicketModal" class="modal" data-event-date="">
         <div class="modal-content custom-modal">
             <span class="close" id="closeModal">&times;</span>
             <h2>Selecciona tu método de pago</h2>
@@ -383,8 +395,6 @@
                     <label for="graderia">Gradería:</label>
                     <select id="graderia" name="graderia">
                         <option value="general">General</option>
-                        <option value="vip">VIP</option>
-                        <option value="preferente">Preferencial</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -403,7 +413,8 @@
                 <div id="cardDetails" style="display: none;">
                     <div class="form-group">
                         <label for="traditionalCardNumber">Número de tarjeta:</label>
-                        <input type="text" id="traditionalCardNumber" placeholder="Número de tarjeta" maxlength="10" required>
+                        <input type="text" id="traditionalCardNumber" placeholder="Número de tarjeta" maxlength="19"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="traditionalExpiryDate">Fecha de vencimiento:</label>
@@ -414,7 +425,8 @@
                         <input type="text" id="traditionalCvv" placeholder="CVV" maxlength="3" required>
                     </div>
                 </div>
-                <button type="button" class="btn-primary" onclick="processPayment('traditional')">Confirmar compra</button>
+                <button type="button" class="btn-primary" onclick="processPayment('traditional')">Confirmar
+                    compra</button>
             </div>
 
             <!-- Contenido de TicketFlex -->
@@ -433,7 +445,6 @@
                 <div class="form-group">
                     <label for="tf-cuotas">Número de cuotas:</label>
                     <select id="tf-cuotas" name="tf-cuotas">
-                        <option value="1">1 cuota</option>
                         <option value="2">2 cuotas</option>
                         <option value="3">3 cuotas</option>
                         <option value="4">4 cuotas</option>
@@ -446,16 +457,17 @@
                     <p><strong>Total a pagar:</strong> <span id="totalTicketFlex">$0</span></p>
                     <p><small>* Tasa de interés del 0.5% mensual</small></p>
                 </div>
-                <button type="button" class="btn-primary" onclick="processPayment('ticketflex')">Confirmar compra con TicketFlex</button>
+                <button type="button" class="btn-primary" onclick="processPayment('ticketflex')">Confirmar compra con
+                    TicketFlex</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de Compra -->
-    <div id="purchaseModal" class="modal">
+    <div id="purchaseModal" class="modal" data-event-date="">
         <div class="modal-content purchase-modal custom-modal">
             <span class="close-modal" id="closePurchaseModal">&times;</span>
-            
+
             <div class="event-details">
                 <div class="event-image">
                     <img id="modalEventImage" src="" alt="Evento">
@@ -476,7 +488,7 @@
 
             <div class="payment-options">
                 <h3>Selecciona tu método de pago</h3>
-                
+
                 <div class="payment-tabs">
                     <button class="payment-tab active" data-payment="traditional">
                         <i class="fas fa-credit-card"></i> Pago Tradicional
@@ -505,7 +517,7 @@
                         </div>
                         <div class="form-group">
                             <label for="traditionalCardName">Nombre en la Tarjeta</label>
-                            <input type="text" id="traditionalCardName" placeholder="Juan Pérez" required>
+                            <input type="text" id="traditionalCardName" placeholder="Jhon Ariza" required>
                         </div>
                         <button type="submit" class="pay-button">Pagar Ahora</button>
                     </form>
@@ -567,15 +579,15 @@
                     <ul>
                         <li><a href="#">Inicio</a></li>
                         <li><a href="#eventosSection">Eventos</a></li>
-                        <li><a href="#">Cómo comprar</a></li>
+                        <li><a href="como-comprar.html">Cómo comprar</a></li>
                     </ul>
-                </div>
+                </div>
 
                 <div class="footer-section">
                     <h3>Contacto</h3>
                     <ul>
                         <li><i class="fas fa-phone"></i> +57 333 2608 028</li>
-                        <li><i class="fas fa-envelope"></i> info@ticketflex.com</li>
+                        <li><i class="fas fa-envelope"></i> ticketflex1@gmail.com</li>
                     </ul>
                 </div>
             </div>
@@ -590,7 +602,7 @@
         </div>
     </footer>
 
-    <!-- Botón para subir (manteniendo funcionalidad) -->
+    <!-- Botón para subir -->
     <div class="scroll-to-top" id="scrollToTopButton">
         <i class="fas fa-arrow-up"></i>
     </div>

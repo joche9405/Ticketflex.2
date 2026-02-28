@@ -1,8 +1,7 @@
 // Estado de autenticación
-let isAuthenticated = false; // Variable para verificar si el usuario está autenticado
-let userId = null; // Variable para almacenar el ID del usuario logueado
+let userId = null; 
 let idEventoToBuy = null;
-let currentEventPrice = 0; // Agregamos la variable para el precio del evento
+let currentEventPrice = 0;
 
 // VARIABLES PARA LA COMPRA DEL BOLETO
 let buyTicketModal;
@@ -16,53 +15,55 @@ let eventListenersInitialized = false;
 
 // Funcion para el DOM
 document.addEventListener('DOMContentLoaded', function () {
-    cargarEventos(); // Cargar eventos al inicio
+    // 1. REVISAR PERSISTENCIA DE SESIÓN
+    const token = localStorage.getItem('ticketflex_token');
+    const usuarioData = localStorage.getItem('usuario');
+
+    if (token && usuarioData) {
+        try {
+            const user = JSON.parse(usuarioData);
+            
+            // Restauramos el estado global
+            isAuthenticated = true;
+            userId = user.id;
+
+            // Actualizamos la interfaz (UI) para que no salga "Iniciar Sesión"
+            if (document.getElementById('userName')) {
+                document.getElementById('userName').innerText = user.nombre;
+            }
+            if (document.getElementById('loginButtonSection')) {
+                document.getElementById('loginButtonSection').classList.add('hidden');
+            }
+            if (document.getElementById('userSection')) {
+                document.getElementById('userSection').classList.remove('hidden');
+            }
+            
+            console.log("Sesión restaurada para:", user.nombre);
+        } catch (e) {
+            console.error("Error al restaurar sesión:", e);
+            localStorage.clear(); // Si el JSON está corrupto, limpiamos
+        }
+    }
+cargarEventos(); 
     agregarEventosLogin();
     agregarEventosFiltros();
     initializeEventListeners();
-    initializeBuyTicketModal(); // Agregar esta línea
+    initializeBuyTicketModal(); 
 });
 
 
 // ========================================================
 // Manejo de eventos relacionados con la autenticación
 
-function agregarEventosLogin() {
-    // Mostrar el modal de inicio de sesión
-    document.getElementById('showLoginButton').addEventListener('click', () => {
-        document.getElementById('loginModal').style.display = 'block';
-    });
-
-    // Mostrar el modal de registro
-    document.getElementById('showRegisterButton').addEventListener('click', () => {
-        document.getElementById('registerModal').style.display = 'block';
-    });
-
-    // Cerrar el modal de inicio de sesión
-    document.getElementById('closeLoginModal').addEventListener('click', () => {
-        document.getElementById('loginModal').style.display = 'none';
-    });
-
-    // Cerrar el modal de registro
-    document.getElementById('closeRegisterModal').addEventListener('click', () => {
-        document.getElementById('registerModal').style.display = 'none';
-    });
-
-    // Manejo del formulario de inicio de sesión
-    document.getElementById('loginForm').addEventListener('submit', login);
-    document.getElementById('registroForm').addEventListener('submit', registro);
-}
-
 function login(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
 
-    fetch('http://localhost:8080/api/usuarios/login', {
+    fetch('/api/usuarios/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(data),
-        credentials: 'include'
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(data)
     })
         .then(response => {
             if (!response.ok) {
@@ -73,20 +74,26 @@ function login(event) {
             return response.json();
         })
         .then(data => {
-            // Solo se ejecuta si las credenciales son correctas
+            // data ahora contiene: { token, id, nombre, rol }
             isAuthenticated = true;
+
+            // 3. GUARDAMOS EL TOKEN (Esto es vital para que la sesión no se pierda)
+            localStorage.setItem('ticketflex_token', data.token);
+            
+            // Guardamos el resto de la info como ya lo hacías
             localStorage.setItem('usuario', JSON.stringify(data));
+            
             userId = data.id;
             document.getElementById('userName').innerText = data.nombre;
             document.getElementById('loginButtonSection').classList.add('hidden');
             document.getElementById('userSection').classList.remove('hidden');
+            
             alert('¡Bienvenido, ' + data.nombre + '!');
             document.getElementById('loginModal').style.display = 'none';
         })
         .catch(error => {
-            // Este bloque solo se ejecuta si hubo un error (como 401)
             console.error('Error al iniciar sesión:', error.message);
-            alert(error.message); // O muestra el mensaje en el DOM si prefieres
+            alert(error.message);
         });
 }
 
@@ -99,7 +106,7 @@ function registro(event) {
 
     console.log("Datos a enviar:", data); // Para depuración
 
-    fetch('http://localhost:8080/api/usuarios/registrar', {
+    fetch('/api/usuarios/registrar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -119,17 +126,26 @@ function registro(event) {
         });
 }
 document.addEventListener('DOMContentLoaded', function () {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
+    // Buscamos 'usuario' y el token (los nombres que usamos en la función login)
+    const storedUser = JSON.parse(localStorage.getItem('usuario'));
+    const token = localStorage.getItem('ticketflex_token');
+
+    if (storedUser && token) {
         isAuthenticated = true;
-        userId = currentUser.id;
-        document.getElementById('userName').innerText = currentUser.nombre;
+        userId = storedUser.id;
+        
+        // Actualizamos la UI
+        const userNameElem = document.getElementById('userName');
+        if (userNameElem) userNameElem.innerText = storedUser.nombre;
+        
         document.getElementById('loginButtonSection').classList.add('hidden');
         document.getElementById('userSection').classList.remove('hidden');
+        
+        console.log("Sesión restaurada correctamente");
     }
 });
 
-// Luego asigna los event listeners
+// La única y correcta versión de la función
 function agregarEventosLogin() {
     // Mostrar modales
     document.getElementById('showLoginButton').addEventListener('click', () => {
@@ -151,8 +167,82 @@ function agregarEventosLogin() {
 
     // Asignar manejadores de formularios
     document.getElementById('loginForm').addEventListener('submit', login);
+    // Asegúrate de tener una función 'registro' definida en tu código
     document.getElementById('registroForm').addEventListener('submit', registro);
+
+    // --- Lógica del Restablecimiento de Contraseña ---
+
+    const forgotPasswordLink = document.querySelector('.forgot-password');
+    const loginModal = document.getElementById('loginModal');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+
+    // Evento para mostrar el modal de restablecer contraseña
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (loginModal) loginModal.style.display = 'none';
+            if (forgotPasswordModal) forgotPasswordModal.style.display = 'block';
+        });
+    }
+
+    // Evento para cerrar el modal de restablecer contraseña
+    if (closeForgotPasswordModal) {
+        closeForgotPasswordModal.addEventListener('click', () => {
+            if (forgotPasswordModal) forgotPasswordModal.style.display = 'none';
+        });
+    }
+
+    // Manejo del formulario de restablecimiento de contraseña
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value;
+
+            fetch('/api/usuarios/reset-password-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.');
+                        if (forgotPasswordModal) forgotPasswordModal.style.display = 'none';
+                    } else {
+                        alert('Ocurrió un error. Por favor, inténtalo de nuevo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error de conexión.');
+                });
+        });
+    }
+
+    // Evento para cerrar modales al hacer clic fuera
+    window.onclick = function (event) {
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+        if (event.target === loginModal) {
+            loginModal.style.display = 'none';
+        }
+        if (event.target === registerModal) {
+            registerModal.style.display = 'none';
+        }
+        if (event.target === forgotPasswordModal) {
+            forgotPasswordModal.style.display = 'none';
+        }
+    };
 }
+
+// Ahora, tu única llamada a la función cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function () {
+    cargarEventos(); // Asegúrate de que esta función exista
+    agregarEventosLogin();
+    agregarEventosFiltros(); // Asegúrate de que esta función exista
+});
 
 // Inicialización cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function () {
@@ -177,31 +267,38 @@ window.onclick = function (event) {
 document.addEventListener('DOMContentLoaded', function () {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
-            e.preventDefault(); // Evita que el <a href="#"> recargue la página
+        logoutBtn.onclick = function (e) {
+            e.preventDefault(); 
 
-            fetch('http://localhost:8080/api/usuarios/logout', {
+            fetch('/api/usuarios/logout', {
                 method: 'POST'
             })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al cerrar sesión');
-                    }
+                    
                     alert('Sesión cerrada exitosamente');
+                    
+                    localStorage.removeItem('ticketflex_token'); // El token JWT
+                    localStorage.removeItem('usuario');          // Datos del JSON
+                    localStorage.removeItem('currentUser');      // Por si usas este nombre
+                    
                     isAuthenticated = false;
                     userId = null;
+
                     document.getElementById('loginButtonSection').classList.remove('hidden');
                     document.getElementById('userSection').classList.add('hidden');
                     document.getElementById('userName').innerText = '';
-                    localStorage.removeItem('currentUser');
+
+                    
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error al cerrar sesión: ' + error.message);
+                    localStorage.clear(); 
+                    location.reload();
                 });
-        });
+        };
     }
 });
+
 
 // ========================================================
 /// Función para cargar y filtrar eventos
@@ -229,7 +326,7 @@ function aplicarFiltros() {
         artista: document.querySelector('#artista').value.trim()
     };
 
-    fetch('http://localhost:8080/api/eventos/filtrar', {
+    fetch('/api/eventos/filtrar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filters),
@@ -303,7 +400,7 @@ function mostrarEventos(eventos) {
 
 
 function cargarEventos() {
-    fetch('http://localhost:8080/api/eventos/listar', {
+    fetch('/api/eventos/listar', {
         credentials: 'include'
     })
         .then(response => {
@@ -346,9 +443,22 @@ function formatearFecha(fechaString) {
 
 // Función para abrir el modal y manejar la compra
 function comprarBoleto(eventoId, precio) {
-    console.log('Comprar boleto - ID recibido:', eventoId, typeof eventoId); // Debug
+    console.log('Comprar boleto - ID recibido:', eventoId, typeof eventoId);
 
-    // Asegurarnos de que el ID sea un string
+    // 1. Verificación extra del Token (por seguridad)
+    const token = localStorage.getItem('ticketflex_token');
+    
+    // Si no hay token o la variable global es false, bloqueamos
+    if (!token || !isAuthenticated) {
+        alert('Por favor, inicie sesión para comprar boletos.');
+        // Opcional: abrir el modal de login automáticamente
+        if (document.getElementById('loginModal')) {
+            document.getElementById('loginModal').style.display = "block";
+        }
+        return;
+    }
+
+    // Asegurarnos de que el ID sea un string (tu lógica actual es correcta)
     if (typeof eventoId === 'object') {
         eventoId = eventoId._id || eventoId.id;
     }
@@ -360,34 +470,80 @@ function comprarBoleto(eventoId, precio) {
         return;
     }
 
-    if (!isAuthenticated) {
-        alert('Por favor, inicie sesión para comprar boletos.');
-        return;
-    }
-
-    // Guardamos el ID del evento y el precio para hacer la compra posteriormente
+    // Guardamos el ID del evento y el precio
     idEventoToBuy = eventoId;
     currentEventPrice = precio || 0;
 
-    console.log('ID del evento guardado:', idEventoToBuy, typeof idEventoToBuy); // Debug adicional
+    console.log('ID del evento guardado listo para procesar:', idEventoToBuy);
 
-    // Mostrar el modal
+    // Mostrar el modal de compra
     const buyTicketModal = document.getElementById('buyTicketModal');
     if (buyTicketModal) {
         buyTicketModal.style.display = "block";
-        // Reinicializar los event listeners
+        
+        // Reinicializar los event listeners del modal
         eventListenersInitialized = false;
         initializeEventListeners();
-        // Calcular cuotas iniciales
-        calcularCuotasTicketFlex();
+        
+        // Calcular cuotas iniciales si existe la función
+        if (typeof calcularCuotasTicketFlex === 'function') {
+            calcularCuotasTicketFlex();
+        }
     }
 }
 
-// Función para procesar pago según método seleccionado
-function processPayment(method) {
-    console.log('Procesando pago - ID del evento:', idEventoToBuy, typeof idEventoToBuy); // Debug
+function validarTarjetaFrontend(cardNumber, expiryDate, cvv) {
+  // --- Validar número de tarjeta: aceptar solo dígitos, sin espacios ni guiones ---
+  if (!cardNumber || !/^\d{10,19}$/.test(cardNumber)) {
+    return "Número de tarjeta inválido. Debe contener solo dígitos y tener entre 10 y 19 dígitos";
+  }
 
-    // Asegurarnos de que el ID sea un string
+
+
+  // --- Validar fecha (formato MM/AA) ---
+  if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
+    return "Fecha de vencimiento inválida. Use formato MM/AA";
+  }
+
+  const [mes, año] = expiryDate.split('/').map(v => parseInt(v, 10));
+  if (mes < 1 || mes > 12) {
+    return "Mes de vencimiento inválido";
+  }
+
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear() % 100; // Tomamos solo 2 dígitos del año
+
+  if (año < currentYear || (año === currentYear && mes < currentMonth)) {
+    return "La tarjeta está vencida";
+  }
+
+  // --- Validar CVV ---
+  if (!cvv || !/^\d{3,4}$/.test(cvv)) {
+    return "CVV inválido. Debe tener 3 o 4 dígitos";
+  }
+
+  return null; // ✅ Sin errores
+}
+
+function processPayment(method) {
+    console.log('Procesando pago - ID del evento:', idEventoToBuy, typeof idEventoToBuy);
+
+    // 1. Obtener Token y Datos del Usuario
+    const token = localStorage.getItem('ticketflex_token');
+    const usuarioStored = JSON.parse(localStorage.getItem('usuario'));
+    const userId = usuarioStored ? usuarioStored.id : null;
+
+    // Validar sesión antes de continuar
+    if (!token || !isAuthenticated || !userId) {
+        alert("Debes iniciar sesión para comprar boletos");
+        if (document.getElementById('loginModal')) {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+        return;
+    }
+
+    // Asegurarnos de que el ID del evento sea un string
     let eventoId = idEventoToBuy;
     if (typeof eventoId === 'object') {
         eventoId = eventoId._id || eventoId.id;
@@ -395,7 +551,6 @@ function processPayment(method) {
     eventoId = String(eventoId);
 
     if (!eventoId || eventoId === 'undefined' || eventoId === 'null') {
-        console.error('Error: ID del evento no definido o inválido en processPayment');
         alert('Error: No se ha seleccionado ningún evento');
         return;
     }
@@ -404,131 +559,271 @@ function processPayment(method) {
         parseInt(document.getElementById('tf-ticketCount')?.value || '1') :
         parseInt(document.getElementById('ticketCount')?.value || '1');
 
-    if (!isAuthenticated) {
-        alert("Debes iniciar sesión para comprar boletos");
-        return;
-    }
+    const graderia = (method === 'ticketflex') ?
+        document.getElementById('tf-graderia')?.value || 'general' :
+        document.getElementById('graderia')?.value || 'general';
 
-    const userId = getCurrentUserId();
-    if (!userId) {
-        alert('Error: No se pudo identificar al usuario');
-        return;
-    }
+    // CONFIGURACIÓN DE HEADERS COMUNES
+    const authHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // 🔑 El token para validar la compra
+    };
 
     if (method === 'ticketflex') {
-        // Lógica para TicketFlex
         const cuotas = parseInt(document.getElementById('tf-cuotas')?.value || '1');
-        const graderia = document.getElementById('tf-graderia')?.value || 'general';
-
-        console.log('Datos de compra TicketFlex:', { eventoId, userId, cantidad, cuotas, graderia }); // Debug
 
         fetch(`/api/boletas/comprar?idEvento=${eventoId}&idUsuario=${userId}&cantidad=${cantidad}&metodoPago=TICKETFLEX&cuotas=${cuotas}&graderia=${graderia}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: authHeaders, // Usamos los headers con token
+            body: JSON.stringify({}) 
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error en la compra: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                showTicketFlexConfirmation(data);
-                const buyTicketModal = document.getElementById('buyTicketModal');
-                if (buyTicketModal) {
-                    buyTicketModal.style.display = "none";
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al procesar el pago: ' + error.message);
-            });
+        .then(response => {
+            if (response.status === 401 || response.status === 403) throw new Error('Sesión expirada o no autorizada');
+            if (!response.ok) throw new Error(`Error en la compra: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            showTicketFlexConfirmation(data);
+            const modal = document.getElementById('buyTicketModal');
+            if (modal) modal.style.display = "none";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar el pago: ' + error.message);
+        });
+
     } else {
-        // Lógica para pago tradicional
         const cardNumber = document.getElementById('traditionalCardNumber')?.value;
         const expiryDate = document.getElementById('traditionalExpiryDate')?.value;
-        const cvv = document.getElementById('traditionalCvv2')?.value;
-        const graderia = document.getElementById('graderia')?.value;
+        const cvv = document.getElementById('traditionalCvv')?.value;
 
-        console.log('cardNumber:', cardNumber, 'expiryDate:', expiryDate, 'cvv:', cvv);
-
-        if (!cardNumber || !expiryDate || !cvv) {
-            alert('Por favor, complete todos los datos de la tarjeta');
+        const errorValidacion = validarTarjetaFrontend(cardNumber, expiryDate, cvv);
+        if (errorValidacion) {
+            alert(errorValidacion);
             return;
         }
 
-        fetch(`http://localhost:8080/api/eventos/${eventoId}/comprar?idUsuario=${userId}&cantidad=${cantidad}&graderia=${graderia}`, {
+        const paymentData = { cardNumber, expiryDate, cvv };
+
+        fetch(`/api/boletas/comprar?idEvento=${eventoId}&idUsuario=${userId}&cantidad=${cantidad}&metodoPago=TRADICIONAL&graderia=${graderia}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: authHeaders, // Usamos los headers con token
+            body: JSON.stringify(paymentData)
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error en la compra: ${response.status} ${response.statusText}`);
-                }
-                return response.text();
-            })
-            .then(data => {
-                alert("Compra exitosa: " + data);
-                buyTicketModal.style.display = "none";
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        .then(response => {
+            if (response.status === 401 || response.status === 403) throw new Error('Sesión expirada o no autorizada');
+            if (!response.ok) throw new Error(`Error en la compra: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            alert("¡Compra exitosa!");
+            const modal = document.getElementById('buyTicketModal');
+            if (modal) modal.style.display = "none";
+            showTraditionalConfirmation(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (error.message.includes('400')) {
+                alert('Error: Datos de tarjeta inválidos.');
+            } else {
                 alert('Error al procesar el pago: ' + error.message);
-            });
+            }
+        });
     }
 }
 
-// Mostrar confirmación de TicketFlex como modal temporal
-function showTicketFlexConfirmation(data) {
-    // Log para depuración
-    console.log('Datos de confirmación TicketFlex:', data);
+// Función para mostrar confirmación de pago tradicional
+function showTraditionalConfirmation(data) {
+    console.log('Datos de confirmación Pago Tradicional:', data);
 
-    // Buscar el campo correcto para el id del boleto
-    const boletoId = data.idBoleto || data.boletoId || data.id || '';
+    const boletoId = data.id || data._id || '';
+    const nombreEvento = data.evento?.nombre || 'Evento no definido';
+    const precioTotal = data.precioTotal || data.precio || 0;
 
-    // Eliminar cualquier modal de confirmación anterior
-    const oldModal = document.getElementById('ticketflexConfirmationModal');
+    // 🔑 Texto QR para TRADICIONAL - Acceso inmediato
+    const qrText = `✅ ENTRADA CONFIRMADA - ACCESO PERMITIDO
+Evento: ${nombreEvento}
+Código: ${boletoId}
+Total: $${precioTotal.toLocaleString('es-CO')}
+Método: Pago Tradicional
+ESTADO: ACTIVA - VÁLIDA PARA ENTRADA`;
+
+    const qrData = encodeURIComponent(qrText);
+
+    const oldModal = document.getElementById('traditionalConfirmationModal');
     if (oldModal) oldModal.remove();
 
-    // Crear el modal
     const modal = document.createElement('div');
-    modal.id = 'ticketflexConfirmationModal';
+    modal.id = 'traditionalConfirmationModal';
     modal.className = 'modal';
     modal.style.display = 'block';
+
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 500px; margin: 5% auto; text-align: center;">
-            <span class="close" id="closeTicketflexConfirmation">&times;</span>
-            <h3 style="color: #4caf50;"><i class="fas fa-check-circle"></i> ¡Reserva Exitosa!</h3>
+            <span class="close" id="closeTraditionalConfirmation">&times;</span>
+            <h3 style="color: #4caf50;"><i class="fas fa-check-circle"></i> ¡Compra Exitosa!</h3>
             <div class="qr-placeholder">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TEMP-${boletoId}" alt="QR Temporal">
-                <p class="text-muted">QR temporal - Se activará al completar el pago</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}" alt="QR de la compra">
+                <p style="color: black; font-weight: bold; color: #2ecc71;">✅ QR ACTIVO - VÁLIDO PARA ENTRADA</p>
+                <p style="color: black;">Escanea este código para acceder al evento</p>
             </div>
             <div class="payment-details">
-                <p><strong>Total a pagar:</strong> $${data.precioTotal}</p>
-                <p><strong>Fecha límite:</strong> ${data.fechaLimitePago ? data.fechaLimitePago : 'Por definir'}</p>
-                <button onclick="location.href='/completar-pago?id=${boletoId}'" class="btn-pay-now">
-                    Completar Pago Ahora
-                </button>
+                <p style="color: black;"><strong>Evento:</strong> ${nombreEvento}</p>
+                <p style="color: black;"><strong>Total pagado:</strong> $${precioTotal.toLocaleString('es-CO')}</p>
+                <p style="color: black;"><strong>Método de pago:</strong> TRADICIONAL</p>
+                <p style="color: black;"><strong>Estado:</strong> CONFIRMADO</p>
+                <p style="color: green; font-weight: bold;">✔ Pago realizado exitosamente</p>
             </div>
         </div>
     `;
+
     document.body.appendChild(modal);
 
-    // Cerrar el modal al hacer clic en la X
-    document.getElementById('closeTicketflexConfirmation').onclick = function () {
+    document.getElementById('closeTraditionalConfirmation').onclick = function () {
         modal.remove();
     };
-    // Cerrar el modal al hacer clic fuera del contenido
+
     modal.onclick = function (event) {
         if (event.target === modal) {
             modal.remove();
         }
     };
 }
+
+// Mostrar confirmación de TicketFlex como modal temporal
+function showTicketFlexConfirmation(data) {
+    console.log('Datos de confirmación TicketFlex:', data);
+
+    const boletoId = data.id || data._id || '';
+    const nombreEvento = data.evento?.nombre || 'Evento no definido';
+    const precioTotal = data.precioTotal || data.precio || 0;
+    const graderia = data.graderia || 'General';
+    const estado = data.estado || 'DESCONOCIDO';
+
+    // =====================
+    // 📌 FECHA LÍMITE
+    // =====================
+    let fechaLimite = 'Por definir';
+    let fechaLimiteObj = null;
+
+    if (!data.fechaLimitePago) {
+        fechaLimiteObj = new Date();
+        fechaLimiteObj.setDate(fechaLimiteObj.getDate() + 7);
+        fechaLimite = fechaLimiteObj.toLocaleDateString('es-CO', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } else {
+        try {
+            fechaLimiteObj = new Date(data.fechaLimitePago);
+            if (!isNaN(fechaLimiteObj.getTime())) {
+                fechaLimite = fechaLimiteObj.toLocaleDateString('es-CO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        } catch (e) {
+            console.error('Error formateando fecha límite:', e);
+        }
+    }
+
+    // =====================
+    // 📌 FECHA PRÓXIMO PAGO
+    // =====================
+    let fechaProximoPago = 'Por definir';
+    if (data.fechaProximoPago) {
+        try {
+            const fechaProximoPagoObj = new Date(data.fechaProximoPago);
+            if (!isNaN(fechaProximoPagoObj.getTime())) {
+                fechaProximoPago = fechaProximoPagoObj.toLocaleDateString('es-CO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        } catch (e) {
+            console.error('Error formateando fecha próximo pago:', e);
+        }
+    }
+
+    // ✅ Estado y método de pago
+    const metodoPago = data.metodoPago || 'N/A';
+
+    // 🔑 Texto QR para TICKETFLEX - Diferente según estado
+    let qrText, qrStatusText, qrStatusColor;
+    
+    if (estado === 'PENDIENTE') {
+        qrText = `⏳ RESERVA PENDIENTE - PAGO INCOMPLETO
+Evento: ${nombreEvento}
+Gradería: ${graderia}
+Código: ${boletoId}
+Total: $${precioTotal.toLocaleString('es-CO')}
+Método: TicketFlex
+ESTADO: PENDIENTE DE PAGO
+FECHA LÍMITE: ${fechaLimite}`;
+        qrStatusText = "⏳ QR NO ACTIVO - PENDIENTE DE PAGO";
+        qrStatusColor = "#f39c12";
+    } else {
+        qrText = `✅ ENTRADA CONFIRMADA - ACCESO PERMITIDO
+Evento: ${nombreEvento}
+Gradería: ${graderia}
+Código: ${boletoId}
+Total: $${precioTotal.toLocaleString('es-CO')}
+Método: TicketFlex
+ESTADO: ACTIVA - VÁLIDA PARA ENTRADA`;
+        qrStatusText = "✅ QR ACTIVO - VÁLIDO PARA ENTRADA";
+        qrStatusColor = "#2ecc71";
+    }
+
+    const qrData = encodeURIComponent(qrText);
+
+    const oldModal = document.getElementById('ticketflexConfirmationModal');
+    if (oldModal) oldModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'ticketflexConfirmationModal';
+    modal.className = 'modal';
+    modal.style.display = 'block';
+
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px; margin: 5% auto; text-align: center;">
+            <span class="close" id="closeTicketflexConfirmation">&times;</span>
+            <h3 style="color: #4caf50;"><i class="fas fa-check-circle"></i> ¡Reserva Exitosa!</h3>
+            <div class="qr-placeholder">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}" alt="QR de la compra">
+                <p style="color: black; font-weight: bold; color: ${qrStatusColor};">${qrStatusText}</p>
+                <p style="color: black;">Escanea este código para ver los detalles de tu boleta</p>
+            </div>
+            <div class="payment-details">
+                <p style="color: black;"><strong>Total a pagar:</strong> $${precioTotal.toLocaleString('es-CO')}</p>
+                <p style="color: black;"><strong>Estado:</strong> ${estado}</p>
+                <p style="color: black;"><strong>Método de pago:</strong> ${metodoPago}</p>
+                <p style="color: black;"><strong>Fecha límite:</strong> ${fechaLimite}</p>
+                <p style="color: black;"><strong>Próximo pago:</strong> ${fechaProximoPago}</p>
+                ${estado === 'PENDIENTE' ? `
+                    
+                ` : `<p style="color: green; font-weight: bold;">✔ Boleta cancelada totalmente</p>`}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('closeTicketflexConfirmation').onclick = function () {
+        modal.remove();
+    };
+
+    modal.onclick = function (event) {
+        if (event.target === modal) {
+            modal.remove();
+        }
+    };
+}
+
+
+
 
 
 
@@ -596,10 +891,30 @@ function getCurrentUserId() {
 
 // Cargar datos del perfil
 function loadProfileData() {
-    const userId = getCurrentUserId(); // Implementa esta función según tu sistema de autenticación
+    // 1. Obtenemos el ID y el Token del localStorage
+    const usuarioData = JSON.parse(localStorage.getItem('usuario'));
+    const token = localStorage.getItem('ticketflex_token');
 
-    fetch(`/api/usuarios/${userId}`)
-        .then(response => response.json())
+    if (!usuarioData || !token) {
+        console.error('No hay sesión activa');
+        return;
+    }
+
+    const userId = usuarioData.id; 
+
+    fetch(`/api/usuarios/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`, 
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (response.status === 401 || response.status === 403) {
+                throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+            }
+            return response.json();
+        })
         .then(data => {
             document.getElementById('profileFirstName').value = data.nombre || '';
             document.getElementById('profileLastName').value = data.apellido || '';
@@ -609,16 +924,27 @@ function loadProfileData() {
         })
         .catch(error => {
             console.error('Error al cargar perfil:', error);
-            alert('Error al cargar los datos del perfil');
+            // Si la sesión expiró, podrías redirigir al login aquí
         });
 }
 
 // Guardar cambios del perfil
 function saveProfileChanges() {
-    const userId = getCurrentUserId();
+    // Obtenemos datos del localStorage
+    const usuarioStored = JSON.parse(localStorage.getItem('usuario'));
+    const token = localStorage.getItem('ticketflex_token');
+    
+    const userId = usuarioStored ? usuarioStored.id : null;
+
+    if (!userId || !token) {
+        alert("Sesión no válida. Por favor, inicia sesión.");
+        return;
+    }
+
     const profileData = {
-        nombre: document.getElementById('profileFirstName').value,
+        nombre: document.getElementById('profileFirstName').value, // Importante incluir nombre si el backend lo requiere
         apellido: document.getElementById('profileLastName').value,
+        email: document.getElementById('profileEmail').value,
         telefono: document.getElementById('profilePhone').value,
         direccion: document.getElementById('profileAddress').value,
     };
@@ -627,23 +953,28 @@ function saveProfileChanges() {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // 🔑 Token indispensable
         },
-        body: JSON.stringify(profileData),
-        credentials: 'include'
+        body: JSON.stringify(profileData)
+        // Eliminamos credentials: 'include'
     })
         .then(response => {
+            if (response.status === 401) throw new Error('Sesión expirada');
             if (!response.ok) throw new Error('Error al guardar');
             return response.json();
         })
         .then(data => {
             alert('Perfil actualizado correctamente');
-            localStorage.setItem('usuario', JSON.stringify(data));
-            updateUserDisplay(data); // Actualiza la visualización del usuario
+            // Actualizamos el objeto usuario en localStorage pero mantenemos el token
+            const newToken = localStorage.getItem('ticketflex_token');
+            localStorage.setItem('usuario', JSON.stringify({ ...data, token: newToken }));
+            
+            if (typeof updateUserDisplay === 'function') updateUserDisplay(data);
             document.getElementById('profileModal').style.display = 'none';
         })
         .catch(error => {
             console.error('Error al guardar perfil:', error);
-            alert('Error al guardar los cambios del perfil');
+            alert(error.message);
         });
 }
 
@@ -653,12 +984,19 @@ document.getElementById('securityForm').addEventListener('submit', function (e) 
     console.log('Formulario de seguridad enviado'); // <-- Añade esto
     changePassword();   // Llama la función para cambiar contraseña
 });
-
 function changePassword() {
     const currentPassword = document.getElementById('currentPassword').value.trim();
     const newPassword = document.getElementById('newPassword').value.trim();
     const confirmPassword = document.getElementById('confirmPassword').value.trim();
-    const userId = getCurrentUserId();
+    
+    const usuarioStored = JSON.parse(localStorage.getItem('usuario'));
+    const token = localStorage.getItem('ticketflex_token');
+    const userId = usuarioStored ? usuarioStored.id : null;
+
+    if (!userId || !token) {
+        alert("No se encontró una sesión activa.");
+        return;
+    }
 
     if (!currentPassword || !newPassword || !confirmPassword) {
         alert('Por favor, completa todos los campos');
@@ -670,22 +1008,20 @@ function changePassword() {
         return;
     }
 
-    const passwordData = {
-        currentPassword,
-        newPassword
-    };
+    const passwordData = { currentPassword, newPassword };
 
     fetch(`/api/usuarios/${userId}/cambiar-contrasena`, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // 🔑 Token indispensable
         },
-        credentials: 'include',
         body: JSON.stringify(passwordData)
     })
         .then(response => {
+            if (response.status === 401) throw new Error('Contraseña actual incorrecta o sesión expirada');
             if (!response.ok) throw new Error('Error al cambiar la contraseña');
-            return response.text(); // O .json() si el backend devuelve JSON
+            return response.text(); 
         })
         .then(message => {
             alert(message || 'Contraseña actualizada correctamente');
@@ -693,69 +1029,250 @@ function changePassword() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al cambiar la contraseña. Verifica que la actual sea correcta.');
+            alert(error.message);
         });
 }
 
+function adjustModalHeight() {
+    const modalContent = document.querySelector('#profileModal .tab-content.active');
+    if (!modalContent) return;
 
-// Cargar historial de compras SOLO en la pestaña del perfil
+    const maxHeight = 500; // px, ajusta según tu pantalla
+    if (modalContent.scrollHeight > maxHeight) {
+        modalContent.style.height = maxHeight + 'px';
+        modalContent.style.overflowY = 'auto';
+    } else {
+        modalContent.style.height = 'auto';
+        modalContent.style.overflowY = 'visible';
+    }
+}
+// Este es el código de tu función original, pero con un cambio crucial.
 function loadPurchaseHistory() {
-    const userId = getCurrentUserId();
+    // 1. Obtener Token y Datos del Usuario
+    const token = localStorage.getItem('ticketflex_token');
+    const usuarioStored = JSON.parse(localStorage.getItem('usuario'));
+    const userId = usuarioStored ? usuarioStored.id : null;
+
     const purchasesList = document.getElementById('purchasesList');
     if (!purchasesList) return;
-    purchasesList.innerHTML = '<p>Cargando compras...</p>';
 
-    fetch(`/api/usuarios/${userId}/historial`)
-        .then(response => response.json())
-        .then(purchases => {
-            if (!purchases || purchases.length === 0) {
-                purchasesList.innerHTML = '<p class="no-purchases">No has realizado ninguna compra aún.</p>';
+    // Si no hay sesión, avisamos al usuario
+    if (!token || !userId) {
+        purchasesList.innerHTML = `
+            <div class="no-purchases">
+                <p>Debes iniciar sesión para ver tu historial de compras</p>
+                <button class="btn-primary" onclick="document.getElementById('loginModal').style.display='block'">Iniciar Sesión</button>
+            </div>`;
+        return;
+    }
+
+    purchasesList.innerHTML = '<p>Cargando compras...</p>';
+fetch(`/api/usuarios/${userId}/historial`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`, // 🔑 Clave para acceder al historial
+            'Content-Type': 'application/json'
+        }
+    })       .then(response => {
+            // Manejo de expiración de token o falta de permisos
+            if (response.status === 401 || response.status === 403) {
+                throw new Error('Tu sesión ha expirado. Por favor, ingresa de nuevo.');
+            }
+            // Maneja el caso de respuesta 204 "No Content" para una lista vacía
+            if (response.status === 204) {
+                return [];
+            }
+            if (!response.ok) {
+                throw new Error('Error al cargar historial de compras');
+            }
+            return response.json();
+        })
+        .then(boletos => {
+            if (!boletos || boletos.length === 0) {
+                purchasesList.innerHTML = `
+                    <div class="no-purchases">
+                        <i class="fas fa-ticket-alt"></i>
+                        <p>No has realizado ninguna compra aún</p>
+                        <button class="btn-primary" onclick="window.scrollTo(0,0)">Explorar eventos</button>
+                    </div>
+                `;
                 return;
             }
 
             let html = '';
-            purchases.forEach(purchase => {
-                // Fecha segura
-                let fechaCompra = 'Sin fecha';
-                if (purchase.fecha) {
-                    const fechaObj = new Date(purchase.fecha);
-                    if (!isNaN(fechaObj.getTime())) {
-                        fechaCompra = fechaObj.toLocaleDateString();
+            // Construye el HTML de las compras
+            boletos.forEach(boleto => {
+                // Accede a los datos directamente del objeto `boleto`
+                const fechaCompra = boleto.fechaCompra
+                    ? new Date(boleto.fechaCompra).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'Sin fecha';
+
+                const fechaLimite = boleto.fechaLimitePago
+                    ? new Date(boleto.fechaLimitePago).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'Por definir';
+
+                const fechaProximoPago = boleto.fechaProximoPago
+                    ? new Date(boleto.fechaProximoPago).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'N/A';
+
+                const nombreEvento = boleto.evento?.nombre || 'Evento desconocido';
+                const precioTotal = boleto.precioTotal || 0;
+                const estadoCompra = boleto.estado || 'DESCONOCIDO';
+                const metodoPago = boleto.metodoPago || 'N/A';
+                const boletoId = boleto.id || 'SIN-CODIGO';
+                const cuotas = boleto.cuotas || 1; // Obtiene el número de cuotas, por defecto 1
+                const graderia = boleto.graderia || 'General';
+                
+                // Obtener fecha y lugar del evento
+                const fechaEvento = boleto.evento?.fecha 
+                    ? new Date(boleto.evento.fecha).toLocaleDateString('es-CO', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : 'Fecha por definir';
+                    
+                // Lógica para mostrar la cuota actual (asumiendo que siempre es la primera)
+                const cuotasDisplay = cuotas > 1 ? `1/${cuotas}` : 'Pago único';
+
+                // 🔑 Texto QR diferenciado según método de pago y estado
+                let qrText, qrStatusText, qrStatusColor;
+                
+                if (metodoPago === 'TICKETFLEX') {
+                    if (estadoCompra === 'PENDIENTE') {
+                        qrText = `⏳ RESERVA PENDIENTE - PAGO INCOMPLETO
+Evento: ${nombreEvento}
+Fecha: ${fechaEvento}
+Gradería: ${graderia}
+N° Boletas: ${boleto.cantidad}
+Código: ${boletoId}
+ESTADO: PENDIENTE DE PAGO
+FECHA LÍMITE: ${fechaLimite}`;
+                        qrStatusText = "⏳ QR NO ACTIVO - PENDIENTE DE PAGO";
+                        qrStatusColor = "#f39c12";
+                    } else {
+                        qrText = `✅ ENTRADA CONFIRMADA - ACCESO PERMITIDO
+Evento: ${nombreEvento}
+Fecha: ${fechaEvento}
+Gradería: ${graderia}
+N° Boletas: ${boleto.cantidad}
+Código: ${boletoId}
+ESTADO: ACTIVA - VÁLIDA PARA ENTRADA`;
+                        qrStatusText = "✅ QR ACTIVO - VÁLIDO PARA ENTRADA";
+                        qrStatusColor = "#2ecc71";
                     }
+                } else {
+                    // Pago tradicional - siempre activo
+                    qrText = `✅ ENTRADA CONFIRMADA - ACCESO PERMITIDO
+Evento: ${nombreEvento}
+Fecha: ${fechaEvento}
+Graderia: ${graderia}
+N° Boletas: ${boleto.cantidad}
+Código: ${boletoId}
+ESTADO: ACTIVA - VÁLIDA PARA ENTRADA`;
+                    qrStatusText = "✅ QR ACTIVO - VÁLIDO PARA ENTRADA";
+                    qrStatusColor = "#2ecc71";
                 }
 
-                // Estado seguro
-                const estadoCompra = purchase.estado ? purchase.estado : 'Sin estado';
+                const qrData = encodeURIComponent(qrText);
 
                 html += `
-                <div class="purchase-item">
-                    <div class="purchase-header">
-                        <h3>${purchase.evento && purchase.evento.nombre ? purchase.evento.nombre : 'Evento desconocido'}</h3>
-                        <span class="purchase-amount">$${purchase.total ? purchase.total.toLocaleString() : '0'}</span>
-                    </div>
-                    <div class="purchase-meta">
-                        <span class="purchase-date">${fechaCompra}</span>
-                        <span class="purchase-status ${estadoCompra}">${estadoCompra}</span>
-                    </div>
-                    <div class="purchase-details">
-                        ${Array.isArray(purchase.boletos) && purchase.boletos.length > 0 ? purchase.boletos.map(boleto => `
-                            <div class="ticket-item">
-                                <span>${boleto.cantidad} x ${boleto.tipo} (${boleto.graderia})</span>
-                                <span>$${(boleto.precio * boleto.cantidad).toLocaleString()}</span>
+                    <div class="purchase-item" data-date="${boleto.fechaCompra}">
+                        <div class="purchase-header">
+                            <h3>${nombreEvento}</h3>
+                            <span class="purchase-date"><strong>Fecha compra:</strong> ${fechaCompra}</span>
+                        </div>
+                        
+                        <div class="purchase-details">
+                            <p><strong>Fecha evento:</strong> ${fechaEvento}</p>
+                            <p><strong>Cantidad:</strong> ${boleto.cantidad}</p>
+                            <p><strong>Precio total:</strong> $${precioTotal.toLocaleString('es-CO')}</p>
+                            <p><strong>Estado:</strong> ${estadoCompra}</p>
+                            <p><strong>Método de pago:</strong> ${metodoPago}</p>
+                            <p><strong>Cuotas:</strong> ${cuotasDisplay}</p>
+                            
+                            ${metodoPago === 'TICKETFLEX' ? `
+                                <p><strong>Fecha límite:</strong> ${fechaLimite}</p>
+                                <p><strong>Próximo pago:</strong> ${fechaProximoPago}</p>
+                            ` : ''}
+                            
+                            <div class="qr-placeholder" style="margin-top: 10px; text-align: center;">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}" alt="QR de la boleta">
+                                <p style="font-weight: bold; color: ${qrStatusColor};">${qrStatusText}</p>
+                                <p>Escanea para ver detalles de tu boleta</p>
                             </div>
-                        `).join('') : '<div class="ticket-item">Sin información de boletos</div>'}
+                        </div>
                     </div>
-                </div>
                 `;
             });
-
             purchasesList.innerHTML = html;
         })
         .catch(error => {
             console.error('Error al cargar historial:', error);
-            purchasesList.innerHTML = '<p class="error">Error al cargar el historial de compras</p>';
+            purchasesList.innerHTML = '<p class="error">Ocurrió un error al cargar tus compras. Inténtalo de nuevo más tarde.</p>';
         });
 }
+
+
+
+// La función que aplica el filtro
+function applyPurchaseFilter() {
+    const purchaseFilter = document.getElementById('purchaseFilter');
+    const filterValue = purchaseFilter.value;
+    const purchaseItems = document.querySelectorAll('.purchase-item');
+    const now = new Date();
+
+    purchaseItems.forEach(item => {
+        // Usa el atributo `data-date` para una fecha más precisa
+        const purchaseDateString = item.dataset.date;
+
+        // Si no hay fecha, muestra el elemento por defecto
+        if (!purchaseDateString) {
+            item.style.display = 'block';
+            return;
+        }
+
+        const purchaseDate = new Date(purchaseDateString);
+        let showItem = false;
+
+        switch (filterValue) {
+            case 'all':
+                showItem = true;
+                break;
+            case 'last30':
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                showItem = purchaseDate >= thirtyDaysAgo;
+                break;
+            case 'last6':
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+                showItem = purchaseDate >= sixMonthsAgo;
+                break;
+            case 'year':
+                const startOfYear = new Date(now.getFullYear(), 0, 1);
+                showItem = purchaseDate >= startOfYear;
+                break;
+            default:
+                showItem = true;
+        }
+
+        item.style.display = showItem ? 'block' : 'none';
+    });
+}
+
+// Escucha el evento 'change' del filtro, independientemente de la carga de compras
+document.addEventListener('DOMContentLoaded', function () {
+    const purchaseFilter = document.getElementById('purchaseFilter');
+    if (purchaseFilter) {
+        purchaseFilter.addEventListener('change', applyPurchaseFilter);
+    }
+});
+
+
+
 
 // Actualizar la visualización del usuario después de cambios
 function updateUserDisplay(userData) {
@@ -910,18 +1427,6 @@ function calcularCuotasTicketFlex() {
 }
 
 // Función para mostrar/ocultar campos de tarjeta
-function toggleCardFields() {
-    const bankSelect = document.getElementById('bank');
-    const cardDetails = document.getElementById('cardDetails');
-
-    if (bankSelect.value) {
-        cardDetails.style.display = 'block';
-    } else {
-        cardDetails.style.display = 'none';
-    }
-}
-
-// Función para inicializar los elementos del modal de compra
 function initializeBuyTicketModal() {
     buyTicketModal = document.getElementById("buyTicketModal");
     closeModalButton = document.getElementById("closeModal");
@@ -929,12 +1434,9 @@ function initializeBuyTicketModal() {
     ticketCountInput = document.getElementById("ticketCount");
     graderiaInput = document.getElementById("graderia");
 
-    // Agregar event listeners solo si los elementos existen
     if (closeModalButton) {
         closeModalButton.addEventListener("click", function () {
-            if (buyTicketModal) {
-                buyTicketModal.style.display = "none";
-            }
+            if (buyTicketModal) buyTicketModal.style.display = "none";
         });
     }
 
@@ -945,28 +1447,39 @@ function initializeBuyTicketModal() {
                 return;
             }
 
-            const cantidad = parseInt(ticketCountInput?.value || '1', 10);
-            const userId = getCurrentUserId();
+            // 1. Obtener Token e ID del usuario desde la persistencia
+            const token = localStorage.getItem('ticketflex_token');
+            const usuarioStored = JSON.parse(localStorage.getItem('usuario'));
+            const userId = usuarioStored ? usuarioStored.id : null;
 
-            // Validación de la cantidad
+            const cantidad = parseInt(ticketCountInput?.value || '1', 10);
+
             if (isNaN(cantidad) || cantidad < 1 || cantidad > 5) {
                 alert('Cantidad no válida. Debe ser un número entre 1 y 5.');
                 return;
             }
 
-            if (!userId) {
+            // 2. Validar que exista el token y el usuario
+            if (!token || !userId) {
                 alert('Debes iniciar sesión para realizar una compra.');
+                if (document.getElementById('loginModal')) {
+                    document.getElementById('loginModal').style.display = 'block';
+                }
                 return;
             }
 
-            // Realizamos la solicitud de compra a la API
-            fetch(`http://localhost:8080/api/eventos/${idEventoToBuy}/comprar?idUsuario=${userId}&cantidad=${cantidad}`, {
+            // 3. Realizar la solicitud con el Header de Authorization
+            fetch(`/api/eventos/${idEventoToBuy}/comprar?idUsuario=${userId}&cantidad=${cantidad}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // 🔑 El token es obligatorio aquí
                 }
             })
                 .then(response => {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Sesión expirada o no autorizada. Reintenta iniciando sesión.');
+                    }
                     if (!response.ok) {
                         throw new Error(`Error en la compra: ${response.status} ${response.statusText}`);
                     }
@@ -977,6 +1490,8 @@ function initializeBuyTicketModal() {
                     if (buyTicketModal) {
                         buyTicketModal.style.display = "none";
                     }
+                    // Opcional: recargar historial si está visible
+                    if (typeof loadPurchaseHistory === 'function') loadPurchaseHistory();
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -985,6 +1500,12 @@ function initializeBuyTicketModal() {
         });
     }
 }
+const mobileMenu = document.getElementById("mobileMenu");
+const navLinks = document.getElementById("navLinks");
+
+mobileMenu.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
 
 
 

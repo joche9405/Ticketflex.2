@@ -35,5 +35,4 @@ public class FuncionEvento {
     @Column(name = "lugar_funcion")
     private String lugarFuncion;
 
-    // Puedes agregar más campos si tu tabla tiene más columnas
 }

@@ -1,8 +1,7 @@
 package com.tu_paquete.ticketflex.Service;
 
-
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,8 +21,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
-        
+
         return (UserDetails) usuario; // Devuelve la entidad Usuario directamente
     }
-    
+
 }

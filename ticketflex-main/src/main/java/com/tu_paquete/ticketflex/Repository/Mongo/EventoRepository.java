@@ -1,4 +1,4 @@
-package com.tu_paquete.ticketflex.Repository.Mongo;
+package com.tu_paquete.ticketflex.repository.mongo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,10 +9,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.tu_paquete.ticketflex.Model.Evento;
-import com.tu_paquete.ticketflex.Model.Usuario;
 import com.tu_paquete.ticketflex.dto.EventoConEstadisticas;
 
 public interface EventoRepository extends MongoRepository<Evento, String> {
@@ -73,8 +71,6 @@ public interface EventoRepository extends MongoRepository<Evento, String> {
         })
         List<EventoConEstadisticas> findEventosConEstadisticas(String idCreador);
 
-        // Bloqueo no es común en MongoDB, pero puedes usar findAndModify para
-        // operaciones atómicas
         @Query("{ '_id' : ?0 }")
         Optional<Evento> findByIdWithLock(String id);
 }

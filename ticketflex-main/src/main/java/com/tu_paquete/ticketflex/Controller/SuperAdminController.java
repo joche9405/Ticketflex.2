@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
 import com.tu_paquete.ticketflex.Service.UsuarioService;
 import com.tu_paquete.ticketflex.dto.LoginAdminDTO;
 import com.tu_paquete.ticketflex.dto.RespuestaAPI;
 import com.tu_paquete.ticketflex.dto.UsuarioDTO;
+import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
 
 @RestController
 @RequestMapping("/api/superadmin")

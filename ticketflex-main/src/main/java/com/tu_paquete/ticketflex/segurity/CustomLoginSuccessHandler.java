@@ -19,19 +19,26 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
 
+        System.out.println("=== DEBUG: USUARIO AUTENTICADO ===");
+        System.out.println("Nombre: " + authentication.getName());
+        System.out.println("Roles: " + authentication.getAuthorities());
+
         for (GrantedAuthority auth : authentication.getAuthorities()) {
             String rol = auth.getAuthority();
+            System.out.println("Rol encontrado: " + rol);
 
             if ("ROLE_Administrador".equals(rol)) {
+                System.out.println("Redirigiendo a /admin/dashboard");
                 response.sendRedirect("/admin/dashboard");
                 return;
             } else if ("ROLE_Usuario".equals(rol)) {
+                System.out.println("Redirigiendo a /usuario/index");
                 response.sendRedirect("/usuario/index");
                 return;
             }
         }
 
-        // Si no hay rol válido, redirige al index por defecto
+        System.out.println("No se encontraron roles válidos, redirigiendo a /");
         response.sendRedirect("/");
     }
 }

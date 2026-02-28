@@ -2,12 +2,10 @@ package com.tu_paquete.ticketflex.Controller;
 
 import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Transaccion;
-import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.TransaccionRepository;
-import com.tu_paquete.ticketflex.Service.TransaccionService;
 import com.tu_paquete.ticketflex.dto.PagoRequest;
+import com.tu_paquete.ticketflex.repository.mongo.BoletoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.TransaccionRepository;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -30,9 +28,6 @@ public class PagoController {
 
     @Autowired
     private TransaccionRepository transaccionRepository;
-
-    @Autowired
-    private TransaccionService transaccionService;
 
     @Value("${payu.apiKey}")
     private String apiKey;
@@ -106,15 +101,15 @@ public class PagoController {
 
         String idTransaccion = referencia.replace("TX-", "");
 
-        ObjectId objId;
+        String Id;
         try {
-            objId = new ObjectId(idTransaccion);
+            Id = new String(idTransaccion);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("ID inválido: " + idTransaccion);
         }
 
-        Optional<Transaccion> optTx = transaccionRepository.findById(objId);
+        Optional<Transaccion> optTx = transaccionRepository.findById(toString());
 
         if (!optTx.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -142,7 +137,5 @@ public class PagoController {
 
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
     }
-
-    
 
 }

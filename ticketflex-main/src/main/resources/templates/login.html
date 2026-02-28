@@ -328,6 +328,13 @@
                 <i class="fas fa-check-circle me-2"></i> Has cerrado sesión correctamente
             </div>
 
+            <!-- Mensaje de contraseña reseteada exitosamente -->
+            <div th:if="${mensaje}" class="alert alert-success animate__animated animate__fadeIn">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${mensaje}"></span>
+            </div>
+
+
             <form th:action="@{/login}" method="post">
                 <div class="form-group">
                     <label for="username">Email</label>
@@ -348,7 +355,7 @@
             </form>
 
             <div class="forgot-password">
-                <a href="#"><i class="fas fa-key me-2"></i>¿Olvidaste tu contraseña?</a>
+                <a href="/admin/forgot-password"><i class="fas fa-key me-2"></i>¿Olvidaste tu contraseña?</a>
             </div>
         </div>
 

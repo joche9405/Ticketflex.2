@@ -7,17 +7,18 @@ import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Boleto.EventoEmbed;
 import com.tu_paquete.ticketflex.Model.Evento;
 import com.tu_paquete.ticketflex.Model.PagoCuota;
-import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.EventoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.PagoCuotaRepository;
 import com.tu_paquete.ticketflex.dto.CompraCuotasRequest;
 import com.tu_paquete.ticketflex.dto.DetalleCompraCuotasDTO;
+import com.tu_paquete.ticketflex.repository.mongo.BoletoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.EventoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.PagoCuotaRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
 @Service
 public class PagoCuotaServiceImpl implements PagoCuotaService {
 
@@ -89,8 +90,8 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
         }
 
         int totalBoletas = detalles.stream()
-                                   .mapToInt(DetalleCompraCuotasDTO::getCantidad)
-                                   .sum();
+                .mapToInt(DetalleCompraCuotasDTO::getCantidad)
+                .sum();
         if (totalBoletas > 6) {
             throw new IllegalArgumentException("No se pueden comprar más de 6 boletas a crédito.");
         }
@@ -99,8 +100,7 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
 
         long mesesDisponibles = ChronoUnit.MONTHS.between(
                 hoy.withDayOfMonth(1),
-                fechaEvento.withDayOfMonth(1)
-        );
+                fechaEvento.withDayOfMonth(1));
 
         if (mesesDisponibles < 2) {
             throw new IllegalArgumentException("No se puede pagar por cuotas si el evento ocurre en 1 mes o menos.");
@@ -120,7 +120,8 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
             int cantidadSolicitada = detalle.getCantidad();
 
             if (evento.getDisponibilidad() < cantidadSolicitada) {
-                throw new IllegalArgumentException("No hay suficientes boletas disponibles para el evento: " + evento.getNombreEvento());
+                throw new IllegalArgumentException(
+                        "No hay suficientes boletas disponibles para el evento: " + evento.getNombreEvento());
             }
 
             // Restar la cantidad de boletas compradas
@@ -133,7 +134,7 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
                 Boleto boleto = new Boleto();
                 String idBoleto = UUID.randomUUID().toString();
                 boleto.setId(idBoleto);
-                boleto.setPrecio(detalle.getValor());  // valor por boleto
+                boleto.setPrecio(detalle.getValor()); // valor por boleto
                 boleto.setEstado(Boleto.EstadoBoleto.PENDIENTE);
 
                 Boleto.UsuarioEmbed user = new Boleto.UsuarioEmbed();
@@ -150,7 +151,8 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
 
                 // Calcular cuotas para ese boleto
                 BigDecimal valorTotal = detalle.getValor();
-                BigDecimal valorPorCuota = valorTotal.divide(BigDecimal.valueOf(cuotasPermitidas), 2, RoundingMode.HALF_UP);
+                BigDecimal valorPorCuota = valorTotal.divide(BigDecimal.valueOf(cuotasPermitidas), 2,
+                        RoundingMode.HALF_UP);
                 String idCompra = UUID.randomUUID().toString();
 
                 for (int cuotaNum = 0; cuotaNum < cuotasPermitidas; cuotaNum++) {
@@ -162,7 +164,7 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
                     cuota.setValor(valorPorCuota);
                     cuota.setPagado(false);
                     cuota.setFechaVencimiento(hoy.plusMonths(cuotaNum + 1));
-                    cuota.setEstado("PENDIENTE"); 
+                    cuota.setEstado("PENDIENTE");
                     pagoCuotaRepository.save(cuota);
                     cuotasGeneradas.add(cuota);
                 }
@@ -179,7 +181,7 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
             PagoCuota cuota = cuotaOpt.get();
             cuota.setPagado(true);
             cuota.setFechaPago(LocalDate.now());
-            cuota.setEstado("PAGADA"); 
+            cuota.setEstado("PAGADA");
             pagoCuotaRepository.save(cuota);
             return true;
         }
@@ -202,10 +204,10 @@ public class PagoCuotaServiceImpl implements PagoCuotaService {
             }
         }
     }
+
     @Override
     public List<PagoCuota> obtenerCuotasPorBoleto(String idBoleto) {
         return pagoCuotaRepository.findByIdBoleto(idBoleto);
     }
-
 
 }

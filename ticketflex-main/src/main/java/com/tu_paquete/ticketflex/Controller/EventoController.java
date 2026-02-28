@@ -33,17 +33,12 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
-import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/eventos")
 public class EventoController {
-    @Autowired
-    private GridFsTemplate gridFsTemplate;
-    @Autowired
-    private GridFsOperations gridFsOperations;
+
     @Autowired
     private EventoService eventoService;
     @Autowired

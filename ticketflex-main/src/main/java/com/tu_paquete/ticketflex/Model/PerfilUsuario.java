@@ -38,7 +38,6 @@ public class PerfilUsuario {
     private Boolean recibeNotificaciones;
 
     @Column(name = "uso_descuento_previo")
-    private Boolean usoDescuentoPrevio; // O Integer si prefieres 0/1 directamente
+    private Boolean usoDescuentoPrevio; 
 
-    // Puedes agregar más campos si tu tabla tiene más columnas
 }

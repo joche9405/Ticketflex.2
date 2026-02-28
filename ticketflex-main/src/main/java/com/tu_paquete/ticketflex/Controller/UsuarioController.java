@@ -11,140 +11,128 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.tu_paquete.ticketflex.Model.Transaccion;
+import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
-import com.tu_paquete.ticketflex.Service.TransaccionService;
+import com.tu_paquete.ticketflex.Service.BoletoService;
 import com.tu_paquete.ticketflex.Service.UsuarioService;
-import com.tu_paquete.ticketflex.dto.PurchaseDTO;
-import jakarta.servlet.http.HttpSession;
+import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.segurity.JwtUtil;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
+
     @Autowired
     private UsuarioService usuarioService;
-    @Autowired
-    private TransaccionService transaccionService;
+
     @Autowired
     private UsuarioRepository usuarioRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private BoletoService boletoService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario) {
         Map<String, String> response = new HashMap<>();
         try {
-            // Validación básica
-            if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty() ||
-                    usuario.getEmail() == null || usuario.getEmail().trim().isEmpty() ||
-                    usuario.getPassword() == null || usuario.getPassword().trim().isEmpty()) {
-
-                response.put("error", "Nombre, email y contraseña son obligatorios");
-                return ResponseEntity.badRequest().body(response);
-            }
-
             Usuario usuarioRegistrado = usuarioService.registrarUsuario(usuario);
             response.put("mensaje", "Usuario registrado exitosamente");
-            response.put("idUsuario", usuarioRegistrado.getId().toString());
+            response.put("idUsuario", usuarioRegistrado.getId());
             return ResponseEntity.ok(response);
-
         } catch (IllegalArgumentException e) {
             response.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(response);
-        } catch (Exception e) {
-            response.put("error", "Error interno: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> iniciarSesion(@RequestParam String email,
-            @RequestParam String password,
-            HttpSession session) {
-        Usuario usuario = usuarioService.iniciarSesion(email, password);
-        if (usuario != null) {
-            // Guardamos usuario en sesión
-            session.setAttribute("usuario", usuario);
+    public ResponseEntity<Map<String, Object>> iniciarSesion(@RequestBody Map<String, String> loginRequest) {
+        String email = loginRequest.get("email");
+        String password = loginRequest.get("password");
+
+        Optional<Usuario> usuarioOpt = usuarioService.iniciarSesion(email, password);
+
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            String rol = usuario.getRol().getNombreRol();
+            String token = jwtUtil.generarToken(usuario.getId(), rol);
 
             Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
             response.put("id", usuario.getId());
             response.put("nombre", usuario.getNombre());
+            response.put("rol", rol);
+
             return ResponseEntity.ok(response);
         }
-        return ResponseEntity.badRequest().body(null);
-    }
 
-    // Manejar solicitudes GET con un mensaje adecuado
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ResponseEntity<String> loginGet() {
-        // Puedes devolver un mensaje de error o una página de error
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body("Método GET no permitido.");
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Usuario o contraseña incorrecta");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> cerrarSesion(HttpSession session) {
-        session.invalidate(); // Invalida toda la sesión
-        return ResponseEntity.ok("Sesión cerrada exitosamente");
+    public ResponseEntity<String> cerrarSesion() {
+        // En JWT el logout se maneja en el frontend borrando el token
+        return ResponseEntity.ok("Sesión cerrada correctamente (borre el token en el cliente)");
+    }
+
+    @GetMapping("/verificarSesion")
+    public ResponseEntity<?> verificarSesion(@RequestAttribute(name = "userId", required = false) String userId,
+            @RequestAttribute(name = "rol", required = false) String rol) {
+        if (userId != null) {
+            return usuarioRepository.findById(userId)
+                    .map(usuario -> {
+                        Map<String, Object> response = new HashMap<>();
+                        response.put("id", usuario.getId());
+                        response.put("nombre", usuario.getNombre());
+                        response.put("rol", rol);
+                        // Aquí Java entiende que devuelve ResponseEntity<Map>
+                        return ResponseEntity.ok((Object) response);
+                    })
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body((Object) "Usuario no encontrado"));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o expirado");
     }
 
     @GetMapping("/{id}/historial")
-public ResponseEntity<List<PurchaseDTO>> obtenerHistorialDeCompras(@PathVariable String id) {
-    try {
-        List<PurchaseDTO> historial = transaccionService.obtenerHistorialDeComprasDTO(id);
-        if (historial.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-        }
-        return ResponseEntity.ok(historial);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
-}
-
-    @GetMapping("/verificarSesion")
-    public ResponseEntity<?> verificarSesion(@SessionAttribute(name = "usuario", required = false) Usuario usuario) {
-        if (usuario != null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", usuario.getId());
-            response.put("nombre", usuario.getNombre());
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No has iniciado sesión");
-        }
+    public ResponseEntity<List<Boleto>> obtenerHistorialDeCompras(@PathVariable String id) {
+        List<Boleto> historial = boletoService.findByUsuarioId(id);
+        return historial.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(historial);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> getUsuarioById(@PathVariable String id) {
-        Optional<Usuario> usuario = usuarioRepository.findById(id);
-        return usuario.map(ResponseEntity::ok)
+        return usuarioRepository.findById(id)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarPerfil(@PathVariable String id, @RequestBody Usuario nuevosDatos) {
-        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
+        return usuarioRepository.findById(id)
+                .map(usuario -> {
+                    usuario.setNombre(nuevosDatos.getNombre());
+                    usuario.setApellido(nuevosDatos.getApellido());
+                    usuario.setTelefono(nuevosDatos.getTelefono());
+                    usuario.setDireccion(nuevosDatos.getDireccion());
 
-        if (optionalUsuario.isPresent()) {
-            Usuario usuario = optionalUsuario.get();
-
-            // Actualizar solo los campos que quieres permitir
-            usuario.setNombre(nuevosDatos.getNombre());
-            usuario.setApellido(nuevosDatos.getApellido());
-            usuario.setTelefono(nuevosDatos.getTelefono());
-            usuario.setDireccion(nuevosDatos.getDireccion());
-
-            usuarioRepository.save(usuario);
-
-            return ResponseEntity.ok(usuario);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
-        }
+                    usuarioRepository.save(usuario);
+                    // Retornamos el objeto usuario, pero como parte de ResponseEntity<?>
+                    return ResponseEntity.ok((Object) usuario);
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body((Object) "Usuario no encontrado"));
     }
 
     @PutMapping("/{id}/cambiar-contrasena")
-    public ResponseEntity<?> cambiarContrasena(@PathVariable String id,
-            @RequestBody Map<String, String> contrasenas) {
+    public ResponseEntity<?> cambiarContrasena(@PathVariable String id, @RequestBody Map<String, String> contrasenas) {
         String actual = contrasenas.get("currentPassword");
         String nueva = contrasenas.get("newPassword");
 
@@ -152,21 +140,45 @@ public ResponseEntity<List<PurchaseDTO>> obtenerHistorialDeCompras(@PathVariable
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(actual, usuario.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("La contraseña actual es incorrecta.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("La contraseña actual es incorrecta.");
         }
 
         if (nueva.length() < 6) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("La nueva contraseña debe tener al menos 6 caracteres.");
+                    .body("La contraseña debe tener al menos 6 caracteres.");
         }
 
         usuario.setPassword(passwordEncoder.encode(nueva));
-        usuarioRepository.save(usuario); // MongoRepository guarda el cambio
-
+        usuarioRepository.save(usuario);
         return ResponseEntity.ok("Contraseña actualizada correctamente.");
     }
 
-    
+    @PostMapping("/reset-password-request")
+    public ResponseEntity<Map<String, String>> requestPasswordReset(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        Map<String, String> response = new HashMap<>();
+        try {
+            usuarioService.generarTokenDeReseteo(email, false);
+            response.put("message", "Si el correo está registrado, recibirás un enlace de reseteo.");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("error", "Error al procesar la solicitud.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String nuevaPassword = request.get("newPassword");
+        Map<String, String> response = new HashMap<>();
+        try {
+            usuarioService.resetearPassword(token, nuevaPassword);
+            response.put("message", "Contraseña actualizada exitosamente.");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

@@ -395,9 +395,29 @@
                                         <th>Nombre</th>
                                         <th>Email</th>
                                         <th>Teléfono</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel-card animate__animated animate__fadeInUp mt-4">
+                        <div class="panel-header">
+                            <h2><i class="fas fa-undo"></i> Restaurar Eventos Eliminados</h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table" id="deletedEventsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID Evento</th>
+                                        <th>Nombre</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -495,29 +515,104 @@
             }
         });
 
+        // ... código JavaScript existente ...
+
         async function cargarAdministradores() {
             try {
                 const response = await fetch("/api/superadmin/administradores", {
-                    headers: {
-                        "idUsuario": idSolicitante
-                    }
+                    headers: { "idUsuario": idSolicitante }
                 });
 
                 if (response.ok) {
                     const admins = await response.json();
                     const tbody = document.querySelector("#adminsTable tbody");
                     tbody.innerHTML = admins.map(admin => `
-                        <tr>
-                            <td>${admin.nombre} ${admin.apellido}</td>
-                            <td>${admin.email}</td>
-                            <td>${admin.telefono}</td>
-                        </tr>
-                    `).join("");
+                <tr>
+                    <td>${admin.nombre} ${admin.apellido}</td>
+                    <td>${admin.email}</td>
+                    <td>${admin.telefono}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarAdministrador('${admin.id}')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+                } else {
+                    console.error("Error al cargar administradores:", await response.text());
                 }
             } catch (error) {
-                console.error("Error cargando administradores:", error);
+                console.error("Error de conexión al cargar administradores:", error);
             }
         }
+
+        async function eliminarAdministrador(idAdmin) {
+            if (!confirm("¿Estás seguro de que quieres eliminar a este administrador?")) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/superadmin/administradores/${idAdmin}`, {
+                    method: "DELETE",
+                    headers: { "idUsuario": idSolicitante }
+                });
+
+                const messageDiv = document.getElementById("message");
+                if (response.ok) {
+                    messageDiv.textContent = "✓ Administrador eliminado exitosamente";
+                    messageDiv.className = "success";
+                    cargarAdministradores(); // Recargar la lista
+                } else {
+                    const error = await response.json();
+                    messageDiv.textContent = "✗ " + error.mensaje;
+                    messageDiv.className = "error";
+                }
+            } catch (error) {
+                console.error("Error al eliminar administrador:", error);
+                document.getElementById("message").textContent = "✗ Error de conexión";
+                document.getElementById("message").className = "error";
+            }
+        }
+
+        // Lógica para la restauración de eventos
+        async function cargarEventosEliminados() {
+            // Necesitas un endpoint en el backend para listar eventos eliminados
+            // const response = await fetch("/api/superadmin/eventos/eliminados");
+            // const eventos = await response.json();
+
+            // Luego, llenar la tabla `deletedEventsTable`
+        }
+
+        async function restaurarEvento(idEvento) {
+            if (!confirm("¿Deseas restaurar este evento?")) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/superadmin/eventos/${idEvento}/restaurar`, {
+                    method: "POST",
+                    headers: { "idUsuario": idSolicitante }
+                });
+
+                const messageDiv = document.getElementById("message");
+                if (response.ok) {
+                    messageDiv.textContent = "✓ Evento restaurado con éxito";
+                    messageDiv.className = "success";
+                    // Recargar la lista de eventos eliminados si es necesario
+                } else {
+                    const error = await response.json();
+                    messageDiv.textContent = "✗ " + error.mensaje;
+                    messageDiv.className = "error";
+                }
+            } catch (error) {
+                console.error("Error al restaurar evento:", error);
+                document.getElementById("message").textContent = "✗ Error de conexión";
+                document.getElementById("message").className = "error";
+            }
+        }
+
+        // Llamar a la nueva función de carga de eventos si la implementas
+        // cargarEventosEliminados();
     </script>
 </body>
 

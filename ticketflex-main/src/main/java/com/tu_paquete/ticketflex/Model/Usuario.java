@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -16,8 +17,8 @@ public class Usuario implements UserDetails {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
-    private String id;              // reemplaza idUsuario
+    @Id
+    private String id;
 
     private String nombre;
     private String apellido;
@@ -26,8 +27,12 @@ public class Usuario implements UserDetails {
     private String direccion;
     private String password;
 
+    // NUEVA LÓGICA: Campos para el reseteo de contraseña
+    private String resetPasswordToken;
+    private LocalDateTime resetPasswordTokenExpiry;
+
     @DBRef
-    private Rol rol;               // referencia a Rol, puedes embeder si prefieres
+    private Rol rol;
 
     // ===== Getters / Setters =====
 
@@ -91,23 +96,39 @@ public class Usuario implements UserDetails {
         this.rol = rol;
     }
 
+    // NUEVA LÓGICA: Getters y setters para los nuevos campos
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public LocalDateTime getResetPasswordTokenExpiry() {
+        return resetPasswordTokenExpiry;
+    }
+
+    public void setResetPasswordTokenExpiry(LocalDateTime resetPasswordTokenExpiry) {
+        this.resetPasswordTokenExpiry = resetPasswordTokenExpiry;
+    }
+
     // ===== UserDetails methods =====
 
     @Override
     public String getPassword() {
-        return this.password;      // ya implementado
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return this.email;         // usamos email como username
+        return this.email;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(
-            new SimpleGrantedAuthority("ROLE_" + this.rol.getNombreRol())
-        );
+                new SimpleGrantedAuthority("ROLE_" + this.rol.getNombreRol()));
     }
 
     @Override
@@ -130,4 +151,3 @@ public class Usuario implements UserDetails {
         return true;
     }
 }
-

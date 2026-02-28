@@ -1,14 +1,11 @@
 package com.tu_paquete.ticketflex.Controller;
 
 import com.tu_paquete.ticketflex.Model.Boleto;
-import com.tu_paquete.ticketflex.Model.Transaccion;
-import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.TransaccionRepository;
-import org.bson.types.ObjectId;
+import com.tu_paquete.ticketflex.repository.mongo.BoletoRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +15,6 @@ import java.util.Optional;
 @RestController
 public class PagoFinalController {
 
-    @Autowired
-    private TransaccionRepository transaccionRepository;
     @Autowired
     private BoletoRepository boletoRepository;
 

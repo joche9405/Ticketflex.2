@@ -18,9 +18,9 @@ import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Evento;
 import com.tu_paquete.ticketflex.Model.Transaccion;
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.EventoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.repository.mongo.BoletoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.EventoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -125,7 +125,7 @@ public class EventoService {
             Boleto.EventoEmbed evEmb = new Boleto.EventoEmbed();
             evEmb.setId(evento.getId().toString());
             evEmb.setNombre(evento.getNombreEvento());
-            evEmb.setFecha(java.sql.Date.valueOf(evento.getFecha())); // ejemplo de conversión
+            evEmb.setFecha(evento.getFecha()); // LocalDate directo ✅
 
             Boleto.UsuarioEmbed uEmb = new Boleto.UsuarioEmbed();
             uEmb.setId(usuario.getId());
@@ -139,7 +139,10 @@ public class EventoService {
             boleto.setCantidad(cantidad);
             boleto.setPrecio(evento.getPrecioBase());
             boleto.setPrecioTotal(evento.getPrecioBase().multiply(BigDecimal.valueOf(cantidad)));
-            boleto.setFechaCompra(new Date());
+            boleto.setFechaCompra(
+
+                    LocalDate.now());
+
             Boleto boletoGuardado = boletoRepository.save(boleto);
 
             // 5) Registrar Transacción

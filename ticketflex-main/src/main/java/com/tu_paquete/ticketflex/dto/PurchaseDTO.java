@@ -5,6 +5,7 @@ import com.tu_paquete.ticketflex.Model.Evento;
 import com.tu_paquete.ticketflex.Model.Transaccion;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,61 +18,67 @@ public class PurchaseDTO {
     private BigDecimal total;
     private String estado;
     private String qrCode;
-    private Date fechaEvento;
+    private LocalDate fechaEvento;
     private String lugarEvento;
     private List<BoletoDetalleDTO> boletos = new ArrayList<>();
+    private String metodoPago;
+    private LocalDate fechaLimitePago;
+    private LocalDate fechaProximoPago;
 
     // DTO para los detalles de cada boleto
     public static class BoletoDetalleDTO {
         private Integer cantidad;
-        private String tipo;
         private String graderia;
-        private BigDecimal precio;
+        private BigDecimal precioUnitario;
+        private BigDecimal precioTotal;
 
-        public BoletoDetalleDTO(Integer cantidad, String tipo, String graderia, BigDecimal precio) {
-            this.cantidad = cantidad;
-            this.tipo = tipo;
-            this.graderia = graderia;
-            this.precio = precio;
+        public BoletoDetalleDTO(Integer cantidad, String graderia, BigDecimal precioUnitario) {
+            this.cantidad = cantidad != null ? cantidad : 1;
+            this.graderia = graderia != null ? graderia : "General";
+            this.precioUnitario = precioUnitario != null ? precioUnitario : BigDecimal.ZERO;
+            this.precioTotal = this.precioUnitario.multiply(new BigDecimal(this.cantidad));
         }
 
-        // Getters y setters
         public Integer getCantidad() {
             return cantidad;
-        }
-
-        public String getTipo() {
-            return tipo;
         }
 
         public String getGraderia() {
             return graderia;
         }
 
-        public BigDecimal getPrecio() {
-            return precio;
+        public BigDecimal getPrecioUnitario() {
+            return precioUnitario;
+        }
+
+        public BigDecimal getPrecioTotal() {
+            return precioTotal;
         }
     }
 
     public PurchaseDTO(Transaccion transaccion, Boleto boleto, Evento evento) {
-        this.idTransaccion = transaccion.getId() != null ? transaccion.getId().toHexString() : null;
+        this.idTransaccion = transaccion.getId() != null ? transaccion.getId().toString() : null;
         this.idBoleto = boleto != null ? boleto.getId() : null;
-        this.nombreEvento = evento != null ? evento.getNombreEvento() : "Evento desconocido";
+        this.nombreEvento = evento != null && evento.getNombreEvento() != null ? evento.getNombreEvento()
+                : "Evento desconocido";
         this.fechaCompra = transaccion.getFechaPago();
-        this.total = transaccion.getTotal();
+        this.total = transaccion.getTotal() != null ? transaccion.getTotal() : BigDecimal.ZERO;
         this.estado = boleto != null && boleto.getEstado() != null
                 ? boleto.getEstado().name()
-                : (transaccion.getEstadoPago() != null ? transaccion.getEstadoPago() : "Sin estado");
-        this.qrCode = boleto != null ? boleto.getQrCode() : null;
-        this.fechaEvento = evento != null ? java.sql.Date.valueOf(evento.getFecha()) : null;
-        this.lugarEvento = evento != null ? evento.getLugar() : null;
+                : (transaccion.getEstadoPago() != null ? transaccion.getEstadoPago() : "DESCONOCIDO");
+        this.qrCode = boleto != null && boleto.getQrCode() != null ? boleto.getQrCode() : "Sin código";
+        this.fechaEvento = evento != null ? evento.getFecha() : null;
+        this.lugarEvento = evento != null && evento.getLugar() != null ? evento.getLugar() : "Por definir";
 
-        // Detalle del boleto (si solo tienes uno asociado a esta transacción)
+        this.metodoPago = transaccion.getMetodoPago() != null ? transaccion.getMetodoPago() : "N/A";
+        this.fechaLimitePago = transaccion.getFechaLimitePago();
+        this.fechaProximoPago = transaccion.getFechaProximoPago();
+
+        // Detalle del boleto: solo gradería "General"
         if (boleto != null) {
             this.boletos.add(new BoletoDetalleDTO(
                     boleto.getCantidad(),
-                    "General", // O el tipo real si lo tienes
-                    boleto.getEvento() != null ? boleto.getEvento().getNombre() : null, // O gradería real
+                    "General",
                     boleto.getPrecio()));
         }
     }
@@ -105,7 +112,7 @@ public class PurchaseDTO {
         return qrCode;
     }
 
-    public Date getFechaEvento() {
+    public LocalDate getFechaEvento() {
         return fechaEvento;
     }
 
@@ -115,5 +122,29 @@ public class PurchaseDTO {
 
     public List<BoletoDetalleDTO> getBoletos() {
         return boletos;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public LocalDate getFechaLimitePago() {
+        return fechaLimitePago;
+    }
+
+    public void setFechaLimitePago(LocalDate fechaLimitePago) {
+        this.fechaLimitePago = fechaLimitePago;
+    }
+
+    public LocalDate getFechaProximoPago() {
+        return fechaProximoPago;
+    }
+
+    public void setFechaProximoPago(LocalDate fechaProximoPago) {
+        this.fechaProximoPago = fechaProximoPago;
     }
 }

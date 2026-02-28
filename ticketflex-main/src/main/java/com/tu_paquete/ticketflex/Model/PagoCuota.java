@@ -14,7 +14,7 @@ public class PagoCuota {
     private String id;
     private String idCompra;
 
-    @DBRef // Esto es necesario si estás usando MongoDB
+    @DBRef 
     private Usuario usuario;
 
     private String idEvento;

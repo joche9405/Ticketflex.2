@@ -1,6 +1,5 @@
 package com.tu_paquete.ticketflex.Service;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -8,20 +7,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.tu_paquete.ticketflex.Model.Transaccion;
-import com.tu_paquete.ticketflex.Repository.Mongo.TransaccionRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.EventoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
 import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Evento;
 import com.tu_paquete.ticketflex.dto.PurchaseDTO;
+import com.tu_paquete.ticketflex.repository.mongo.BoletoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.EventoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.TransaccionRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
+
 @Service
 public class TransaccionService {
     @Autowired
     private TransaccionRepository transaccionRepository;
+
     @Autowired
     private EventoRepository eventoRepository;
 
@@ -42,12 +43,12 @@ public class TransaccionService {
     }
 
     // Obtiene una transacción por su id (String)
-    public Transaccion obtenerTransaccionPorId(ObjectId id) {
+    public Transaccion obtenerTransaccionPorId(String id) {
         return transaccionRepository.findById(id).orElse(null);
     }
 
     // Elimina una transacción por su id (String)
-    public void eliminarTransaccion(ObjectId id) {
+    public void eliminarTransaccion(String id) {
         transaccionRepository.deleteById(id);
     }
 
@@ -93,7 +94,6 @@ public class TransaccionService {
             } else if (evento != null) {
                 historial.add(new PurchaseDTO(trx, new Boleto(), evento)); // Boleto vacío
             }
-            // Si quieres mostrar solo los que tienen ambos, deja solo el primer if
         }
         return historial;
     }

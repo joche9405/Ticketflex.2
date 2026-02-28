@@ -3,7 +3,7 @@ package com.tu_paquete.ticketflex.Model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Document(collection = "boletos")
 public class Boleto {
@@ -17,52 +17,73 @@ public class Boleto {
     private BigDecimal precio;
     private Integer cantidad;
 
-    private Date fechaCompra;
-
+    private LocalDate fechaCompra;
     private BigDecimal precioTotal;
-
     private EstadoBoleto estado;
-
-    private Date fechaLimitePago;
-
+    private LocalDate fechaLimitePago;
     private String qrCode;
-
     private BigDecimal saldoPendiente;
 
-    public enum EstadoBoleto {
-        PENDIENTE, ACTIVO, CANCELADO
-    }
+    // ✅ CAMPOS NUEVOS PARA TICKETFLEX
+    private String graderia; // Tipo de gradería (general, vip, etc.)
+    private Integer cuotas; // Número de cuotas para TicketFlex
+    private String metodoPago; // TICKETFLEX, TRADICIONAL, etc.
+    private String nombreBoleta; // Nombre descriptivo de la boleta
+    private LocalDate fechaProximoPago;
 
-    // ==== Embedded classes (con constructores agregados) ====
+    public enum EstadoBoleto {
+        PENDIENTE, ACTIVO, CANCELADO, PAGADO_PARCIALMENTE
+    }
 
     public static class EventoEmbed {
         private String id;
         private String nombre;
-        private Date fecha;
+        private LocalDate fecha;
         private String idUsuario;
 
-        // ✅ Constructor con parámetros
-        public EventoEmbed(String id, String nombre, Date fecha, String idUsuario) {
+        public EventoEmbed() {
+        }
+
+        public EventoEmbed(String id, String nombre, LocalDate fecha, String idUsuario) {
             this.id = id;
             this.nombre = nombre;
             this.fecha = fecha;
             this.idUsuario = idUsuario;
         }
 
-        public EventoEmbed() {}
+        // Getters y Setters...
+        public String getId() {
+            return id;
+        }
 
-        // Getters y Setters
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
+        public void setId(String id) {
+            this.id = id;
+        }
 
-        public String getNombre() { return nombre; }
-        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getNombre() {
+            return nombre;
+        }
 
-        public Date getFecha() { return fecha; }
-        public void setFecha(Date fecha) { this.fecha = fecha; }
+        public void setNombre(String nombre) {
+            this.nombre = nombre;
+        }
 
-        public String getIdUsuario() { return idUsuario; }
-        public void setIdUsuario(String idUsuario) { this.idUsuario = idUsuario; }
+        public LocalDate getFecha() {
+            return fecha;
+        }
+
+        public void setFecha(LocalDate fecha) {
+            this.fecha = fecha;
+        }
+
+        public String getIdUsuario() {
+            return idUsuario;
+        }
+
+        public void setIdUsuario(String idUsuario) {
+            this.idUsuario = idUsuario;
+        }
+
     }
 
     public static class UsuarioEmbed {
@@ -70,60 +91,164 @@ public class Boleto {
         private String nombre;
         private String correo;
 
-        // ✅ Constructor con parámetros
+        public UsuarioEmbed() {
+        }
+
         public UsuarioEmbed(String id, String nombre, String correo) {
             this.id = id;
             this.nombre = nombre;
             this.correo = correo;
         }
 
-        public UsuarioEmbed() {}
+        // Getters y Setters...
+        public String getId() {
+            return id;
+        }
 
-        // Getters y Setters
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
+        public void setId(String id) {
+            this.id = id;
+        }
 
-        public String getNombre() { return nombre; }
-        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getNombre() {
+            return nombre;
+        }
 
-        public String getCorreo() { return correo; }
-        public void setCorreo(String correo) { this.correo = correo; }
+        public void setNombre(String nombre) {
+            this.nombre = nombre;
+        }
+
+        public String getCorreo() {
+            return correo;
+        }
+
+        public void setCorreo(String correo) {
+            this.correo = correo;
+        }
     }
 
-    // ==== Getters y Setters del documento Boleto ====
+    // ==== GETTERS Y SETTERS ====
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public EventoEmbed getEvento() { return evento; }
-    public void setEvento(EventoEmbed evento) { this.evento = evento; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public UsuarioEmbed getUsuario() { return usuario; }
-    public void setUsuario(UsuarioEmbed usuario) { this.usuario = usuario; }
+    public EventoEmbed getEvento() {
+        return evento;
+    }
 
-    public BigDecimal getPrecio() { return precio; }
-    public void setPrecio(BigDecimal precio) { this.precio = precio; }
+    public void setEvento(EventoEmbed evento) {
+        this.evento = evento;
+    }
 
-    public Integer getCantidad() { return cantidad; }
-    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    public UsuarioEmbed getUsuario() {
+        return usuario;
+    }
 
-    public Date getFechaCompra() { return fechaCompra; }
-    public void setFechaCompra(Date fechaCompra) { this.fechaCompra = fechaCompra; }
+    public void setUsuario(UsuarioEmbed usuario) {
+        this.usuario = usuario;
+    }
 
-    public BigDecimal getPrecioTotal() { return precioTotal; }
-    public void setPrecioTotal(BigDecimal precioTotal) { this.precioTotal = precioTotal; }
+    public BigDecimal getPrecio() {
+        return precio;
+    }
 
-    public EstadoBoleto getEstado() { return estado; }
-    public void setEstado(EstadoBoleto estado) { this.estado = estado; }
+    public void setPrecio(BigDecimal precio) {
+        this.precio = precio;
+    }
 
-    public Date getFechaLimitePago() { return fechaLimitePago; }
-    public void setFechaLimitePago(Date fechaLimitePago) { this.fechaLimitePago = fechaLimitePago; }
+    public Integer getCantidad() {
+        return cantidad;
+    }
 
-    public String getQrCode() { return qrCode; }
-    public void setQrCode(String qrCode) { this.qrCode = qrCode; }
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
 
-    public BigDecimal getSaldoPendiente() { return saldoPendiente; }
-    public void setSaldoPendiente(BigDecimal saldoPendiente) { this.saldoPendiente = saldoPendiente; }
+    public LocalDate getFechaCompra() {
+        return fechaCompra;
+    }
+
+    public void setFechaCompra(LocalDate fechaCompra) {
+        this.fechaCompra = fechaCompra;
+    }
+
+    public BigDecimal getPrecioTotal() {
+        return precioTotal;
+    }
+
+    public void setPrecioTotal(BigDecimal precioTotal) {
+        this.precioTotal = precioTotal;
+    }
+
+    public EstadoBoleto getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoBoleto estado) {
+        this.estado = estado;
+    }
+
+    public LocalDate getFechaLimitePago() {
+        return fechaLimitePago;
+    }
+
+    public void setFechaLimitePago(LocalDate fechaLimitePago) {
+        this.fechaLimitePago = fechaLimitePago;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public BigDecimal getSaldoPendiente() {
+        return saldoPendiente;
+    }
+
+    public void setSaldoPendiente(BigDecimal saldoPendiente) {
+        this.saldoPendiente = saldoPendiente;
+    }
+
+    // ✅ GETTERS Y SETTERS PARA LOS CAMPOS NUEVOS
+
+    public String getGraderia() {
+        return graderia;
+    }
+
+    public void setGraderia(String graderia) {
+        this.graderia = graderia;
+    }
+
+    public Integer getCuotas() {
+        return cuotas;
+    }
+
+    public void setCuotas(Integer cuotas) {
+        this.cuotas = cuotas;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public String getNombreBoleta() {
+        return nombreBoleta;
+    }
+
+    public void setNombreBoleta(String nombreBoleta) {
+        this.nombreBoleta = nombreBoleta;
+    }
 
     public String getUsuarioId() {
         return (usuario != null) ? usuario.getId() : null;
@@ -131,5 +256,21 @@ public class Boleto {
 
     public String getEventoId() {
         return (evento != null) ? evento.getId() : null;
+    }
+
+    // ✅ MÉTODO PARA GENERAR NOMBRE DE BOLETA AUTOMÁTICO
+    public String generarNombreBoleta() {
+        if (graderia != null && evento != null) {
+            return evento.getNombre() + " - " + graderia.toUpperCase();
+        }
+        return "Boleto General";
+    }
+
+    public LocalDate getFechaProximoPago() {
+        return fechaProximoPago;
+    }
+
+    public void setFechaProximoPago(LocalDate fechaProximoPago) {
+        this.fechaProximoPago = fechaProximoPago;
     }
 }

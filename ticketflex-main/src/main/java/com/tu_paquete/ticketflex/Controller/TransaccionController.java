@@ -1,14 +1,13 @@
 package com.tu_paquete.ticketflex.Controller;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.tu_paquete.ticketflex.Model.Transaccion;
-import com.tu_paquete.ticketflex.Repository.Mongo.TransaccionRepository;
 import com.tu_paquete.ticketflex.Service.TransaccionService;
+import com.tu_paquete.ticketflex.repository.mongo.TransaccionRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -51,12 +50,12 @@ public class TransaccionController {
     }
 
     @GetMapping("/{id}")
-    public Transaccion obtenerTransaccionPorId(@PathVariable ObjectId id) {
+    public Transaccion obtenerTransaccionPorId(@PathVariable String id) {
         return transaccionService.obtenerTransaccionPorId(id);
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarTransaccion(@PathVariable ObjectId id) {
+    public void eliminarTransaccion(@PathVariable String id) {
         transaccionService.eliminarTransaccion(id);
     }
 

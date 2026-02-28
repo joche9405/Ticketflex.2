@@ -3,23 +3,16 @@ package com.tu_paquete.ticketflex.Controller;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,27 +27,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Evento;
 import com.tu_paquete.ticketflex.Model.FuncionEvento;
 import com.tu_paquete.ticketflex.Model.PerfilUsuario;
 import com.tu_paquete.ticketflex.Model.PrediccionResultado;
-import com.tu_paquete.ticketflex.Model.Boleto;
-import com.tu_paquete.ticketflex.Model.Evento;
-import com.tu_paquete.ticketflex.Model.Transaccion;
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.BoletoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.EventoRepository;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
-import com.tu_paquete.ticketflex.Repository.jpa.FuncionEventoRepository;
-import com.tu_paquete.ticketflex.Repository.jpa.PerfilUsuarioRepository;
 import com.tu_paquete.ticketflex.Service.EventoService;
 import com.tu_paquete.ticketflex.Service.PrediccionEventoService;
-import com.tu_paquete.ticketflex.Service.TransaccionService;
 import com.tu_paquete.ticketflex.Service.UsuarioService;
 import com.tu_paquete.ticketflex.Service.dto.NuevaPersonaRequest;
 import com.tu_paquete.ticketflex.Service.dto.PrediccionMasivaResultado;
 import com.tu_paquete.ticketflex.dto.EventoConEstadisticas;
+import com.tu_paquete.ticketflex.repository.jpa.FuncionEventoRepository;
+import com.tu_paquete.ticketflex.repository.jpa.PerfilUsuarioRepository;
+import com.tu_paquete.ticketflex.repository.mongo.EventoRepository;
+import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -75,9 +62,6 @@ public class AdminController {
     private GridFsTemplate gridFsTemplate;
 
     @Autowired
-    private BoletoRepository boletoRepository;
-
-    @Autowired
     private EventoRepository eventoRepository;
 
     @Autowired
@@ -85,9 +69,6 @@ public class AdminController {
 
     @Autowired
     private UsuarioService usuarioService;
-
-    @Autowired
-    private TransaccionService transaccionService;
 
     @Autowired
     private EventoService eventoService;
@@ -517,4 +498,46 @@ public class AdminController {
 
         return "redirect:/admin/perfil?success"; // en vez de ?success=contrasena_actualizada
     }
+
+    // --- Olvidé mi contraseña (ADMIN) ---
+
+    @GetMapping("/forgot-password")
+    public String mostrarFormularioOlvidePasswordAdmin() {
+        return "admin/forgot-password-admin"; // Vista con formulario de email
+    }
+
+    @PostMapping("/reset-password-request")
+    public String procesarSolicitudResetPasswordAdmin(@RequestParam("email") String email,
+            RedirectAttributes redirectAttributes) {
+        try {
+            usuarioService.generarTokenDeReseteo(email, true); // <-- nombre correcto
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "Si el correo existe, se enviará un enlace para restablecer la contraseña.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al procesar la solicitud.");
+        }
+        return "redirect:/admin/forgot-password";
+    }
+
+    @GetMapping("/reset-password/{token}")
+    public String mostrarFormularioResetPasswordAdmin(@PathVariable String token, Model model) {
+        model.addAttribute("token", token);
+        return "admin/reset-password-admin"; // Vista con form de nueva contraseña
+    }
+
+    @PostMapping("/reset-password")
+    public String procesarResetPasswordAdmin(
+            @RequestParam("token") String token,
+            @RequestParam("newPassword") String nuevaPassword,
+            RedirectAttributes redirectAttributes) {
+        try {
+            usuarioService.resetearPassword(token, nuevaPassword);
+            redirectAttributes.addFlashAttribute("mensaje", "Contraseña actualizada con éxito.");
+            return "redirect:/login"; // o la ruta del login de admin
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/reset-password/" + token;
+        }
+    }
+
 }

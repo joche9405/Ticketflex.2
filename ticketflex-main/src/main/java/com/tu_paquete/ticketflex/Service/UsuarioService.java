@@ -1,6 +1,9 @@
 package com.tu_paquete.ticketflex.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,16 +13,14 @@ import org.springframework.stereotype.Service;
 
 import com.tu_paquete.ticketflex.Model.Rol;
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
 import com.tu_paquete.ticketflex.dto.UsuarioDTO;
+import com.tu_paquete.ticketflex.repository.mongo.RolRepository;
+import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.PostConstruct;
-
-import com.tu_paquete.ticketflex.Repository.Mongo.RolRepository;
-
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -30,24 +31,25 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService; // Inyección de dependencia del nuevo servicio
 
     @Autowired
     public UsuarioService(UsuarioRepository usuarioRepository,
             RolRepository rolRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Transactional
     public Usuario registrarUsuario(Usuario usuario) {
-        // Verificar si ya existe un usuario con ese correo
         usuarioRepository.findByEmail(usuario.getEmail()).ifPresent(u -> {
             throw new IllegalArgumentException("El usuario ya existe con ese correo electrónico");
         });
 
-        // Buscar o crear el rol "Usuario"
         Rol rolUsuario = rolRepository.findByNombreRol("Usuario")
                 .orElseGet(() -> {
                     Rol nuevoRol = new Rol();
@@ -55,31 +57,21 @@ public class UsuarioService {
                     return rolRepository.save(nuevoRol);
                 });
 
-        // Asignar el rol y encriptar la contraseña
         usuario.setRol(rolUsuario);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
-        // Guardar y retornar el usuario
         return usuarioRepository.save(usuario);
     }
 
     @Transactional(readOnly = true)
-    public Usuario iniciarSesion(String email, String password) {
-        System.out.println("Intentando iniciar sesión con email: " + email);
+    public Optional<Usuario> iniciarSesion(String email, String password) {
+        log.info("Intentando iniciar sesión con email: {}", email);
 
         return usuarioRepository.findByEmail(email)
-                .map(usuario -> {
-                    System.out.println("Usuario encontrado: " + usuario.getEmail());
+                .filter(usuario -> {
                     boolean match = passwordEncoder.matches(password, usuario.getPassword());
-                    System.out.println("Contraseña coincide? " + match);
-                    if (match)
-                        return usuario;
-                    else
-                        return null;
-                })
-                .orElseGet(() -> {
-                    System.out.println("No se encontró usuario con ese email.");
-                    return null;
+                    log.info("¿Contraseña coincide para {}?: {}", email, match);
+                    return match;
                 });
     }
 
@@ -94,7 +86,6 @@ public class UsuarioService {
     }
 
     // CREACION DEL SUPER ADMIN
-
     @Value("${superadmin.default.email:superadmin@admin.com}")
     private String superAdminEmail;
 
@@ -163,8 +154,15 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public List<UsuarioDTO> listarAdministradores() {
-        return usuarioRepository.findAll().stream()
-                .filter(u -> u.getRol() != null && "Administrador".equalsIgnoreCase(u.getRol().getNombreRol()))
+        // 1. Encuentra el objeto Rol 'Administrador' por su nombre.
+        Rol rolAdmin = rolRepository.findByNombreRol("Administrador")
+                .orElseThrow(() -> new RuntimeException("Rol 'Administrador' no encontrado."));
+
+        // 2. Usa el objeto Rol para buscar usuarios asociados a ese ID de rol.
+        List<Usuario> administradores = usuarioRepository.findByRol(rolAdmin);
+
+        // 3. Mapea la lista a DTOs.
+        return administradores.stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }
@@ -186,8 +184,6 @@ public class UsuarioService {
                 .orElse(false);
     }
 
-    // NUEVOS METODOS
-
     public Usuario buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email).orElse(null);
     }
@@ -206,6 +202,87 @@ public class UsuarioService {
 
     public Usuario buscarPorId(String id) {
         return obtenerPorId(id);
+    }
+
+    // NUEVA LÓGICA: Métodos para restablecer contraseña
+
+    @Transactional
+    public String generarTokenDeReseteo(String email, boolean esAdmin) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElse(null);
+
+        if (usuario == null) {
+            log.info("Usuario con email {} no encontrado. No se enviará correo.", email);
+            return null;
+        }
+
+        // Revisar si ya existe un token activo
+        if (usuario.getResetPasswordToken() != null &&
+                usuario.getResetPasswordTokenExpiry() != null &&
+                usuario.getResetPasswordTokenExpiry().isAfter(LocalDateTime.now())) {
+
+            log.info("Usuario {} ya tiene un token activo que expira en {}. No se enviará nuevo correo.",
+                    email, usuario.getResetPasswordTokenExpiry());
+            return usuario.getResetPasswordToken();
+        }
+
+        // Limpiar token expirado
+        if (usuario.getResetPasswordToken() != null &&
+                usuario.getResetPasswordTokenExpiry() != null &&
+                usuario.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+
+            log.info("Token expirado para usuario {}. Generando nuevo token.", email);
+            usuario.setResetPasswordToken(null);
+            usuario.setResetPasswordTokenExpiry(null);
+        }
+
+        // Generar nuevo token
+        String token = UUID.randomUUID().toString();
+        usuario.setResetPasswordToken(token);
+        usuario.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(10));
+        usuarioRepository.save(usuario);
+
+        // Construir link según tipo de usuario
+        String resetLink;
+        if (esAdmin) {
+            resetLink = "https://ticketflex-2.onrender.com/admin/reset-password/" + token;
+        } else {
+            resetLink = "https://ticketflex-2.onrender.com/reset-password/" + token;
+        }
+
+        // Preparar y enviar correo
+        String subject = "Restablece tu contraseña - TicketFlex";
+        String body = "<p>Hola,</p>"
+                + "<p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta TicketFlex.</p>"
+                + "<p>Por favor, haz clic en el siguiente enlace para crear una nueva contraseña:</p>"
+                + "<p><a href=\"" + resetLink + "\">Restablecer Contraseña</a></p>"
+                + "<p>Este enlace es válido por 10 minutos. Si no solicitaste este cambio, puedes ignorar este correo.</p>"
+                + "<p>Gracias,<br>Soporte de TicketFlex</p>";
+
+        emailService.enviarCorreo(email, subject, body);
+        log.info("Correo de reseteo enviado exitosamente a: {}. Token expira en 10 minutos.", email);
+
+        return token;
+    }
+
+    @Transactional
+    public void resetearPassword(String token, String nuevaPassword) {
+        Usuario usuario = usuarioRepository.findByResetPasswordToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token de restablecimiento inválido."));
+
+        if (usuario.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("El token ha expirado. Por favor, solicita uno nuevo.");
+        }
+
+        // Encriptar la nueva contraseña
+        String passwordEncriptada = passwordEncoder.encode(nuevaPassword);
+        usuario.setPassword(passwordEncriptada);
+
+        // Invalidar el token para evitar que se use de nuevo
+        usuario.setResetPasswordToken(null);
+        usuario.setResetPasswordTokenExpiry(null);
+
+        usuarioRepository.save(usuario);
     }
 
 }

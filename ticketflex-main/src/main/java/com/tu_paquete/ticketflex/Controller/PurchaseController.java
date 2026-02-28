@@ -3,7 +3,6 @@ package com.tu_paquete.ticketflex.Controller;
 import com.tu_paquete.ticketflex.Model.Boleto;
 import com.tu_paquete.ticketflex.Model.Transaccion;
 import com.tu_paquete.ticketflex.Model.Usuario;
-import com.tu_paquete.ticketflex.Repository.Mongo.UsuarioRepository;
 import com.tu_paquete.ticketflex.Service.BoletoService;
 import com.tu_paquete.ticketflex.Service.TransaccionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +23,6 @@ public class PurchaseController {
 
     @Autowired
     private TransaccionService transaccionService;
-
-    
-    @Autowired
-    private UsuarioRepository usuarioRepository;
 
     @GetMapping("/boletos")
     public ResponseEntity<List<Boleto>> getUserBoletos(@AuthenticationPrincipal Usuario usuario) {
