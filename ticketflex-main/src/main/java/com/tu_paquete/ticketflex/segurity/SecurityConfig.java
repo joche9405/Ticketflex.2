@@ -36,7 +36,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/politica-privacidad.html", "/terminos-servicio.html",
                                                                 "/como-comprar.html")
                                                 .permitAll()
-                                                .requestMatchers("/api/usuarios/login",
+                                                .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
                                                                 "/api/usuarios/reset-password**",
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
