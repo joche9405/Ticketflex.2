@@ -40,7 +40,7 @@ public class SecurityConfig {
                                                                 "/api/usuarios/reset-password**",
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/eventos/**", "/eventos/**", "/getimagen")
+                                                .requestMatchers("/api/eventos/**", "/eventos/**", "/getimagen/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasRole("Administrador")
                                                 .requestMatchers("/api/usuarios/auth/**").authenticated()
