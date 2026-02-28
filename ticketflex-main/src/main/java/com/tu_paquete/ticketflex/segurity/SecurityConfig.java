@@ -24,6 +24,14 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
+                                .cors(cors -> cors.configurationSource(request -> {
+                                        var opt = new org.springframework.web.cors.CorsConfiguration();
+                                        opt.setAllowedOrigins(java.util.List.of("*"));
+                                        opt.setAllowedMethods(
+                                                        java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                                        opt.setAllowedHeaders(java.util.List.of("*"));
+                                        return opt;
+                                }))
                                 .csrf(csrf -> csrf.disable())
                                 // 1. STATELESS: No guardamos sesiones en el servidor
                                 .sessionManagement(session -> session
