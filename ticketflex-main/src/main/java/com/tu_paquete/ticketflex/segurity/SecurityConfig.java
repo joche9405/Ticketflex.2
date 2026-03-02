@@ -45,7 +45,8 @@ public class SecurityConfig {
                                                 // 2. ENDPOINTS DE IMÁGENES Y EVENTOS (Públicos)
                                                 // Asegúrate de incluir tanto la ruta con /api como la directa si ambas
                                                 // existen
-                                                .requestMatchers("/getimagen/**", "/api/eventos/**", "/eventos/**")
+                                                .requestMatchers("/api/imagen/**", "/api/eventos/**", "/eventos/**",
+                                                                "/getimagen/**")
                                                 .permitAll()
 
                                                 // 3. AUTH (Login y Registro)

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections; // Usa el java.util estándar
+import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -21,6 +21,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
+    }
+
+    /**
+     * ¡ESTA ES LA CORRECCIÓN!
+     * Indica qué rutas deben saltarse este filtro por completo.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        // Agregamos /api/imagen que es la ruta real de tu controlador
+        return path.startsWith("/api/imagen") ||
+                path.startsWith("/getimagen") ||
+                path.startsWith("/api/eventos") ||
+                path.startsWith("/eventos");
     }
 
     @Override
@@ -34,29 +48,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
-            if (jwtUtil.validarToken(token)) {
-                String userId = jwtUtil.obtenerUserId(token);
-                String rol = jwtUtil.obtenerRol(token);
+            try {
+                if (jwtUtil.validarToken(token)) {
+                    String userId = jwtUtil.obtenerUserId(token);
+                    String rol = jwtUtil.obtenerRol(token);
 
-                // 1. Creamos la autoridad (Spring espera ROLE_ al usar hasRole en
-                // SecurityConfig)
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
+                    // Spring espera "ROLE_" para coincidir con hasRole en SecurityConfig
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
 
-                // 2. Creamos el objeto de autenticación para Spring Security
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId,
-                        null, Collections.singletonList(authority));
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userId, null, Collections.singletonList(authority));
 
-                // 3. ¡IMPORTANTE! Esto es lo que mantiene la sesión activa durante esta
-                // petición
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // Mantenemos los atributos por si los usas en tus controllers
-                request.setAttribute("userId", userId);
-                request.setAttribute("rol", rol);
+                    request.setAttribute("userId", userId);
+                    request.setAttribute("rol", rol);
+                }
+            } catch (Exception e) {
+                // Si el token es inválido o expiró, simplemente no autenticamos
+                SecurityContextHolder.clearContext();
             }
         }
 
-        // Continuar con el siguiente filtro en la cadena
         filterChain.doFilter(request, response);
     }
 }
