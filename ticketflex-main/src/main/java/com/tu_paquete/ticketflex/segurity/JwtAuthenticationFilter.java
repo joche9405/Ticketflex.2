@@ -40,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/admin/forgot-password") || // Importante para el admin
                 path.startsWith("/admin/reset-password") ||
                 path.startsWith("/api/imagen") ||
-                path.startsWith("/public");
+                path.startsWith("/public") ||
+                path.startsWith("/login");
     }
 
     @Override
