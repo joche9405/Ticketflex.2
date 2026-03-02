@@ -5,8 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,39 +31,42 @@ public class SecurityConfig {
                                         return opt;
                                 }))
                                 .csrf(csrf -> csrf.disable())
-                                // 1. STATELESS: No guardamos sesiones en el servidor
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                                 .authorizeHttpRequests(auth -> auth
+                                                // 1. RECURSOS ESTÁTICOS Y PÚBLICOS (Prioridad alta)
                                                 .requestMatchers("/", "/index", "/public/**", "/fonts/**", "/css/**",
                                                                 "/js/**", "/images/**")
                                                 .permitAll()
                                                 .requestMatchers("/politica-privacidad.html", "/terminos-servicio.html",
                                                                 "/como-comprar.html")
                                                 .permitAll()
+
+                                                // 2. ENDPOINTS DE IMÁGENES Y EVENTOS (Públicos)
+                                                // Asegúrate de incluir tanto la ruta con /api como la directa si ambas
+                                                // existen
+                                                .requestMatchers("/getimagen/**", "/api/eventos/**", "/eventos/**")
+                                                .permitAll()
+
+                                                // 3. AUTH (Login y Registro)
                                                 .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
                                                                 "/api/usuarios/reset-password**",
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/eventos/**", "/eventos/**", "/getimagen/**")
-                                                .permitAll()
+
+                                                // 4. RUTAS PROTEGIDAS
                                                 .requestMatchers("/admin/**").hasRole("Administrador")
-                                                .requestMatchers("/api/usuarios/auth/**").authenticated()
-                                                .requestMatchers("/api/estadisticas/**").authenticated()
+                                                .requestMatchers("/api/usuarios/auth/**", "/api/estadisticas/**")
+                                                .authenticated()
+
                                                 .anyRequest().authenticated())
 
-                                // 2. Filtro JWT: El corazón de la nueva autenticación
+                                // 5. FILTRO JWT
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
                                 .exceptionHandling(exception -> exception
                                                 .accessDeniedPage("/access-denied"));
 
                 return http.build();
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
         }
 }
