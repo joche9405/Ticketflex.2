@@ -51,7 +51,7 @@ public class SecurityConfig {
 
                                                 // 3. AUTH (Login y Registro)
                                                 .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
-                                                                "/api/usuarios/reset-password**",
+                                                                "/api/usuarios/reset-password**", "/login.html",
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
 
