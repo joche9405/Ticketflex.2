@@ -34,6 +34,9 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+
+                                                .requestMatchers("/login", "/login.html", "/registro", "/registro.html")
+                                                .permitAll()
                                                 // 1. RECURSOS ESTÁTICOS Y PÚBLICOS (Prioridad alta)
                                                 .requestMatchers("/", "/index", "/public/**", "/fonts/**", "/css/**",
                                                                 "/js/**", "/images/**")
