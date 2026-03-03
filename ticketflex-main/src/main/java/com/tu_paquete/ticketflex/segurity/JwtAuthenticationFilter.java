@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 if (jwtUtil.validarToken(token)) {
                     String userId = jwtUtil.obtenerUserId(token);
-                    String rol = jwtUtil.obtenerRol(token);
+                    String rol = jwtUtil.obtenerRol(token).trim();
 
                     // Spring espera "ROLE_" para coincidir con .hasRole() en SecurityConfig
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
