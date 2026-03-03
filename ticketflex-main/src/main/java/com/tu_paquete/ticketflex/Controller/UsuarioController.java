@@ -69,7 +69,7 @@ public class UsuarioController {
             // --- CONFIGURACIÓN DE LA COOKIE SEGURA ---
             jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
             cookie.setHttpOnly(true); // Bloquea que JavaScript robe el token (Anti-XSS)
-            cookie.setSecure(false); // Ponlo en 'true' cuando subas a Render (HTTPS)
+            cookie.setSecure(true); // Ponlo en 'true' cuando subas a Render (HTTPS)
             cookie.setPath("/"); // Disponible en toda la web
             cookie.setMaxAge(86400); // Dura 24 horas
 
