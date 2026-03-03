@@ -87,21 +87,23 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
-        // Obtener el usuario autenticado
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // 1. authentication.getName() ahora devuelve el ID del usuario (según tu
+        // filtro)
+        String userId = authentication.getName();
 
-        // Obtener solo los eventos del usuario autenticado
+        // 2. Buscamos por ID en lugar de Email
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
+        // 3. El resto de tu lógica se mantiene igual
         List<Evento> eventos = eventoService.obtenerEventosPorCreador(usuario.getId());
         Long boletosVendidos = eventoService.contarBoletosVendidosPorCreador(usuario.getId());
 
-        // Agregar atributos al modelo
-        model.addAttribute("nombreUsuario", usuario.getNombre()); // Asumiendo que tienes getNombre()
-        model.addAttribute("apellidoUsuario", usuario.getApellido()); // Si necesitas el apellido
-        model.addAttribute("emailUsuario", usuario.getEmail()); // Si necesitas el email
+        model.addAttribute("nombreUsuario", usuario.getNombre());
+        model.addAttribute("apellidoUsuario", usuario.getApellido());
+        model.addAttribute("emailUsuario", usuario.getEmail());
         model.addAttribute("eventos", eventos);
-        model.addAttribute("totalBoletosVendidos", boletosVendidos); // Envía el total filtrado
+        model.addAttribute("totalBoletosVendidos", boletosVendidos);
 
         return "admin/dashboard";
     }
