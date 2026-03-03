@@ -64,8 +64,9 @@ public class SecurityConfig {
 
                                                 // 4. RUTAS PROTEGIDAS PARA ADMINISTRADORES
                                                 // hasRole("Administrador") buscará "ROLE_Administrador" en el filtro
-                                                .requestMatchers("/admin/**").hasAuthority("ROLE_Administrador")
-                                                // 5. RUTAS PARA USUARIOS AUTENTICADOS EN GENERAL
+                                                .requestMatchers("/admin/**").authenticated()
+                                                // 5. RUTAS PARA USUARIOS
+                                                // AUTENTICADOS EN GENERAL
                                                 .requestMatchers("/api/usuarios/auth/**", "/api/estadisticas/**")
                                                 .authenticated()
 
