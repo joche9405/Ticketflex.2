@@ -86,7 +86,7 @@ function login(event) {
         if (data.rol === 'Administrador') {
             alert('¡Bienvenido Administrador, ' + data.nombre + '! Redirigiendo al panel...');
             // Al hacer esto, el navegador envía la Cookie HttpOnly que puso Java
-            window.location.href = '/admin/dashboard';
+            window.location.replace('/admin/dashboard');
         } else {
             // Lógica para usuario normal (cerrar modal, actualizar header)
             alert('¡Bienvenido, ' + data.nombre + '!');
