@@ -52,7 +52,10 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> iniciarSesion(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<Map<String, Object>> iniciarSesion(
+            @RequestBody Map<String, String> loginRequest,
+            jakarta.servlet.http.HttpServletResponse response) { // <--- Añadimos el response
+
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
@@ -63,13 +66,23 @@ public class UsuarioController {
             String rol = usuario.getRol().getNombreRol();
             String token = jwtUtil.generarToken(usuario.getId(), rol);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("id", usuario.getId());
-            response.put("nombre", usuario.getNombre());
-            response.put("rol", rol);
+            // --- CONFIGURACIÓN DE LA COOKIE SEGURA ---
+            jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
+            cookie.setHttpOnly(true); // Bloquea que JavaScript robe el token (Anti-XSS)
+            cookie.setSecure(false); // Ponlo en 'true' cuando subas a Render (HTTPS)
+            cookie.setPath("/"); // Disponible en toda la web
+            cookie.setMaxAge(86400); // Dura 24 horas
 
-            return ResponseEntity.ok(response);
+            response.addCookie(cookie); // Se envía al navegador automáticamente
+
+            // Respuesta JSON normal para tu lógica de Frontend
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("token", token);
+            responseBody.put("id", usuario.getId());
+            responseBody.put("nombre", usuario.getNombre());
+            responseBody.put("rol", rol);
+
+            return ResponseEntity.ok(responseBody);
         }
 
         Map<String, Object> errorResponse = new HashMap<>();

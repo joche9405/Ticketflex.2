@@ -65,36 +65,47 @@ function login(event) {
         headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify(data)
     })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(error => {
-                    throw new Error(error.error || 'Credenciales incorrectas.');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            // data ahora contiene: { token, id, nombre, rol }
-            isAuthenticated = true;
-
-            // 3. GUARDAMOS EL TOKEN (Esto es vital para que la sesión no se pierda)
-            localStorage.setItem('ticketflex_token', data.token);
-            
-            // Guardamos el resto de la info como ya lo hacías
-            localStorage.setItem('usuario', JSON.stringify(data));
-            
-            userId = data.id;
-            document.getElementById('userName').innerText = data.nombre;
-            document.getElementById('loginButtonSection').classList.add('hidden');
-            document.getElementById('userSection').classList.remove('hidden');
-            
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(error => {
+                throw new Error(error.error || 'Credenciales incorrectas.');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 1. Guardar info en localStorage para el uso de la interfaz pública
+        localStorage.setItem('ticketflex_token', data.token);
+        localStorage.setItem('usuario', JSON.stringify(data));
+        
+        // 2. Actualizar UI básica
+        isAuthenticated = true;
+        userId = data.id;
+        
+        // 3. LÓGICA DE REDIRECCIÓN POR ROL
+        if (data.rol === 'Administrador') {
+            alert('¡Bienvenido Administrador, ' + data.nombre + '! Redirigiendo al panel...');
+            // Al hacer esto, el navegador envía la Cookie HttpOnly que puso Java
+            window.location.href = '/admin/dashboard';
+        } else {
+            // Lógica para usuario normal (cerrar modal, actualizar header)
             alert('¡Bienvenido, ' + data.nombre + '!');
+            if(document.getElementById('userName')) {
+                document.getElementById('userName').innerText = data.nombre;
+            }
+            if(document.getElementById('loginButtonSection')) {
+                document.getElementById('loginButtonSection').classList.add('hidden');
+            }
+            if(document.getElementById('userSection')) {
+                document.getElementById('userSection').classList.remove('hidden');
+            }
             document.getElementById('loginModal').style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error al iniciar sesión:', error.message);
-            alert(error.message);
-        });
+        }
+    })
+    .catch(error => {
+        console.error('Error al iniciar sesión:', error.message);
+        alert(error.message);
+    });
 }
 
 
@@ -273,32 +284,46 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch('/api/usuarios/logout', {
                 method: 'POST'
             })
-                .then(response => {
-                    
-                    alert('Sesión cerrada exitosamente');
-                    
-                    localStorage.removeItem('ticketflex_token'); // El token JWT
-                    localStorage.removeItem('usuario');          // Datos del JSON
-                    localStorage.removeItem('currentUser');      // Por si usas este nombre
-                    
-                    isAuthenticated = false;
-                    userId = null;
+            .then(response => {
+                alert('Sesión cerrada exitosamente');
+                
+                // 1. LIMPIAR LOCALSTORAGE (Como ya lo hacías)
+                localStorage.removeItem('ticketflex_token');
+                localStorage.removeItem('usuario');
+                localStorage.removeItem('currentUser');
+                
+                // 2. ELIMINAR LA COOKIE (Vital para la seguridad)
+                // Esto le dice al navegador que la cookie "token" ya expiró
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
+                // 3. ACTUALIZAR ESTADOS Y UI
+                isAuthenticated = false;
+                userId = null;
+
+                if(document.getElementById('loginButtonSection')) {
                     document.getElementById('loginButtonSection').classList.remove('hidden');
+                }
+                if(document.getElementById('userSection')) {
                     document.getElementById('userSection').classList.add('hidden');
+                }
+                if(document.getElementById('userName')) {
                     document.getElementById('userName').innerText = '';
+                }
 
-                    
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    localStorage.clear(); 
-                    location.reload();
-                });
+                // 4. REDIRECCIÓN (Opcional pero recomendada para Admins)
+                // Si el admin cierra sesión, lo mejor es mandarlo al inicio o login
+                window.location.href = '/'; 
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Si falla el fetch, forzamos limpieza local y recargamos
+                localStorage.clear();
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                location.reload();
+            });
         };
     }
 });
-
 
 // ========================================================
 /// Función para cargar y filtrar eventos

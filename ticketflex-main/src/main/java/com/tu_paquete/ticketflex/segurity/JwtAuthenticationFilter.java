@@ -2,6 +2,7 @@ package com.tu_paquete.ticketflex.segurity;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -23,30 +24,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
-    /**
-     * ¡ESTA ES LA CORRECCIÓN!
-     * Indica qué rutas deben saltarse este filtro por completo.
-     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
-        // Agregamos /api/imagen que es la ruta real de tu controlador
-        return path.startsWith("/api/imagen") ||
+
+        // Retornamos true para las rutas que NO deben ser filtradas (públicas)
+        return path.startsWith("/api/usuarios/login") ||
+                path.startsWith("/api/usuarios/registrar") ||
+                path.startsWith("/api/imagen") ||
                 path.startsWith("/getimagen") ||
                 path.startsWith("/api/eventos") ||
                 path.startsWith("/eventos") ||
-                path.startsWith("/api/usuarios/login") ||
-                path.startsWith("/api/usuarios/registrar") ||
-                path.startsWith("/admin/forgot-password") || // Importante para el admin
+                path.startsWith("/admin/forgot-password") ||
                 path.startsWith("/admin/reset-password") ||
-                path.startsWith("/api/imagen") ||
                 path.startsWith("/public") ||
                 path.startsWith("/login") ||
                 path.equals("/login.html") ||
-                path.startsWith("/api/usuarios/login") ||
                 path.startsWith("/css/") ||
                 path.startsWith("/js/") ||
-                path.startsWith("/api/imagen");
+                path.startsWith("/images/");
     }
 
     @Override
@@ -55,17 +51,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
+        String token = null;
+
+        // 1. Intentar obtener el token del Header Authorization
         String header = request.getHeader("Authorization");
-
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
+            token = header.substring(7);
+        }
+        // 2. Si no hay header, buscar en las Cookies (Fundamental para el Dashboard
+        // Admin)
+        else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
+        // 3. Si hay un token, validarlo y autenticar
+        if (token != null) {
             try {
                 if (jwtUtil.validarToken(token)) {
                     String userId = jwtUtil.obtenerUserId(token);
                     String rol = jwtUtil.obtenerRol(token);
 
-                    // Spring espera "ROLE_" para coincidir con hasRole en SecurityConfig
+                    // Spring espera "ROLE_" para coincidir con .hasRole() en SecurityConfig
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -73,11 +84,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
+                    // Guardamos info extra en el request por si la necesitamos en los controladores
                     request.setAttribute("userId", userId);
                     request.setAttribute("rol", rol);
                 }
             } catch (Exception e) {
-                // Si el token es inválido o expiró, simplemente no autenticamos
+                // En caso de error (token expirado o manipulado), limpiamos el contexto
                 SecurityContextHolder.clearContext();
             }
         }
