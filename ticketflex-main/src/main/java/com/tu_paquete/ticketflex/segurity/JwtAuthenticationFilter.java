@@ -11,7 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import org.springframework.lang.NonNull;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -46,10 +46,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
+
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        // LOG 1: Entrada de la petición
+        System.out.println(">>> [JWT FILTER] Petición recibida en: " + path + " [" + method + "]");
 
         String token = null;
 
@@ -57,42 +63,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             token = header.substring(7);
+            System.out.println(">>> [JWT FILTER] Token encontrado en Header Authorization");
         }
-        // 2. Si no hay header, buscar en las Cookies (Fundamental para el Dashboard
-        // Admin)
+        // 2. Si no hay header, buscar en las Cookies
         else if (request.getCookies() != null) {
+            System.out.println(">>> [JWT FILTER] Buscando en cookies... Total: " + request.getCookies().length);
             for (Cookie cookie : request.getCookies()) {
-                System.out.println("Cookie encontrada: " + cookie.getName());
+                System.out.println(">>> [JWT FILTER] Cookie vista: " + cookie.getName());
                 if ("token".equals(cookie.getName())) {
                     token = cookie.getValue();
+                    System.out.println(">>> [JWT FILTER] Cookie 'token' detectada con éxito");
                     break;
                 }
             }
+        } else {
+            System.out.println(">>> [JWT FILTER] No se detectaron cookies ni Header en la petición");
         }
 
-        // 3. Si hay un token, validarlo y autenticar
+        // 3. Validar el token y autenticar
         if (token != null) {
             try {
                 if (jwtUtil.validarToken(token)) {
                     String userId = jwtUtil.obtenerUserId(token);
                     String rol = jwtUtil.obtenerRol(token).trim();
 
-                    // Spring espera "ROLE_" para coincidir con .hasRole() en SecurityConfig
+                    System.out.println(">>> [JWT FILTER] Token VÁLIDO. Usuario: " + userId + " | Rol: " + rol);
+
+                    // Crear autoridad con prefijo ROLE_
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
+                    System.out.println(">>> [JWT FILTER] Autoridad asignada: " + authority.getAuthority());
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userId, null, Collections.singletonList(authority));
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println(">>> [JWT FILTER] Seguridad establecida en el contexto de Spring");
 
-                    // Guardamos info extra en el request por si la necesitamos en los controladores
                     request.setAttribute("userId", userId);
                     request.setAttribute("rol", rol);
+                } else {
+                    System.out.println(
+                            ">>> [JWT FILTER] ALERTA: El token existe pero NO es válido (expirado o malformado)");
                 }
             } catch (Exception e) {
-                // En caso de error (token expirado o manipulado), limpiamos el contexto
+                System.out.println(">>> [JWT FILTER] ERROR procesando token: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
+        } else {
+            System.out.println(">>> [JWT FILTER] No se pudo extraer ningún token. La petición sigue como ANÓNIMA");
         }
 
         filterChain.doFilter(request, response);
