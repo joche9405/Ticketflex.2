@@ -69,13 +69,13 @@ public class UsuarioController {
             // --- CONFIGURACIÓN DE LA COOKIE BLINDADA PARA RENDER (HTTPS) ---
             // Usamos addHeader para tener control total sobre SameSite
             String cookieHeader = String.format(
-                    "token=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=Lax",
+                    "token=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=None",
                     token,
                     86400 // 24 horas
             );
 
             // Enviamos la cookie al navegador
-            response.addHeader("Set-Cookie", cookieHeader);
+            response.setHeader("Set-Cookie", cookieHeader);
 
             // Respuesta JSON para el resto de la lógica de tu Frontend
             Map<String, Object> responseBody = new HashMap<>();
