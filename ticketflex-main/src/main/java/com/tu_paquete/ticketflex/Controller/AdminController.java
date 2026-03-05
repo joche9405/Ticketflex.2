@@ -258,44 +258,45 @@ public class AdminController {
     }
 
     @GetMapping("/estadisticas-data")
-    @ResponseBody // Indica que el valor de retorno debe ser serializado directamente al cuerpo de
-                  // la respuesta (ej. JSON)
+    @ResponseBody
     public Map<String, Long> obtenerDatosEstadisticas(Authentication authentication) {
-        // ... (la misma lógica para obtener las estadísticas que antes) ...
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // 1. Extraemos el ID del usuario (getName() devuelve el ID del token)
+        String userId = authentication.getName();
 
+        // 2. CORRECCIÓN: Buscar por ID, no por Email
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
+        // 3. Obtener eventos usando el ID real del usuario encontrado
         List<EventoConEstadisticas> eventos = eventoRepository.findEventosConEstadisticas(usuario.getId());
+
         Long totalBoletosVendidos = eventos.stream()
                 .mapToLong(EventoConEstadisticas::getBoletosVendidos)
                 .sum();
 
         Map<String, Long> estadisticas = new HashMap<>();
         estadisticas.put("totalBoletosVendidos", totalBoletosVendidos);
+
         return estadisticas;
     }
 
     @GetMapping("/estadisticas")
     public String mostrarEstadisticas(Model model, Authentication authentication) {
-        // Obtener el usuario/admin logueado
+        // 1. Obtener el ID del usuario desde la autenticación
         String userId = authentication.getName();
+
+        // 2. Corregido: Buscar por ID en lugar de Email
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
-        System.out.println("ID del usuario: " + usuario.getId());
+
+        System.out.println("ID del usuario autenticado: " + usuario.getId());
 
         // 1. Obtener solo los eventos del administrador actual
-        // Cambio: El ID en MongoDB es String en lugar de Integer
         List<EventoConEstadisticas> eventos = eventoRepository.findEventosConEstadisticas(usuario.getId());
 
         System.out.println("Número de eventos encontrados: " + eventos.size());
-        eventos.forEach(e -> System.out.println(
-                "Evento: " + e.getNombreEvento() +
-                        " | Boletos: " + e.getBoletosVendidos() +
-                        " | Capacidad: " + e.getCapacidad() +
-                        " | Ingresos: " + e.getIngresos()));
 
-        // 2. Calcular estadísticas SOLO para los eventos de este administrador
+        // 2. Calcular estadísticas
         Long totalBoletosVendidos = eventos.stream()
                 .mapToLong(EventoConEstadisticas::getBoletosVendidos)
                 .sum();
@@ -309,6 +310,7 @@ public class AdminController {
                 .average()
                 .orElse(0.0);
 
+        // 3. Agregar atributos al modelo
         model.addAttribute("totalBoletosVendidos", totalBoletosVendidos);
         model.addAttribute("ingresosTotales", ingresosTotales);
         model.addAttribute("ocupacionPromedio", Math.round(ocupacionPromedio));
@@ -320,9 +322,13 @@ public class AdminController {
     @GetMapping("/estadisticas/eventos")
     @ResponseBody
     public List<Map<String, Object>> getEstadisticasEventos(Authentication authentication) {
+        // 1. Obtener el ID del usuario
         String userId = authentication.getName();
+
+        // 2. Corregido: Buscar por ID
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
         List<EventoConEstadisticas> eventos = eventoRepository.findEventosConEstadisticas(usuario.getId());
 
         return eventos.stream().map(e -> {
@@ -333,8 +339,8 @@ public class AdminController {
             datos.put("capacidad", e.getCapacidad());
             datos.put("porcentajeOcupacion", e.getPorcentajeOcupacion());
             datos.put("ingresos", e.getIngresos());
-            datos.put("categoria", e.getCategoria()); // 👈 NUEVO
-            datos.put("artista", e.getArtista()); // 👈 NUEVO
+            datos.put("categoria", e.getCategoria());
+            datos.put("artista", e.getArtista());
             return datos;
         }).toList();
     }
