@@ -335,8 +335,8 @@
             </div>
 
 
-            <form th:action="@{/login}" method="post">
-                <div class="form-group">
+                    <form id="loginForm">
+                    <div class="form-group">
                     <label for="username">Email</label>
                     <i class="fas fa-envelope input-icon"></i>
                     <input type="email" class="form-control" id="username" name="username"
@@ -391,11 +391,54 @@
         });
 
         // Efecto de carga para el botón de login
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const btn = this.querySelector('button[type="submit"]');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Verificando...';
-            btn.disabled = true;
+       // Manejo del Login con Fetch para capturar la Cookie en Render
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); // Evita que la página se recargue
+
+    const btn = this.querySelector('button[type="submit"]');
+    const email = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    // Efecto visual de carga
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Verificando...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/usuarios/login', { // Asegúrate que esta sea tu ruta de login
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password }),
+            // VITAL: Esto permite que el navegador acepte y guarde la cookie Set-Cookie
+            credentials: 'include' 
         });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Si el login es exitoso, guardamos info básica y redirigimos
+            localStorage.setItem('usuario', JSON.stringify(data));
+            
+            if (data.rol === 'Administrador' || data.rol === 'SuperAdmin') {
+                window.location.assign('/admin/dashboard');
+            } else {
+                window.location.assign('/'); // O tu página de usuario normal
+            }
+        } else {
+            // Si hay error, mostramos una alerta (puedes mejorar esto estéticamente)
+            alert(data.error || 'Credenciales incorrectas');
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error en el login:', error);
+        alert('Error de conexión con el servidor');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+});
 
         // ANIMACIÓN 3D DEL TICKET - VERSIÓN FUNCIONAL
         document.addEventListener('DOMContentLoaded', function () {
