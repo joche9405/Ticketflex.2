@@ -358,8 +358,8 @@
                 <h1><i class="fas fa-plus-circle"></i> Crear Nuevo Evento</h1>
             </div>
             
-            <form th:action="@{/admin/eventos/crear}" method="post" th:object="${evento}" enctype="multipart/form-data">
-                <div class="mb-4">
+                <form id="crearEventoForm" enctype="multipart/form-data">  
+                  <div class="mb-4">
                     <label for="nombreEvento" class="form-label">Nombre del Evento</label>
                     <input type="text" class="form-control" id="nombreEvento" th:field="*{nombreEvento}" required>
                 </div>
@@ -457,7 +457,43 @@
             const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
             document.getElementById('file-name').textContent = fileName;
         });
+document.getElementById('crearEventoForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); // Detenemos el envío tradicional que da 403
 
+    const btn = this.querySelector('button[type="submit"]');
+    const originalContent = btn.innerHTML;
+    
+    // Feedback visual
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
+    btn.disabled = true;
+
+    // FormData captura automáticamente todos los inputs, incluyendo el archivo (imagen)
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch('/admin/eventos/crear', {
+            method: 'POST',
+            body: formData,
+            // VITAL: Envía la cookie de sesión/JWT para evitar el 403
+            credentials: 'include' 
+        });
+
+        if (response.ok) {
+            alert('¡Evento creado exitosamente!');
+            window.location.href = '/admin/dashboard';
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            alert('Error al crear evento: ' + (errorData.message || 'Acceso denegado (403)'));
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión con el servidor');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+});
         // Validación de fecha mínima
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date();

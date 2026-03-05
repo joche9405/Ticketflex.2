@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -121,9 +122,9 @@ public class AdminController {
 
     // Método POST para procesar el formulario de creación
     @PostMapping("/eventos/crear")
-    public String crearEvento(
+    public ResponseEntity<?> crearEvento(
             @RequestParam String nombreEvento,
-            @RequestParam LocalDate fecha,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @RequestParam String lugar,
             @RequestParam String descripcion,
             @RequestParam BigDecimal precioBase,
@@ -131,40 +132,51 @@ public class AdminController {
             @RequestParam String categoria,
             @RequestParam(required = false) String artista,
             @RequestParam("imagen") MultipartFile imagenFile,
-            Authentication authentication) throws IOException {
+            Authentication authentication) {
 
-        // Crear objeto Evento manualmente
-        Evento evento = new Evento();
-        evento.setNombreEvento(nombreEvento);
-        evento.setFecha(fecha);
-        evento.setLugar(lugar);
-        evento.setDescripcion(descripcion);
-        evento.setPrecioBase(precioBase);
-        evento.setDisponibilidad(disponibilidad);
-        evento.setCategoria(categoria);
-        evento.setArtista(artista);
+        try {
+            // 1. Validar autenticación
+            if (authentication == null) {
+                return ResponseEntity.status(401).body("{\"error\": \"No autenticado\"}");
+            }
 
-        // Obtener usuario autenticado
-        String email = authentication.getName();
-        Usuario creador = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        evento.setCreador(creador);
+            String email = authentication.getName();
+            Usuario creador = usuarioRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Manejar la imagen
-        if (imagenFile != null && !imagenFile.isEmpty()) {
-            ObjectId id = gridFsTemplate.store(
-                    imagenFile.getInputStream(),
-                    imagenFile.getOriginalFilename(),
-                    imagenFile.getContentType());
-            evento.setImagen(id.toString());
-        } else {
-            evento.setImagen("default.jpg");
+            // 2. Crear objeto Evento
+            Evento evento = new Evento();
+            evento.setNombreEvento(nombreEvento);
+            evento.setFecha(fecha);
+            evento.setLugar(lugar);
+            evento.setDescripcion(descripcion);
+            evento.setPrecioBase(precioBase);
+            evento.setDisponibilidad(disponibilidad);
+            evento.setCategoria(categoria);
+            evento.setArtista(artista);
+            evento.setCreador(creador);
+
+            // 3. Manejar la imagen en GridFS
+            if (imagenFile != null && !imagenFile.isEmpty()) {
+                ObjectId id = gridFsTemplate.store(
+                        imagenFile.getInputStream(),
+                        imagenFile.getOriginalFilename(),
+                        imagenFile.getContentType());
+                evento.setImagen(id.toString());
+            } else {
+                evento.setImagen("default.jpg");
+            }
+
+            // 4. Guardar
+            eventoService.crearEvento(evento, imagenFile, email);
+
+            // 5. IMPORTANTE: Devolver JSON exitoso para el Fetch
+            return ResponseEntity.ok().body("{\"message\": \"Evento creado correctamente\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage() + "\"}");
         }
-
-        // Guardar el evento
-        eventoService.crearEvento(evento, imagenFile, email);
-
-        return "redirect:/admin/dashboard";
     }
 
     @GetMapping("/eventos/listar")
