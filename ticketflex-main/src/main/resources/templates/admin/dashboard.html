@@ -203,7 +203,10 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             function actualizarBoletosVendidos() {
-                fetch("/admin/estadisticas-data")
+                fetch("/admin/estadisticas-data", {
+                     method: 'GET',
+                     credentials: 'include' // <--- ESTO ES LO QUE FALTA
+                     })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Error al obtener las estadísticas');
@@ -302,7 +305,10 @@
 
             // Actualizar boletos vendidos periódicamente
             function actualizarBoletosVendidos() {
-                fetch("/admin/estadisticas-data")
+    fetch("/admin/estadisticas-data", {
+        method: 'GET',
+        credentials: 'include' // <--- ESTO ES LO QUE FALTA
+    })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Error al obtener las estadísticas del dashboard');
