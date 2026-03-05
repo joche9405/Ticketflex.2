@@ -41,7 +41,7 @@ public class SecurityConfig {
                                                                 "/registro", "/registro.html")
                                                 .permitAll()
                                                 .requestMatchers("/public/**", "/fonts/**", "/css/**", "/js/**",
-                                                                "/images/**")
+                                                                "/images/**", "/favicon.ico")
                                                 .permitAll()
                                                 .requestMatchers("/politica-privacidad.html", "/terminos-servicio.html",
                                                                 "/como-comprar.html")
@@ -64,8 +64,10 @@ public class SecurityConfig {
 
                                                 // 4. RUTAS PROTEGIDAS PARA ADMINISTRADORES
                                                 // hasRole("Administrador") buscará "ROLE_Administrador" en el filtro
-                                                .requestMatchers("/admin/**").authenticated()
-                                                // 5. RUTAS PARA USUARIOS
+                                                .requestMatchers("/admin/**")
+                                                .hasAnyAuthority("Administrador", "ADMIN", "ROLE_ADMIN") // 5. RUTAS
+                                                                                                         // PARA
+                                                                                                         // USUARIOS
                                                 // AUTENTICADOS EN GENERAL
                                                 .requestMatchers("/api/usuarios/auth/**", "/api/estadisticas/**")
                                                 .authenticated()

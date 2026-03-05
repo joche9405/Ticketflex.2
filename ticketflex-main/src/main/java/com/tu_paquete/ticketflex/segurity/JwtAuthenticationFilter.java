@@ -11,9 +11,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import org.springframework.lang.NonNull;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -89,12 +91,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     System.out.println(">>> [JWT FILTER] Token VÁLIDO. Usuario: " + userId + " | Rol: " + rol);
 
-                    // Crear autoridad con prefijo ROLE_
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
-                    System.out.println(">>> [JWT FILTER] Autoridad asignada: " + authority.getAuthority());
+                    // --- CORRECCIÓN: Doble autoridad para evitar fallos de matching ---
+                    List<SimpleGrantedAuthority> authorities = Arrays.asList(
+                            new SimpleGrantedAuthority("ROLE_" + rol),
+                            new SimpleGrantedAuthority(rol));
+
+                    System.out.println(">>> [JWT FILTER] Autoridades asignadas: " + authorities);
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userId, null, Collections.singletonList(authority));
+                            userId, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     System.out.println(">>> [JWT FILTER] Seguridad establecida en el contexto de Spring");
