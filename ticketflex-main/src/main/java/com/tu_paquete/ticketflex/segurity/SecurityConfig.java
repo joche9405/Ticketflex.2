@@ -38,10 +38,10 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 // 1. RECURSOS PÚBLICOS
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
-                                                                "/registro", "/registro.html")
+                                                                "/registro", "/registro.html", "/favicon.ico")
                                                 .permitAll()
                                                 .requestMatchers("/public/**", "/fonts/**", "/css/**", "/js/**",
-                                                                "/images/**", "/favicon.ico")
+                                                                "/images/**")
                                                 .permitAll()
                                                 .requestMatchers("/politica-privacidad.html", "/terminos-servicio.html",
                                                                 "/como-comprar.html")
