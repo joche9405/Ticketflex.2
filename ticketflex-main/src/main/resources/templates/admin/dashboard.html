@@ -201,32 +201,67 @@
 
     <script>
 
-        document.addEventListener('DOMContentLoaded', function () {
-            function actualizarBoletosVendidos() {
-                fetch("/admin/estadisticas-data", {
-                     method: 'GET',
-                     credentials: 'include' // <--- ESTO ES LO QUE FALTA
-                     })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error al obtener las estadísticas');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const boletosElement = document.querySelector('.boletos-vendidos');
-                        if (boletosElement) {
-                            boletosElement.textContent = data.totalBoletosVendidos;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al actualizar boletos vendidos:', error);
-                    });
-            }
+            
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Configuración del Gráfico (ApexCharts)
+        var options = {
+            series: [{
+                name: 'Boletos Vendidos',
+                data: [30, 40, 35, 50, 49, 60, 70, 91, 125, 150, 180, 200]
+            }],
+            chart: {
+                height: 350,
+                type: 'area',
+                toolbar: { show: false },
+                foreColor: '#fff'
+            },
+            colors: ['#6c63ff'],
+            stroke: { curve: 'smooth', width: 3 },
+            fill: {
+                type: 'gradient',
+                gradient: { opacityFrom: 0.7, opacityTo: 0.3 }
+            },
+            xaxis: {
+                categories: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+            },
+            tooltip: { theme: 'dark' }
+        };
 
-            actualizarBoletosVendidos(); // carga inicial
-            setInterval(actualizarBoletosVendidos, 5000); // cada 5 segundos
-        });
+        var chart = new ApexCharts(document.querySelector("#performanceChart"), options);
+        chart.render();
+
+        // 2. Función ÚNICA para obtener estadísticas
+        function cargarEstadisticas() {
+            fetch("/admin/estadisticas-data", {
+                method: 'GET',
+                credentials: 'include' // Obligatorio para enviar la cookie 'token'
+            })
+            .then(response => {
+                if (response.status === 403) {
+                    console.error("Sesión expirada o sin permisos (403)");
+                    // Opcional: window.location.href = "/login"; 
+                    return;
+                }
+                if (!response.ok) throw new Error('Error en la petición');
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.totalBoletosVendidos !== undefined) {
+                    // Actualizar el número en la tarjeta de boletos
+                    const boletosElement = document.querySelector('.boletos-vendidos');
+                    if (boletosElement) {
+                        boletosElement.textContent = data.totalBoletosVendidos;
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetch:', error));
+        }
+
+        // Ejecutar una vez al cargar y luego cada 15 segundos (5 es muy frecuente para Render)
+        cargarEstadisticas();
+        setInterval(cargarEstadisticas, 15000);
+    });
+         
 
 
 
@@ -303,33 +338,8 @@
             var chart = new ApexCharts(document.querySelector("#performanceChart"), options);
             chart.render();
 
-            // Actualizar boletos vendidos periódicamente
-            function actualizarBoletosVendidos() {
-    fetch("/admin/estadisticas-data", {
-        method: 'GET',
-        credentials: 'include' // <--- ESTO ES LO QUE FALTA
-    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error al obtener las estadísticas del dashboard');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const totalBoletosElement = document.querySelector('.stats-card:nth-child(2) .stat-number');
-                        if (totalBoletosElement) {
-                            totalBoletosElement.textContent = data.totalBoletosVendidos;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al actualizar boletos vendidos:', error);
-                    });
-            }
-
-            setInterval(actualizarBoletosVendidos, 5000);
-            actualizarBoletosVendidos();
         });
     </script>
-</body>
+    </body>
 
 </html>
