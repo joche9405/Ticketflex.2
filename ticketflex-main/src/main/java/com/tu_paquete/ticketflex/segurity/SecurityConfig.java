@@ -25,18 +25,18 @@ public class SecurityConfig {
                 http
                                 .cors(cors -> cors.configurationSource(request -> {
                                         CorsConfiguration opt = new CorsConfiguration();
-                                        opt.setAllowedOrigins(List.of("*")); // En producción, es mejor especificar el
-                                                                             // dominio
+                                        // CORRECCIÓN: Si usas allowCredentials(true), NO puedes usar "*" en Origins
+                                        opt.setAllowedOriginPatterns(List.of("*"));
                                         opt.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                                         opt.setAllowedHeaders(List.of("*"));
-                                        opt.setAllowCredentials(true); // Importante para permitir el envío de Cookies
+                                        opt.setAllowCredentials(true);
                                         return opt;
                                 }))
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                // 1. RECURSOS ESTÁTICOS Y PÁGINAS BASE
+                                                // 1. RECURSOS PÚBLICOS
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
                                                                 "/registro", "/registro.html")
                                                 .permitAll()
@@ -46,15 +46,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/politica-privacidad.html", "/terminos-servicio.html",
                                                                 "/como-comprar.html")
                                                 .permitAll()
-
-                                                // 2. ENDPOINTS PÚBLICOS DE API (Imágenes y Eventos)
                                                 .requestMatchers("/api/imagen/**", "/api/eventos/**", "/eventos/**",
                                                                 "/getimagen/**")
                                                 .permitAll()
-
-                                                // 3. AUTH (Login, Registro y Reset)
-                                                // Agregamos el logout a la lista de permitidos para que el JS pueda
-                                                // limpiarlo siempre
                                                 .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
                                                                 "/api/usuarios/logout")
                                                 .permitAll()
@@ -62,21 +56,17 @@ public class SecurityConfig {
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
 
-                                                // 4. RUTAS PROTEGIDAS PARA ADMINISTRADORES
-                                                // hasRole("Administrador") buscará "ROLE_Administrador" en el filtro
+                                                // 2. RUTAS DE ADMINISTRADOR (Ajustadas)
                                                 .requestMatchers("/admin/**")
-                                                .hasAnyAuthority("Administrador", "ADMIN", "ROLE_ADMIN") // 5. RUTAS
-                                                                                                         // PARA
-                                                                                                         // USUARIOS
-                                                // AUTENTICADOS EN GENERAL
+                                                .hasAnyAuthority("ROLE_Administrador", "Administrador", "ROLE_ADMIN",
+                                                                "ADMIN")
+
+                                                // 3. RESTO AUTENTICADO
                                                 .requestMatchers("/api/usuarios/auth/**", "/api/estadisticas/**")
                                                 .authenticated()
-
                                                 .anyRequest().authenticated())
 
-                                // 6. FILTRO JWT (Antes del filtro de autenticación por defecto)
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
                                 .exceptionHandling(exception -> exception
                                                 .accessDeniedPage("/access-denied"));
 

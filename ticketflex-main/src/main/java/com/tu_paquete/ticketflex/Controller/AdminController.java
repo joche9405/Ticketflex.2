@@ -279,10 +279,9 @@ public class AdminController {
     @GetMapping("/estadisticas")
     public String mostrarEstadisticas(Model model, Authentication authentication) {
         // Obtener el usuario/admin logueado
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
+        String userId = authentication.getName();
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
         System.out.println("ID del usuario: " + usuario.getId());
 
         // 1. Obtener solo los eventos del administrador actual
@@ -321,10 +320,9 @@ public class AdminController {
     @GetMapping("/estadisticas/eventos")
     @ResponseBody
     public List<Map<String, Object>> getEstadisticasEventos(Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
+        String userId = authentication.getName();
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
         List<EventoConEstadisticas> eventos = eventoRepository.findEventosConEstadisticas(usuario.getId());
 
         return eventos.stream().map(e -> {
