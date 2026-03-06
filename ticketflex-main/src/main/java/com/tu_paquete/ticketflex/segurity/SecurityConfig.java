@@ -37,6 +37,10 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
+                                                .permitAll()
+                                                .requestMatchers("/api/superadmin/login-superadmin").permitAll()
+
                                                 // 1. RECURSOS PÚBLICOS
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
                                                                 "/registro", "/registro.html", "/favicon.ico")
@@ -56,7 +60,6 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/usuarios/reset-password**",
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/superadmin/login-superadmin").permitAll()
                                                 .requestMatchers("/api/superadmin/**").hasRole("SuperAdmin")
                                                 // 2. RUTAS DE ADMINISTRADOR (Ajustadas)
                                                 .requestMatchers("/admin/**")
