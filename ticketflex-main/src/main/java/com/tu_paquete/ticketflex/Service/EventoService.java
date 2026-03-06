@@ -49,21 +49,29 @@ public class EventoService {
     private UsuarioRepository usuarioRepository;
 
     public Evento crearEvento(Evento evento, MultipartFile imagen, String emailCreador) throws IOException {
-        // Validar que el evento tenga un creador
+        // 1. Validación de seguridad
         if (evento.getCreador() == null) {
             throw new IllegalArgumentException("El evento debe tener un usuario creador");
         }
 
-        // Subir imagen a GridFS si se envió una
+        // 2. Manejo de la imagen
+        // Nota: El controlador ya hace una parte, pero es bueno tener esta lógica aquí
+        // por si el servicio se llama desde otro lugar en el futuro.
         if (imagen != null && !imagen.isEmpty()) {
-            ObjectId id = gridFsTemplate.store(imagen.getInputStream(), imagen.getOriginalFilename(),
+            ObjectId id = gridFsTemplate.store(
+                    imagen.getInputStream(),
+                    imagen.getOriginalFilename(),
                     imagen.getContentType());
-            evento.setImagen(id.toString()); // Guarda el ID del archivo en Mongo
-        } else {
-            // Si no se envía imagen, usar una por defecto (ya subida a GridFS)
+            evento.setImagen(id.toString());
+        } else if (evento.getImagen() == null || evento.getImagen().isEmpty()) {
+            // Solo ponemos default si el controlador no asignó nada previamente
             evento.setImagen("default.jpg");
         }
 
+        // 3. Guardado final
+        // Al guardar el objeto 'evento', MongoDB guardará la referencia al ID del
+        // creador
+        // que asignamos en el controlador.
         return eventoRepository.save(evento);
     }
 

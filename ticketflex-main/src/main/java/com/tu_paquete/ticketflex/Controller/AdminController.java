@@ -140,9 +140,10 @@ public class AdminController {
                 return ResponseEntity.status(401).body("{\"error\": \"No autenticado\"}");
             }
 
-            String email = authentication.getName();
-            Usuario creador = usuarioRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            // CORRECCIÓN: El getName() devuelve el ID del usuario, no el email
+            String userId = authentication.getName();
+            Usuario creador = usuarioRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
 
             // 2. Crear objeto Evento
             Evento evento = new Evento();
@@ -167,14 +168,16 @@ public class AdminController {
                 evento.setImagen("default.jpg");
             }
 
-            // 4. Guardar
-            eventoService.crearEvento(evento, imagenFile, email);
+            // 4. Guardar: Usamos el email real obtenido del objeto 'creador'
+            eventoService.crearEvento(evento, imagenFile, creador.getEmail());
 
             // 5. IMPORTANTE: Devolver JSON exitoso para el Fetch
             return ResponseEntity.ok().body("{\"message\": \"Evento creado correctamente\"}");
 
         } catch (Exception e) {
             e.printStackTrace();
+            // Devolvemos 500 con el mensaje de error real para depurar en la consola del
+            // navegador
             return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
