@@ -314,9 +314,7 @@
         }
     </style>
 </head>
-
 <body>
-    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg">
         <div class="container d-flex align-items-center">
             <a class="navbar-brand" href="#">
@@ -324,20 +322,17 @@
                 <span class="brand-text">TicketFlex Admin</span>
             </a>
 
-            <!-- Espaciador para empujar todo lo demás a la derecha -->
             <div class="ms-auto d-flex align-items-center">
                 <div class="user-info me-3">
                     <i class="fas fa-user-shield"></i>
                     <span class="user-name" th:text="${nombreUsuario}"></span>
                 </div>
 
-                <!-- BOTÓN PERFIL -->
                 <a th:href="@{/admin/perfil}" class="btn btn-glass me-2">
                     <i class="fas fa-user me-1"></i>
                     <span class="d-none d-md-inline">Perfil</span>
                 </a>
 
-                <!-- CERRAR SESIÓN -->
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn btn-glass">
                         <i class="fas fa-sign-out-alt me-1"></i>
@@ -358,20 +353,20 @@
                 <h1><i class="fas fa-plus-circle"></i> Crear Nuevo Evento</h1>
             </div>
             
-                <form id="crearEventoForm">  
-                  <div class="mb-4">
+            <form id="crearEventoForm">  
+                <div class="mb-4">
                     <label for="nombreEvento" class="form-label">Nombre del Evento</label>
-                    <input type="text" class="form-control" id="nombreEvento" name ="*{nombreEvento}" required>
+                    <input type="text" class="form-control" id="nombreEvento" name="nombreEvento" required>
                 </div>
                 
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label for="fecha" class="form-label">Fecha</label>
-                        <input type="date" min="2025-04-29" class="form-control" id="fecha" name ="*{fecha}" required>
+                        <input type="date" class="form-control" id="fecha" name="fecha" required>
                     </div>
                     <div class="col-md-6">
                         <label for="lugar" class="form-label">Lugar</label>
-                        <select class="form-select" id="lugar" name = "*{lugar}" required>
+                        <select class="form-select" id="lugar" name="lugar" required>
                             <option value="">Seleccionar ciudad</option>
                             <option value="Bogota">Bogotá</option>
                             <option value="Medellin">Medellín</option>
@@ -399,17 +394,17 @@
                 
                 <div class="mb-4">
                     <label for="descripcion" class="form-label">Descripción</label>
-                    <textarea class="form-control" id="descripcion" name ="*{descripcion}" rows="4" required></textarea>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
                 </div>
                 
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label for="precioBase" class="form-label">Precio Base ($)</label>
-                        <input type="number" step="0.01" class="form-control" id="precioBase" name ="*{precioBase}" required>
+                        <input type="number" step="0.01" class="form-control" id="precioBase" name="precioBase" required>
                     </div>
                     <div class="col-md-6">
                         <label for="disponibilidad" class="form-label">Disponibilidad</label>
-                        <input type="number" class="form-control" id="disponibilidad" name ="*{disponibilidad}" required>
+                        <input type="number" class="form-control" id="disponibilidad" name="disponibilidad" required>
                     </div>
                 </div>
                 
@@ -429,14 +424,14 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label for="categoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="categoria" name ="*{categoria}">
+                        <select class="form-select" id="categoria" name="categoria">
                             <option value="">Seleccione una categoría</option>
                             <option th:each="cat : ${categorias}" th:value="${cat}" th:text="${cat}"></option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="artista" class="form-label">Artista/Grupo Principal</label>
-                        <input type="text" class="form-control" id="artista" th:field="*{artista}">
+                        <input type="text" class="form-control" id="artista" name="artista">
                         <small class="form-text">Nombre del artista o grupo principal</small>
                     </div>
                 </div>
@@ -447,59 +442,78 @@
             </form>
         </div>
     </div>
+</body>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // Mostrar nombre de archivo seleccionado
-        document.getElementById('imagen').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
-            document.getElementById('file-name').textContent = fileName;
-        });
+       // Mostrar nombre de archivo seleccionado
+document.getElementById('imagen').addEventListener('change', function(e) {
+    const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+    document.getElementById('file-name').textContent = fileName;
+});
+
 document.getElementById('crearEventoForm').addEventListener('submit', async function (e) {
-    e.preventDefault(); // Detenemos el envío tradicional que da 403
+    e.preventDefault();
 
     const btn = this.querySelector('button[type="submit"]');
     const originalContent = btn.innerHTML;
     
-    // Feedback visual
+    // Feedback visual inmediato
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Procesando...';
     btn.disabled = true;
 
-    // FormData captura automáticamente todos los inputs, incluyendo el archivo (imagen)
+    // FormData captura los nombres (name="") de los inputs
     const formData = new FormData(this);
 
     try {
+        // CORRECCIÓN: Usamos la ruta completa para evitar confusiones de contexto
         const response = await fetch('/admin/eventos/crear', {
             method: 'POST',
             body: formData,
-            // VITAL: Envía la cookie de sesión/JWT para evitar el 403
-            credentials: 'include' 
+            credentials: 'include' // Mantiene la sesión activa
         });
 
         if (response.ok) {
+            // Si el servidor responde con éxito (200-299)
             alert('¡Evento creado exitosamente!');
             window.location.href = '/admin/dashboard';
         } else {
-            const errorData = await response.json().catch(() => ({}));
-            alert('Error al crear evento: ' + (errorData.message || 'Acceso denegado (403)'));
-            btn.innerHTML = originalContent;
-            btn.disabled = false;
+            // Intentar leer el mensaje de error del servidor si existe
+            let errorMessage = 'Error en el servidor';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+            } catch (jsonError) {
+                // Si no es JSON (ej. un error 403 de Tomcat), usamos el texto de la respuesta
+                if (response.status === 403) errorMessage = 'Sesión expirada o permisos insuficientes (403)';
+                if (response.status === 404) errorMessage = 'Ruta no encontrada (404)';
+            }
+            
+            throw new Error(errorMessage);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexión con el servidor');
+        alert('❌ ' + error.message);
+        
+        // Restaurar botón en caso de error
         btn.innerHTML = originalContent;
         btn.disabled = false;
     }
 });
-        // Validación de fecha mínima
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date();
-            const minDate = new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0];
-            document.getElementById('fecha').min = minDate;
-        });
+
+// Validación de fecha mínima (Mañana)
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaInput = document.getElementById('fecha');
+    if (fechaInput) {
+        const today = new Date();
+        today.setDate(today.getDate() + 1);
+        const minDate = today.toISOString().split('T')[0];
+        fechaInput.min = minDate;
+    }
+});
     </script>
 </body>
 </html>
