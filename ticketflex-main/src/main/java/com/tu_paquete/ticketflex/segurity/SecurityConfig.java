@@ -26,10 +26,10 @@ public class SecurityConfig {
                 http
                                 .cors(cors -> cors.configurationSource(request -> {
                                         CorsConfiguration opt = new CorsConfiguration();
-                                        // CORRECCIÓN: Si usas allowCredentials(true), NO puedes usar "*" en Origins
                                         opt.setAllowedOriginPatterns(List.of("*"));
                                         opt.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                                         opt.setAllowedHeaders(List.of("*"));
+                                        opt.setExposedHeaders(List.of("Authorization")); // Exponer el header
                                         opt.setAllowCredentials(true);
                                         return opt;
                                 }))
@@ -37,19 +37,18 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                // Prioridad máxima a las peticiones OPTIONS y al Login de SuperAdmin
                                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/superadmin/login-superadmin").permitAll()
+                                                .requestMatchers("/api/superadmin/login-superadmin").permitAll() // Sin
+                                                                                                                 // filtros
 
-                                                // 1. RECURSOS PÚBLICOS
+                                                // Recursos públicos
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
                                                                 "/registro", "/registro.html", "/favicon.ico")
                                                 .permitAll()
-                                                .requestMatchers("/public/**", "/fonts/**", "/css/**", "/js/**",
-                                                                "/images/**")
-                                                .permitAll()
-                                                .requestMatchers("/politica-privacidad.html", "/terminos-servicio.html",
-                                                                "/como-comprar.html")
+                                                .requestMatchers("/public/**", "/css/**", "/js/**", "/images/**",
+                                                                "/fonts/**")
                                                 .permitAll()
                                                 .requestMatchers("/api/imagen/**", "/api/eventos/**", "/eventos/**",
                                                                 "/getimagen/**")
@@ -57,23 +56,14 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
                                                                 "/api/usuarios/logout")
                                                 .permitAll()
-                                                .requestMatchers("/api/usuarios/reset-password**",
-                                                                "/admin/reset-password/**")
-                                                .permitAll()
-                                                .requestMatchers("/api/superadmin/**").hasRole("SuperAdmin")
-                                                // 2. RUTAS DE ADMINISTRADOR (Ajustadas)
-                                                .requestMatchers("/admin/**")
-                                                .hasAnyAuthority("ROLE_Administrador", "Administrador", "ROLE_ADMIN",
-                                                                "ADMIN")
 
-                                                // 3. RESTO AUTENTICADO
-                                                .requestMatchers("/api/usuarios/auth/**", "/api/estadisticas/**")
-                                                .authenticated()
+                                                // Restricciones por Rol (Asegúrate de que el rol en DB sea
+                                                // "SuperAdmin")
+                                                .requestMatchers("/api/superadmin/**")
+                                                .hasAnyAuthority("ROLE_SuperAdmin", "SuperAdmin")
+
                                                 .anyRequest().authenticated())
-
-                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                                .exceptionHandling(exception -> exception
-                                                .accessDeniedPage("/access-denied"));
+                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
