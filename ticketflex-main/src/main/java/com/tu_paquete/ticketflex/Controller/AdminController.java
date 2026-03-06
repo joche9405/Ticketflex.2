@@ -110,9 +110,11 @@ public class AdminController {
     }
 
     @GetMapping("/eventos/crear")
-    public String mostrarFormularioCrearEvento(Model model) {
+    public String mostrarFormularioCrearEvento(Model model, Authentication authentication) {
         model.addAttribute("evento", new Evento()); // Agrega un objeto Evento vacío al modelo
-
+        if (authentication != null) {
+            System.out.println("Autoridades en el controlador: " + authentication.getAuthorities());
+        }
         // Lista de categorías predefinidas
         List<String> categorias = Arrays.asList("Concierto", "Festival", "Teatro", "Conferencia", "Feria");
         model.addAttribute("categorias", categorias); // Enviar la lista a la vista
