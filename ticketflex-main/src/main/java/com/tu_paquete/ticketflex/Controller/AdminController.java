@@ -495,31 +495,46 @@ public class AdminController {
 
     @GetMapping("/perfil")
     public String verPerfil(Model model, Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (authentication == null)
+            return "redirect:/login";
+
+        String identifier = authentication.getName(); // Puede ser Email o ID
+
+        // Intenta buscar por Email, si falla intenta por ID (ajusta según tu lógica)
+        Usuario usuario = usuarioRepository.findByEmail(identifier)
+                .orElseGet(() -> usuarioRepository.findById(identifier)
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + identifier)));
 
         model.addAttribute("usuario", usuario);
-        return "admin/perfil"; // Ruta del archivo HTML en templates/admin/perfil.html
+        // VITAL para que el Navbar no rompa la página:
+        model.addAttribute("nombreUsuario", usuario.getNombre());
+
+        return "admin/perfil";
     }
 
     @PostMapping("/actualizarPerfil")
-    public String actualizarContraseña(@RequestParam("password") String nuevaPassword, Authentication authentication) {
+    public String actualizarPassword(@RequestParam("password") String nuevaPassword, Authentication authentication) {
         if (authentication == null) {
             return "redirect:/admin/perfil?error=no_autenticado";
         }
 
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        String identifier = authentication.getName();
 
-        if (nuevaPassword != null && !nuevaPassword.isEmpty()) {
+        // Busca por Email o por ID según lo que guardes en el JWT
+        Usuario usuario = usuarioRepository.findByEmail(identifier)
+                .orElseGet(() -> usuarioRepository.findById(identifier)
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado")));
+
+        if (nuevaPassword != null && !nuevaPassword.trim().isEmpty()) {
+            // Asegúrate de que este método realmente devuelva el hash (BCrypt)
             String passwordEncriptada = usuarioService.encriptarPassword(nuevaPassword);
             usuario.setPassword(passwordEncriptada);
-            usuarioService.updateUsuario(usuario);
+
+            // ¡IMPORTANTE! Asegúrate de que el repositorio guarde los cambios
+            usuarioRepository.save(usuario);
         }
 
-        return "redirect:/admin/perfil?success"; // en vez de ?success=contrasena_actualizada
+        return "redirect:/admin/perfil?success";
     }
 
     // --- Olvidé mi contraseña (ADMIN) ---
