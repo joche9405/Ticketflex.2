@@ -45,7 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/css/") ||
                 path.startsWith("/js/") ||
                 path.startsWith("/favicon.ico") ||
-                path.startsWith("//api/superadmin/login-superadmin") ||
+                path.startsWith("/superadmin/login-superadmin") ||
+                path.startsWith("/login-superadmin.html") ||
                 path.startsWith("/images/");
     }
 

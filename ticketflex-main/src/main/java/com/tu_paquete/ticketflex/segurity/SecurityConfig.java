@@ -57,6 +57,7 @@ public class SecurityConfig {
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
                                                 .requestMatchers("/api/superadmin/login-superadmin").permitAll()
+                                                .requestMatchers("/api/superadmin/**").hasRole("SuperAdmin")
                                                 // 2. RUTAS DE ADMINISTRADOR (Ajustadas)
                                                 .requestMatchers("/admin/**")
                                                 .hasAnyAuthority("ROLE_Administrador", "Administrador", "ROLE_ADMIN",
