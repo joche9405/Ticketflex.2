@@ -425,195 +425,138 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Obtener el ID del SuperAdmin del localStorage
-        const idSolicitante = localStorage.getItem("superAdminId");
+<script>
+    // 1. Verificación de sesión inicial
+    const idSolicitante = localStorage.getItem("superAdminId");
+    if (!idSolicitante) {
+        window.location.href = "/login-superadmin.html"; // Redirigir si no hay sesión
+    } else {
         document.getElementById("idSolicitante").value = idSolicitante;
+    }
 
-        // Mostrar/ocultar contraseña
-        document.getElementById('togglePassword').addEventListener('click', function () {
-            const password = document.getElementById('password');
-            const icon = this.querySelector('i');
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            icon.classList.toggle('fa-eye-slash');
-        });
+    // 2. Mostrar/ocultar contraseña
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const password = document.getElementById('password');
+        const icon = this.querySelector('i');
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        icon.classList.toggle('fa-eye-slash');
+    });
 
-        // Cargar lista de administradores al iniciar
+    // 3. Cargar datos al iniciar
+    document.addEventListener('DOMContentLoaded', () => {
         cargarAdministradores();
+        // cargarEventosEliminados(); // Descomentar cuando el endpoint esté listo
+    });
 
-        // Manejar envío del formulario
-        document.getElementById("adminForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+    // 4. Manejar envío del formulario (Crear Admin)
+    document.getElementById("adminForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const btnSubmit = document.querySelector('#adminForm button[type="submit"]');
-            const originalBtnContent = btnSubmit.innerHTML;
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const originalBtnContent = btnSubmit.innerHTML;
+        const messageDiv = document.getElementById("message");
 
-            // Mostrar loading
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
-            btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+        btnSubmit.disabled = true;
 
-            const adminData = {
-                nombre: document.getElementById("nombre").value,
-                apellido: document.getElementById("apellido").value,
-                email: document.getElementById("email").value,
-                telefono: document.getElementById("telefono").value,
-                direccion: document.getElementById("direccion").value,
-                password: document.getElementById("password").value
-            };
+        const adminData = {
+            nombre: document.getElementById("nombre").value,
+            apellido: document.getElementById("apellido").value,
+            email: document.getElementById("email").value,
+            telefono: document.getElementById("telefono").value,
+            direccion: document.getElementById("direccion").value,
+            password: document.getElementById("password").value
+        };
 
-            try {
-                const response = await fetch("/api/superadmin/administradores", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "idUsuario": idSolicitante
-                    },
-                    body: JSON.stringify(adminData)
-                });
+        try {
+            const response = await fetch("/api/superadmin/administradores", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "idUsuario": idSolicitante
+                },
+                body: JSON.stringify(adminData)
+            });
 
-                const messageDiv = document.getElementById("message");
+            const data = await response.json();
 
-                if (response.ok) {
-                    messageDiv.textContent = "✓ Administrador creado exitosamente";
-                    messageDiv.className = "success";
+            if (response.ok) {
+                messageDiv.textContent = "✓ " + (data.mensaje || "Administrador creado");
+                messageDiv.className = "alert alert-success mt-3 animate__animated animate__fadeIn";
 
-                    // Animación de éxito
-                    btnSubmit.innerHTML = '<i class="fas fa-check"></i> ¡Creado!';
-                    btnSubmit.style.background = "linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%)";
+                btnSubmit.innerHTML = '<i class="fas fa-check"></i> ¡Creado!';
+                btnSubmit.style.background = "#2ed573";
 
-                    document.getElementById("adminForm").reset();
-                    cargarAdministradores();
-
-                    setTimeout(() => {
-                        btnSubmit.innerHTML = originalBtnContent;
-                        btnSubmit.style.background = "var(--gradient)";
-                        btnSubmit.disabled = false;
-                    }, 2000);
-                } else {
-                    const error = await response.text();
-                    messageDiv.textContent = "✗ " + error;
-                    messageDiv.className = "error";
-
-                    // Animación de error
-                    btnSubmit.innerHTML = '<i class="fas fa-times"></i> Error';
-                    btnSubmit.style.background = "linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)";
-
-                    setTimeout(() => {
-                        btnSubmit.innerHTML = originalBtnContent;
-                        btnSubmit.style.background = "var(--gradient)";
-                        btnSubmit.disabled = false;
-                    }, 2000);
-                }
-            } catch (error) {
-                document.getElementById("message").textContent = "✗ Error de conexión con el servidor";
-                document.getElementById("message").className = "error";
-
+                e.target.reset();
+                cargarAdministradores();
+            } else {
+                throw new Error(data.mensaje || "Error al crear administrador");
+            }
+        } catch (error) {
+            messageDiv.textContent = "✗ " + error.message;
+            messageDiv.className = "alert alert-danger mt-3 animate__animated animate__shakeX";
+            btnSubmit.innerHTML = '<i class="fas fa-times"></i> Error';
+            btnSubmit.style.background = "#ff4757";
+        } finally {
+            setTimeout(() => {
                 btnSubmit.innerHTML = originalBtnContent;
+                btnSubmit.style.background = ""; 
                 btnSubmit.disabled = false;
-            }
-        });
-
-        // ... código JavaScript existente ...
-
-        async function cargarAdministradores() {
-            try {
-                const response = await fetch("/api/superadmin/administradores", {
-                    headers: { "idUsuario": idSolicitante }
-                });
-
-                if (response.ok) {
-                    const admins = await response.json();
-                    const tbody = document.querySelector("#adminsTable tbody");
-                    tbody.innerHTML = admins.map(admin => `
-                <tr>
-                    <td>${admin.nombre} ${admin.apellido}</td>
-                    <td>${admin.email}</td>
-                    <td>${admin.telefono}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarAdministrador('${admin.id}')">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                </tr>
-            `).join("");
-                } else {
-                    console.error("Error al cargar administradores:", await response.text());
-                }
-            } catch (error) {
-                console.error("Error de conexión al cargar administradores:", error);
-            }
+            }, 2000);
         }
+    });
 
-        async function eliminarAdministrador(idAdmin) {
-            if (!confirm("¿Estás seguro de que quieres eliminar a este administrador?")) {
-                return;
+    // 5. Cargar lista de administradores
+    async function cargarAdministradores() {
+        const tbody = document.querySelector("#adminsTable tbody");
+        try {
+            const response = await fetch("/api/superadmin/administradores", {
+                headers: { "idUsuario": idSolicitante }
+            });
+
+            if (response.ok) {
+                const admins = await response.json();
+                tbody.innerHTML = admins.length > 0 ? admins.map(admin => `
+                    <tr>
+                        <td>${admin.nombre} ${admin.apellido}</td>
+                        <td>${admin.email}</td>
+                        <td>${admin.telefono}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarAdministrador('${admin.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join("") : '<tr><td colspan="4" class="text-center">No hay administradores registrados</td></tr>';
             }
-
-            try {
-                const response = await fetch(`/api/superadmin/administradores/${idAdmin}`, {
-                    method: "DELETE",
-                    headers: { "idUsuario": idSolicitante }
-                });
-
-                const messageDiv = document.getElementById("message");
-                if (response.ok) {
-                    messageDiv.textContent = "✓ Administrador eliminado exitosamente";
-                    messageDiv.className = "success";
-                    cargarAdministradores(); // Recargar la lista
-                } else {
-                    const error = await response.json();
-                    messageDiv.textContent = "✗ " + error.mensaje;
-                    messageDiv.className = "error";
-                }
-            } catch (error) {
-                console.error("Error al eliminar administrador:", error);
-                document.getElementById("message").textContent = "✗ Error de conexión";
-                document.getElementById("message").className = "error";
-            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Error al conectar con el servidor</td></tr>';
         }
+    }
 
-        // Lógica para la restauración de eventos
-        async function cargarEventosEliminados() {
-            // Necesitas un endpoint en el backend para listar eventos eliminados
-            // const response = await fetch("/api/superadmin/eventos/eliminados");
-            // const eventos = await response.json();
+    // 6. Eliminar Administrador
+    async function eliminarAdministrador(idAdmin) {
+        if (!confirm("¿Estás seguro de que quieres eliminar a este administrador?")) return;
 
-            // Luego, llenar la tabla `deletedEventsTable`
-        }
+        try {
+            const response = await fetch(`/api/superadmin/administradores/${idAdmin}`, {
+                method: "DELETE",
+                headers: { "idUsuario": idSolicitante }
+            });
 
-        async function restaurarEvento(idEvento) {
-            if (!confirm("¿Deseas restaurar este evento?")) {
-                return;
+            if (response.ok) {
+                cargarAdministradores();
+                alert("Administrador eliminado correctamente");
+            } else {
+                const data = await response.json();
+                alert("Error: " + data.mensaje);
             }
-
-            try {
-                const response = await fetch(`/api/superadmin/eventos/${idEvento}/restaurar`, {
-                    method: "POST",
-                    headers: { "idUsuario": idSolicitante }
-                });
-
-                const messageDiv = document.getElementById("message");
-                if (response.ok) {
-                    messageDiv.textContent = "✓ Evento restaurado con éxito";
-                    messageDiv.className = "success";
-                    // Recargar la lista de eventos eliminados si es necesario
-                } else {
-                    const error = await response.json();
-                    messageDiv.textContent = "✗ " + error.mensaje;
-                    messageDiv.className = "error";
-                }
-            } catch (error) {
-                console.error("Error al restaurar evento:", error);
-                document.getElementById("message").textContent = "✗ Error de conexión";
-                document.getElementById("message").className = "error";
-            }
+        } catch (error) {
+            alert("Error de conexión");
         }
-
-        // Llamar a la nueva función de carga de eventos si la implementas
-        // cargarEventosEliminados();
-    </script>
+    }
+</script>
 </body>
 
 </html>

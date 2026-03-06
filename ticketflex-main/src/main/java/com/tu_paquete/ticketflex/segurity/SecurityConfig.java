@@ -56,12 +56,14 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/usuarios/reset-password**",
                                                                 "/admin/reset-password/**")
                                                 .permitAll()
-
+                                                .requestMatchers("/api/superadmin/login-superadmin").permitAll()
                                                 // 2. RUTAS DE ADMINISTRADOR (Ajustadas)
                                                 .requestMatchers("/admin/**")
                                                 .hasAnyAuthority("ROLE_Administrador", "Administrador", "ROLE_ADMIN",
                                                                 "ADMIN")
+                                                .requestMatchers("/api/superadmin/**").hasRole("SuperAdmin")
 
+                                                .anyRequest().authenticated()
                                                 // 3. RESTO AUTENTICADO
                                                 .requestMatchers("/api/usuarios/auth/**", "/api/estadisticas/**")
                                                 .authenticated()

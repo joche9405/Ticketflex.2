@@ -281,87 +281,93 @@
     <div class="footer">
         <p>© 2023 TicketFlex - Todos los derechos reservados</p>
     </div>
+<script>
+    // Mostrar/ocultar contraseña
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const password = document.getElementById('password');
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+    });
 
-    <script>
-        // Mostrar/ocultar contraseña
-        document.getElementById('togglePassword').addEventListener('click', function () {
-            const password = document.getElementById('password');
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
+    // Animación de entrada para los campos
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach((input, index) => {
+        input.style.opacity = '0';
+        input.style.transform = 'translateY(20px)';
+        input.style.transition = `all 0.5s ease ${index * 0.1}s`;
 
-        // Animación de entrada para los campos
-        const inputs = document.querySelectorAll('.form-control');
-        inputs.forEach((input, index) => {
-            input.style.opacity = '0';
-            input.style.transform = 'translateY(20px)';
-            input.style.transition = `all 0.5s ease ${index * 0.1}s`;
+        setTimeout(() => {
+            input.style.opacity = '1';
+            input.style.transform = 'translateY(0)';
+        }, 100);
+    });
 
-            setTimeout(() => {
-                input.style.opacity = '1';
-                input.style.transform = 'translateY(0)';
-            }, 100);
-        });
+    // Manejo del formulario
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-        // Manejo del formulario
-        document.getElementById("loginForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const messageDiv = document.getElementById("message");
+        const btnSubmit = document.querySelector('button[type="submit"]');
 
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const messageDiv = document.getElementById("message");
-            const btnSubmit = document.querySelector('button[type="submit"]');
+        // Reset de mensajes previos
+        messageDiv.textContent = "";
+        messageDiv.className = "";
 
-            // Mostrar loading
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
-            btnSubmit.disabled = true;
+        // Mostrar loading
+        const originalHTML = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+        btnSubmit.disabled = true;
 
-            try {
-                const res = await fetch("/api/superadmin/login-superadmin", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
-                });
+        try {
+            const res = await fetch("/api/superadmin/login-superadmin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
 
-                if (res.ok) {
-                    const data = await res.json();
-                    localStorage.setItem("superAdminId", data.id);
+            const data = await res.json(); // Leemos el JSON siempre (sea éxito o error)
 
-                    messageDiv.textContent = "✓ Acceso concedido. Redirigiendo...";
-                    messageDiv.className = "success";
+            if (res.ok) {
+                // Guardar el ID y opcionalmente el token si lo incluyes después
+                localStorage.setItem("superAdminId", data.id);
 
-                    // Animación de éxito
-                    btnSubmit.innerHTML = '<i class="fas fa-check"></i> ¡Bienvenido!';
-                    btnSubmit.style.background = "linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%)";
+                messageDiv.textContent = "✓ " + (data.mensaje || "Acceso concedido");
+                messageDiv.className = "success";
 
-                    setTimeout(() => {
-                        window.location.href = "/superadmin-panel.html";
-                    }, 1500);
-                } else {
-                    const errorText = await res.text();
-                    messageDiv.textContent = "✗ " + errorText;
-                    messageDiv.className = "error";
+                // Feedback visual de éxito
+                btnSubmit.innerHTML = '<i class="fas fa-check"></i> ¡Bienvenido!';
+                btnSubmit.style.background = "linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%)";
 
-                    // Animación de error
-                    btnSubmit.innerHTML = '<i class="fas fa-times"></i> Error';
-                    btnSubmit.style.background = "linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)";
-
-                    setTimeout(() => {
-                        btnSubmit.innerHTML = '<i class="fas fa-sign-in-alt"></i> Ingresar';
-                        btnSubmit.style.background = "linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)";
-                        btnSubmit.disabled = false;
-                    }, 2000);
-                }
-            } catch (error) {
-                messageDiv.textContent = "✗ Error de conexión con el servidor";
+                setTimeout(() => {
+                    window.location.href = "/superadmin-panel.html"; // Asegúrate de que esta ruta exista
+                }, 1500);
+            } else {
+                // El error viene en data.mensaje según nuestro controlador corregido
+                messageDiv.textContent = "✗ " + (data.mensaje || "Credenciales incorrectas");
                 messageDiv.className = "error";
 
-                btnSubmit.innerHTML = '<i class="fas fa-sign-in-alt"></i> Ingresar';
-                btnSubmit.disabled = false;
+                // Feedback visual de error
+                btnSubmit.innerHTML = '<i class="fas fa-times"></i> Error';
+                btnSubmit.style.background = "linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)";
+
+                setTimeout(() => {
+                    btnSubmit.innerHTML = originalHTML;
+                    btnSubmit.style.background = ""; // Vuelve al CSS original
+                    btnSubmit.disabled = false;
+                }, 2000);
             }
-        });
-    </script>
+        } catch (error) {
+            console.error("Error:", error);
+            messageDiv.textContent = "✗ Error de conexión con el servidor";
+            messageDiv.className = "error";
+            btnSubmit.innerHTML = originalHTML;
+            btnSubmit.disabled = false;
+        }
+    });
+</script>
 </body>
 
 </html>
