@@ -1,7 +1,6 @@
 package com.tu_paquete.ticketflex.Controller;
 
 import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +13,10 @@ import com.tu_paquete.ticketflex.dto.LoginAdminDTO;
 import com.tu_paquete.ticketflex.dto.RespuestaAPI;
 import com.tu_paquete.ticketflex.dto.UsuarioDTO;
 import com.tu_paquete.ticketflex.repository.mongo.UsuarioRepository;
+import com.tu_paquete.ticketflex.segurity.JwtUtil;
+
+import jakarta.servlet.http.Cookie; // Importante: faltaba esta importación
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/superadmin")
@@ -22,21 +25,24 @@ public class SuperAdminController {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    // Inyección por constructor (Práctica recomendada sobre @Autowired en campos)
+    // Constructor CORREGIDO (sintaxis y comas)
     public SuperAdminController(UsuarioService usuarioService,
             UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil) {
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     /**
-     * LOGIN SUPERADMIN: Debe ser público en el SecurityConfig
+     * LOGIN SUPERADMIN: Verifica credenciales y emite Cookie con JWT
      */
     @PostMapping("/login-superadmin")
-    public ResponseEntity<?> loginSuperAdmin(@RequestBody LoginAdminDTO login) {
+    public ResponseEntity<?> loginSuperAdmin(@RequestBody LoginAdminDTO login, HttpServletResponse response) {
         // 1. Verificar existencia del usuario
         Usuario usuario = usuarioRepository.findByEmail(login.getEmail())
                 .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
@@ -47,15 +53,28 @@ public class SuperAdminController {
                     .body(new RespuestaAPI("Contraseña incorrecta"));
         }
 
-        // 3. Verificar Rol específico
-        if (!"SuperAdmin".equalsIgnoreCase(usuario.getRol().getNombreRol())) {
+        // 3. Verificar Rol específico (Ignora mayúsculas/minúsculas)
+        String nombreRol = usuario.getRol().getNombreRol();
+        if (!"SuperAdmin".equalsIgnoreCase(nombreRol)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new RespuestaAPI("Acceso denegado: No tiene permisos de SuperAdmin"));
         }
 
-        // 4. Retornar ID (y el JWT se debería emitir aquí o mediante el filtro)
+        // 4. GENERAR TOKEN JWT
+        String token = jwtUtil.generarToken(usuario.getId(), nombreRol);
+
+        // 5. CREAR COOKIE SEGURA
+        Cookie cookie = new Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // Necesario para HTTPS en Render
+        cookie.setPath("/");
+        cookie.setMaxAge(3600); // 1 hora de duración
+        response.addCookie(cookie);
+
         return ResponseEntity.ok(Map.of(
                 "id", usuario.getId(),
+                "rol", nombreRol,
+                "token", token,
                 "mensaje", "Login exitoso como SuperAdmin"));
     }
 
@@ -92,7 +111,6 @@ public class SuperAdminController {
             @RequestHeader("idUsuario") String idSolicitante) {
 
         try {
-            // Validación de rol delegada al servicio o interceptada aquí
             if (!usuarioService.esSuperAdmin(idSolicitante)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new RespuestaAPI("Acceso no autorizado: Se requiere rol SuperAdmin"));
@@ -104,5 +122,10 @@ public class SuperAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new RespuestaAPI("Error al obtener la lista: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/login-superadmin")
+    public String mostrarLoginSuperAdmin() {
+        return "login-superadmin"; // Esto busca el archivo login-superadmin.html en templates
     }
 }

@@ -10,4 +10,9 @@ public class LoginController {
     public String login() {
         return "login"; // Renderiza la vista de inicio de sesión
     }
+
+    @GetMapping("/login-superadmin")
+    public String mostrarLoginSuperAdmin() {
+        return "login-superadmin"; // Esto busca el archivo login-superadmin.html en templates
+    }
 }
