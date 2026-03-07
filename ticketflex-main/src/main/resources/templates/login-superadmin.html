@@ -334,7 +334,7 @@
             if (res.ok) {
                 // Guardar el ID y opcionalmente el token si lo incluyes después
                 localStorage.setItem("superAdminId", data.id);
-localStorage.setItem("token", data.token);
+                localStorage.setItem("token", data.token);
                 messageDiv.textContent = "✓ " + (data.mensaje || "Acceso concedido");
                 messageDiv.className = "success";
 

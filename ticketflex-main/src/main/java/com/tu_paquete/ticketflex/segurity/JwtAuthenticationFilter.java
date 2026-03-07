@@ -45,10 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/js/") ||
                 path.startsWith("/favicon.ico") ||
                 path.equals("/superadmin/login") || // La ruta que definimos para el
-
                 path.equals("/api/superadmin/login-superadmin") ||
                 path.contains("login-superadmin") ||
-
                 path.startsWith("/api/superadmin/login-superadmin") ||
                 path.startsWith("/login-superadmin.html") ||
                 path.equals("/superadmin/login") ||

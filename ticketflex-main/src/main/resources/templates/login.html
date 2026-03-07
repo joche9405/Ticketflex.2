@@ -396,7 +396,10 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     e.preventDefault(); // Evita que la página se recargue
 
     const btn = this.querySelector('button[type="submit"]');
-    const email = document.getElementById('username').value;
+    const messageDiv = document.getElementById('message'); // Div para mensajes de error/éxito
+    
+    // Ajustado a los IDs de tu HTML: 'email' y 'password'
+    const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     // Efecto visual de carga
@@ -404,37 +407,59 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Verificando...';
     btn.disabled = true;
 
+    // Limpiar mensajes previos
+    if(messageDiv) {
+        messageDiv.textContent = "";
+        messageDiv.className = "";
+    }
+
     try {
-        const response = await fetch('/api/usuarios/login', { // Asegúrate que esta sea tu ruta de login
+        // Ruta específica del SuperAdminController
+        const response = await fetch('/api/superadmin/login-superadmin', { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email, password }),
-            // VITAL: Esto permite que el navegador acepte y guarde la cookie Set-Cookie
+            // VITAL: Permite que el navegador reciba y guarde la Cookie JWT
             credentials: 'include' 
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Si el login es exitoso, guardamos info básica y redirigimos
-            localStorage.setItem('usuario', JSON.stringify(data));
+            // Guardamos información en localStorage (útil para mostrar el nombre en el panel)
+            localStorage.setItem('superAdminId', data.id);
+            localStorage.setItem('rol', data.rol);
             
-            if (data.rol === 'Administrador' || data.rol === 'SuperAdmin') {
-                window.location.assign('/admin/dashboard');
-            } else {
-                window.location.assign('/'); // O tu página de usuario normal
-            }
+            // Feedback visual de éxito
+            btn.innerHTML = '<i class="fas fa-check"></i> ¡Acceso concedido!';
+            btn.style.background = "linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%)";
+
+            // Redirigimos a la nueva ruta controlada por el SuperAdminViewController
+            setTimeout(() => {
+                window.location.assign('/superadmin/dashboard');
+            }, 1000);
+
         } else {
-            // Si hay error, mostramos una alerta (puedes mejorar esto estéticamente)
-            alert(data.error || 'Credenciales incorrectas');
+            // Manejo de errores específicos del backend (401, 403, etc.)
+            const errorMsg = data.mensaje || data.error || 'Credenciales incorrectas';
+            
+            if(messageDiv) {
+                messageDiv.textContent = "✗ " + errorMsg;
+                messageDiv.className = "error-message"; // Asegúrate de tener este estilo en tu CSS
+            } else {
+                alert(errorMsg);
+            }
+
+            // Restaurar botón
             btn.innerHTML = originalContent;
+            btn.style.background = ""; 
             btn.disabled = false;
         }
     } catch (error) {
         console.error('Error en el login:', error);
-        alert('Error de conexión con el servidor');
+        alert('Error de conexión con el servidor. Verifica que el backend esté corriendo.');
         btn.innerHTML = originalContent;
         btn.disabled = false;
     }

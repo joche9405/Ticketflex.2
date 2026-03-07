@@ -425,28 +425,36 @@
             </div>
         </div>
     </div>
-<script>
+
     // 1. Verificación de sesión inicial
+  <script>
+    // 1. Verificación de seguridad inicial
     const idSolicitante = localStorage.getItem("superAdminId");
+    
     if (!idSolicitante) {
-        window.location.href = "/login-superadmin.html"; // Redirigir si no hay sesión
-    } else {
-        document.getElementById("idSolicitante").value = idSolicitante;
+        // Si no hay ID, redirigimos a la ruta del controlador de vista
+        window.location.href = "/superadmin/login"; 
     }
 
     // 2. Mostrar/ocultar contraseña
-    document.getElementById('togglePassword').addEventListener('click', function () {
-        const password = document.getElementById('password');
-        const icon = this.querySelector('i');
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        icon.classList.toggle('fa-eye-slash');
-    });
+    const togglePassword = document.getElementById('togglePassword');
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function () {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i') || this; // Maneja si el id está en el i o en el contenedor
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
 
     // 3. Cargar datos al iniciar
     document.addEventListener('DOMContentLoaded', () => {
+        // Inyectamos el ID en el campo oculto si existe
+        const idInput = document.getElementById("idSolicitante");
+        if (idInput) idInput.value = idSolicitante;
+        
         cargarAdministradores();
-        // cargarEventosEliminados(); // Descomentar cuando el endpoint esté listo
     });
 
     // 4. Manejar envío del formulario (Crear Admin)
@@ -474,9 +482,11 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "idUsuario": idSolicitante
+                    "idUsuario": idSolicitante // Tu controlador usa este header para validar
                 },
-                body: JSON.stringify(adminData)
+                body: JSON.stringify(adminData),
+                // VITAL: Envía la cookie de sesión al servidor
+                credentials: 'include' 
             });
 
             const data = await response.json();
@@ -510,9 +520,16 @@
     // 5. Cargar lista de administradores
     async function cargarAdministradores() {
         const tbody = document.querySelector("#adminsTable tbody");
+        if (!tbody) return;
+
         try {
             const response = await fetch("/api/superadmin/administradores", {
-                headers: { "idUsuario": idSolicitante }
+                method: "GET",
+                headers: { 
+                    "idUsuario": idSolicitante 
+                },
+                // VITAL: Envía la cookie de sesión para que el JwtFilter te reconozca
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -529,6 +546,8 @@
                         </td>
                     </tr>
                 `).join("") : '<tr><td colspan="4" class="text-center">No hay administradores registrados</td></tr>';
+            } else if (response.status === 403) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-warning text-center">Sesión expirada o no autorizada. Reingrese al sistema.</td></tr>';
             }
         } catch (error) {
             tbody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Error al conectar con el servidor</td></tr>';
@@ -542,20 +561,78 @@
         try {
             const response = await fetch(`/api/superadmin/administradores/${idAdmin}`, {
                 method: "DELETE",
-                headers: { "idUsuario": idSolicitante }
+                headers: { 
+                    "idUsuario": idSolicitante 
+                },
+                credentials: 'include'
             });
 
             if (response.ok) {
                 cargarAdministradores();
+                // Usar un mensaje más elegante si tienes un div, si no, alert está bien
                 alert("Administrador eliminado correctamente");
             } else {
                 const data = await response.json();
-                alert("Error: " + data.mensaje);
+                alert("Error: " + (data.mensaje || "No se pudo eliminar"));
             }
         } catch (error) {
             alert("Error de conexión");
         }
     }
+    async function cargarEventosEliminados() {
+    const tbody = document.querySelector("#deletedEventsTable tbody");
+    if (!tbody) return;
+
+    try {
+        const response = await fetch("/api/superadmin/eventos/eliminados", {
+            method: "GET",
+            headers: { "idUsuario": idSolicitante },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const eventos = await response.json();
+            tbody.innerHTML = eventos.length > 0 ? eventos.map(evento => `
+                <tr>
+                    <td>${evento.id}</td>
+                    <td>${evento.nombre}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="restaurarEvento('${evento.id}')">
+                            <i class="fas fa-undo"></i> Restaurar
+                        </button>
+                    </td>
+                </tr>
+            `).join("") : '<tr><td colspan="3" class="text-center">No hay eventos para restaurar</td></tr>';
+        }
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar eventos</td></tr>';
+    }
+}
+
+async function restaurarEvento(idEvento) {
+    try {
+        const response = await fetch(`/api/superadmin/eventos/restaurar/${idEvento}`, {
+            method: "PUT",
+            headers: { "idUsuario": idSolicitante },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            alert("¡Evento restaurado con éxito!");
+            cargarEventosEliminados(); // Refrescar la tabla
+        }
+    } catch (error) {
+        alert("Error al intentar restaurar el evento.");
+    }
+}
+document.querySelector('form[action="/logout"]').addEventListener('submit', function(e) {
+    // 1. Limpiar datos de navegación
+    localStorage.removeItem("superAdminId");
+    localStorage.removeItem("rol");
+    
+    // El formulario seguirá su curso hacia el backend para borrar la cookie
+    console.log("Sesión cerrada localmente, notificando al servidor...");
+});
 </script>
 </body>
 
