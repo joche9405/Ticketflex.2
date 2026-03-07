@@ -124,8 +124,4 @@ public class SuperAdminController {
         }
     }
 
-    @GetMapping("/login-superadmin")
-    public String mostrarLoginSuperAdmin() {
-        return "login-superadmin"; // Esto busca el archivo login-superadmin.html en templates
-    }
 }
