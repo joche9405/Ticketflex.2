@@ -40,8 +40,9 @@ public class SecurityConfig {
                                                 // Prioridad máxima a las peticiones OPTIONS y al Login de SuperAdmin
                                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/superadmin/login-superadmin").permitAll() // Sin
-                                                                                                                 // filtros
+                                                .requestMatchers("/superadmin/login",
+                                                                "/api/superadmin/login-superadmin")
+                                                .permitAll() // filtros
 
                                                 // Recursos públicos
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
