@@ -11,8 +11,9 @@ public class SuperAdminViewController {
         return "login-superadmin"; // Busca login-superadmin.html en /templates
     }
 
+ 
     @GetMapping("/superadmin/dashboard") // Esta será la nueva ruta del panel
-            public String mostrarP
-            return "superadmin-panel"; // Busca superadmin-panel.html en templ
-        }
+        public String mostrarPanel() {
+        return "superadmin-panel"; // Busca superadmin-panel.html en templates
+    }
 }
