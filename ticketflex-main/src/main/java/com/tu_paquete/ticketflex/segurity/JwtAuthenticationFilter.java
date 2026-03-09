@@ -43,6 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/login.html") ||
                 path.startsWith("/css/") ||
                 path.startsWith("/js/") ||
+                path.startsWith("/api/pagos/confirmacion-payu") ||
                 path.startsWith("/favicon.ico") ||
                 path.equals("/superadmin/login") || // La ruta que definimos para el
                 path.equals("/api/superadmin/login-superadmin") ||
@@ -63,7 +64,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         String method = request.getMethod();
 
-        // LOG 1: Entrada de la petición
         System.out.println(">>> [JWT FILTER] Petición recibida en: " + path + " [" + method + "]");
 
         String token = null;
@@ -72,57 +72,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             token = header.substring(7);
-            System.out.println(">>> [JWT FILTER] Token encontrado en Header Authorization");
         }
-        // 2. Si no hay header, buscar en las Cookies
+        // 2. Buscar en Cookies si no hay header
         else if (request.getCookies() != null) {
-            System.out.println(">>> [JWT FILTER] Buscando en cookies... Total: " + request.getCookies().length);
             for (Cookie cookie : request.getCookies()) {
-                System.out.println(">>> [JWT FILTER] Cookie vista: " + cookie.getName());
                 if ("token".equals(cookie.getName())) {
                     token = cookie.getValue();
-                    System.out.println(">>> [JWT FILTER] Cookie 'token' detectada con éxito");
                     break;
                 }
             }
-        } else {
-            System.out.println(">>> [JWT FILTER] No se detectaron cookies ni Header en la petición");
         }
 
         // 3. Validar el token y autenticar
         if (token != null) {
             try {
                 if (jwtUtil.validarToken(token)) {
+                    // EXTRACCIÓN DE DATOS
                     String userId = jwtUtil.obtenerUserId(token);
                     String rol = jwtUtil.obtenerRol(token).trim();
 
-                    System.out.println(">>> [JWT FILTER] Token VÁLIDO. Usuario: " + userId + " | Rol: " + rol);
+                    // --- CAMBIO CLAVE: Obtener el EMAIL para el PagoController ---
+                    // Si tu obtenerUserId ya devuelve el email, estamos bien.
+                    // Si devuelve el ID numérico/hex, necesitas un método obtenerEmail en jwtUtil.
+                    String email = jwtUtil.obtenerUserId(token); // O jwtUtil.obtenerEmail(token);
 
-                    // --- CORRECCIÓN: Doble autoridad para evitar fallos de matching ---
+                    System.out.println(">>> [JWT FILTER] Autenticando email: " + email);
+
                     List<SimpleGrantedAuthority> authorities = Arrays.asList(
                             new SimpleGrantedAuthority("ROLE_" + rol),
                             new SimpleGrantedAuthority(rol));
 
-                    System.out.println(">>> [JWT FILTER] Autoridades asignadas: " + authorities);
-
+                    // Guardamos el EMAIL como el "Name" de la autenticación
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userId, null, authorities);
+                            email, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    System.out.println(">>> [JWT FILTER] Seguridad establecida en el contexto de Spring");
 
+                    // Guardamos atributos adicionales para uso interno en el Request
                     request.setAttribute("userId", userId);
+                    request.setAttribute("userEmail", email);
                     request.setAttribute("rol", rol);
+
                 } else {
-                    System.out.println(
-                            ">>> [JWT FILTER] ALERTA: El token existe pero NO es válido (expirado o malformado)");
+                    System.out.println(">>> [JWT FILTER] Token inválido");
                 }
             } catch (Exception e) {
-                System.out.println(">>> [JWT FILTER] ERROR procesando token: " + e.getMessage());
+                System.out.println(">>> [JWT FILTER] ERROR: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
-        } else {
-            System.out.println(">>> [JWT FILTER] No se pudo extraer ningún token. La petición sigue como ANÓNIMA");
         }
 
         filterChain.doFilter(request, response);

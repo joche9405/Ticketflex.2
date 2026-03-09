@@ -464,100 +464,68 @@
     </div>
 
     <!-- Modal de Compra -->
-    <div id="purchaseModal" class="modal" data-event-date="">
-        <div class="modal-content purchase-modal custom-modal">
-            <span class="close-modal" id="closePurchaseModal">&times;</span>
+   <div id="purchaseModal" class="modal" data-event-date="">
+    <div class="modal-content purchase-modal custom-modal">
+        <span class="close-modal" id="closePurchaseModal">&times;</span>
 
-            <div class="event-details">
-                <div class="event-image">
-                    <img id="modalEventImage" src="" alt="Evento">
-                </div>
-                <div class="event-info">
-                    <h2 id="modalEventName"></h2>
-                    <div class="event-meta">
-                        <p><i class="fas fa-calendar"></i> <span id="modalEventDate"></span></p>
-                        <p><i class="fas fa-map-marker-alt"></i> <span id="modalEventLocation"></span></p>
-                        <p><i class="fas fa-clock"></i> <span id="modalEventTime"></span></p>
-                    </div>
-                    <p class="event-description" id="modalEventDescription"></p>
-                    <div class="event-price">
-                        <h3>Precio: <span id="modalEventPrice"></span></h3>
-                    </div>
-                </div>
+        <div class="event-details">
+            <div class="event-image">
+                <img id="modalEventImage" src="" alt="Evento">
             </div>
-
-            <div class="payment-options">
-                <h3>Selecciona tu método de pago</h3>
-
-                <div class="payment-tabs">
-                    <button class="payment-tab active" data-payment="traditional">
-                        <i class="fas fa-credit-card"></i> Pago Tradicional
-                    </button>
-                    <button class="payment-tab" data-payment="ticketflex">
-                        <i class="fas fa-ticket-alt"></i> TicketFlex (Pago a Cuotas)
-                    </button>
+            <div class="event-info">
+                <h2 id="modalEventName"></h2>
+                <div class="event-meta">
+                    <p><i class="fas fa-calendar"></i> <span id="modalEventDate"></span></p>
+                    <p><i class="fas fa-map-marker-alt"></i> <span id="modalEventLocation"></span></p>
+                    <p><i class="fas fa-clock"></i> <span id="modalEventTime"></span></p>
                 </div>
-
-                <!-- Formulario de Pago Tradicional -->
-                <div class="payment-form active" id="traditionalPayment">
-                    <form id="traditionalPaymentForm">
-                        <div class="form-group">
-                            <label for="traditionalCardNumber2">Número de Tarjeta</label>
-                            <input type="text" id="traditionalCardNumber2" placeholder="1234 5678 9012 3456" required>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="traditionalExpiryDate2">Fecha de Expiración</label>
-                                <input type="text" id="traditionalExpiryDate2" placeholder="MM/AA" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="traditionalCvv2">CVV</label>
-                                <input type="text" id="traditionalCvv2" placeholder="123" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="traditionalCardName">Nombre en la Tarjeta</label>
-                            <input type="text" id="traditionalCardName" placeholder="Jhon Ariza" required>
-                        </div>
-                        <button type="submit" class="pay-button">Pagar Ahora</button>
-                    </form>
-                </div>
-
-                <!-- Formulario de Pago TicketFlex -->
-                <div class="payment-form" id="ticketflexPayment">
-                    <form id="ticketflexPaymentForm">
-                        <div class="form-group">
-                            <label for="installments">Número de Cuotas</label>
-                            <select id="installments" required>
-                                <option value="">Selecciona el número de cuotas</option>
-                                <option value="2">2 cuotas</option>
-                                <option value="3">3 cuotas</option>
-                                <option value="4">4 cuotas</option>
-                                <option value="6">6 cuotas</option>
-                            </select>
-                            <div class="installment-details">
-                                <p>Valor por cuota: <span id="installmentValue"></span></p>
-                                <p>Fecha de pago: <span id="paymentDate"></span></p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="ticketflexName">Nombre Completo</label>
-                            <input type="text" id="ticketflexName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="ticketflexEmail">Correo Electrónico</label>
-                            <input type="email" id="ticketflexEmail" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="ticketflexPhone">Teléfono</label>
-                            <input type="tel" id="ticketflexPhone" required>
-                        </div>
-                        <button type="submit" class="pay-button">Confirmar Compra</button>
-                    </form>
+                <p class="event-description" id="modalEventDescription"></p>
+                <div class="event-price">
+                    <h3>Precio: <span id="modalEventPrice"></span></h3>
                 </div>
             </div>
         </div>
+
+        <div class="payment-options">
+            <h3>Selecciona tu método de pago</h3>
+
+            <div class="payment-tabs">
+                <button class="payment-tab active" data-payment="traditional">
+                    <i class="fas fa-credit-card"></i> Pago Tradicional (PayU)
+                </button>
+                <button class="payment-tab" data-payment="ticketflex">
+                    <i class="fas fa-ticket-alt"></i> TicketFlex (Pago a Cuotas)
+                </button>
+            </div>
+
+            <div class="payment-form active" id="traditionalPayment">
+                <div class="form-group">
+                    <label for="ticketCountTraditional">Cantidad de boletos:</label>
+                    <input type="number" id="ticketCountTraditional" min="1" max="10" value="1">
+                </div>
+                <div class="info-box">
+                    <p><i class="fas fa-info-circle"></i> Serás redirigido a la pasarela segura de PayU para completar tu pago.</p>
+                </div>
+                <button type="button" class="pay-button" id="btnPayNormal">
+                    <i class="fas fa-external-link-alt"></i> Pagar con PayU
+                </button>
+            </div>
+
+            <div class="payment-form" id="ticketflexPayment">
+                <div class="form-group">
+                    <label for="ticketCountFlex">Cantidad de boletos:</label>
+                    <input type="number" id="ticketCountFlex" min="1" max="10" value="1">
+                </div>
+                <div class="info-box">
+                    <p><i class="fas fa-clock"></i> Esta opción te permite diferir tu pago en cuotas mensuales.</p>
+                </div>
+                <button type="button" class="pay-button" id="btnPayFlex">
+                    Continuar con TicketFlex
+                </button>
+            </div>
+        </div>
     </div>
+</div>
 
     <!-- Footer Rediseñado -->
     <footer id="footer" class="modern-footer">

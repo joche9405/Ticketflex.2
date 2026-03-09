@@ -1,132 +1,115 @@
-// Funcionalidad del Modal de Compra
+// Funcionalidad del Modal de Compra - TicketFlex con PayU
 document.addEventListener('DOMContentLoaded', function() {
     const purchaseModal = document.getElementById('purchaseModal');
     const closePurchaseModal = document.getElementById('closePurchaseModal');
     const paymentTabs = document.querySelectorAll('.payment-tab');
     const paymentForms = document.querySelectorAll('.payment-form');
-    const installmentsSelect = document.getElementById('installments');
-    const installmentValue = document.getElementById('installmentValue');
-    const paymentDate = document.getElementById('paymentDate');
-    const traditionalPaymentForm = document.getElementById('traditionalPaymentForm');
-    const ticketflexPaymentForm = document.getElementById('ticketflexPaymentForm');
+    
+    // Elementos de la UI para cálculos
+    const ticketCountInput = document.getElementById('ticketCountTraditional');
+    const btnPayNormal = document.getElementById('btnPayNormal');
+    const btnPayFlex = document.getElementById('btnPayFlex');
 
-    // Función para abrir el modal de compra
+    // Variable global para mantener el ID del evento de MongoDB
+    let currentEventId = null;
+
+    /**
+     * Función global para abrir el modal y cargar los datos
+     * @param {Object} eventData - Objeto con los datos del evento (id, name, price, etc.)
+     */
     window.openPurchaseModal = function(eventData) {
-        // Llenar los datos del evento en el modal
-        document.getElementById('modalEventImage').src = eventData.image;
+        // 1. Verificación del ID de MongoDB
+        if (!eventData.id) {
+            console.error("Error: El evento no tiene un ID de MongoDB válido.");
+            return;
+        }
+        
+        currentEventId = eventData.id;
+
+        // 2. Llenar los datos visuales del modal
+        document.getElementById('modalEventImage').src = eventData.image || 'default.jpg';
         document.getElementById('modalEventName').textContent = eventData.name;
         document.getElementById('modalEventDate').textContent = eventData.date;
         document.getElementById('modalEventLocation').textContent = eventData.location;
-        document.getElementById('modalEventTime').textContent = eventData.time;
+        document.getElementById('modalEventTime').textContent = eventData.time || '--:--';
         document.getElementById('modalEventDescription').textContent = eventData.description;
         document.getElementById('modalEventPrice').textContent = eventData.price;
 
-        // Mostrar el modal
+        // 3. Mostrar el modal
         purchaseModal.style.display = 'block';
     };
 
-    // Cerrar el modal
-    closePurchaseModal.onclick = function() {
-        purchaseModal.style.display = 'none';
+    // --- MANEJO DE CIERRE ---
+    closePurchaseModal.onclick = () => purchaseModal.style.display = 'none';
+
+    window.onclick = (event) => {
+        if (event.target == purchaseModal) purchaseModal.style.display = 'none';
     };
 
-    // Cerrar el modal al hacer clic fuera de él
-    window.onclick = function(event) {
-        if (event.target == purchaseModal) {
-            purchaseModal.style.display = 'none';
-        }
-    };
-
-    // Cambiar entre métodos de pago
+    // --- PESTAÑAS DE PAGO ---
     paymentTabs.forEach(tab => {
         tab.addEventListener('click', function() {
-            // Remover clase active de todas las pestañas y formularios
             paymentTabs.forEach(t => t.classList.remove('active'));
             paymentForms.forEach(f => f.classList.remove('active'));
 
-            // Agregar clase active a la pestaña seleccionada
             this.classList.add('active');
-
-            // Mostrar el formulario correspondiente
             const paymentType = this.dataset.payment;
             document.getElementById(paymentType + 'Payment').classList.add('active');
         });
     });
 
-    // Calcular cuotas
-    installmentsSelect.addEventListener('change', function() {
-        const totalPrice = parseFloat(document.getElementById('modalEventPrice').textContent.replace(/[^0-9.-]+/g, ''));
-        const numInstallments = parseInt(this.value);
-        const eventDate = new Date(document.getElementById('modalEventDate').textContent);
-        
-        if (numInstallments && totalPrice) {
-            const installmentAmount = totalPrice / numInstallments;
-            installmentValue.textContent = `$${installmentAmount.toFixed(2)}`;
+    // --- LÓGICA DE PROCESAMIENTO DE PAGO ---
 
-            // Calcular fecha de pago (un mes antes del evento)
-            const paymentDateObj = new Date(eventDate);
-            paymentDateObj.setMonth(paymentDateObj.getMonth() - 1);
-            paymentDate.textContent = paymentDateObj.toLocaleDateString();
+    // 1. Pago Tradicional (Redirección a PayU vía Backend)
+    btnPayNormal.addEventListener('click', async function() {
+        const cantidad = ticketCountInput ? ticketCountInput.value : 1;
+
+        if (!currentEventId) {
+            alert("Error: No se ha seleccionado ningún evento.");
+            return;
+        }
+
+        try {
+            // Cambiar el botón a estado de carga
+            btnPayNormal.disabled = true;
+btnPayNormal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
+            const response = await fetch('/api/pagos/pagar', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    idBoleto: currentEventId, // ID de MongoDB enviado al backend
+                    cantidad: parseInt(cantidad),
+                    metodoPago: "TRADICIONAL"
+                })
+            });
+
+            if (response.ok) {
+                // El backend debe devolver el HTML del formulario oculto de PayU
+                const htmlForm = await response.text();
+                
+                const div = document.createElement('div');
+                div.style.display = 'none'; // Oculto para el usuario
+                div.innerHTML = htmlForm;
+                document.body.appendChild(div);
+
+                // El script devuelto por el backend enviará el formulario automáticamente
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                alert("Error al iniciar el pago: " + (errorData.message || "Servidor no disponible"));
+            }
+        } catch (error) {
+            console.error("Error en la petición:", error);
+            alert("Ocurrió un error al intentar conectar con la pasarela de pagos.");
+        } finally {
+            btnPayNormal.disabled = false;
+            btnPayNormal.textContent = "Pagar con PayU";
         }
     });
 
-    // Manejar pago tradicional
-    traditionalPaymentForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Aquí iría la lógica de procesamiento del pago
-        const paymentData = {
-            cardNumber: document.getElementById('traditionalCardNumber2').value,
-            expiryDate: document.getElementById('traditionalExpiryDate2').value,
-            cvv: document.getElementById('traditionalCvv2').value,
-            cardName: document.getElementById('traditionalCardName2').value,
-            eventId: currentEventId, // Necesitarás definir esta variable globalmente
-            paymentType: 'traditional'
-        };
-
-        // Simular procesamiento del pago
-        processPayment(paymentData);
+    // 2. Pago TicketFlex (Lógica futura)
+    btnPayFlex.addEventListener('click', function() {
+        alert("El sistema de cuotas TicketFlex está en mantenimiento. Por favor, usa el método tradicional temporalmente.");
     });
-
-    // Manejar pago TicketFlex
-    ticketflexPaymentForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const paymentData = {
-            name: document.getElementById('ticketflexName').value,
-            email: document.getElementById('ticketflexEmail').value,
-            phone: document.getElementById('ticketflexPhone').value,
-            installments: document.getElementById('installments').value,
-            eventId: currentEventId, // Necesitarás definir esta variable globalmente
-            paymentType: 'ticketflex'
-        };
-
-        // Simular procesamiento del pago
-        processPayment(paymentData);
-    });
-
-    // Función para procesar el pago
-    function processPayment(paymentData) {
-        // Aquí iría la lógica para enviar los datos al servidor
-        console.log('Procesando pago:', paymentData);
-
-        // Simular respuesta del servidor
-        setTimeout(() => {
-            alert(paymentData.paymentType === 'traditional' 
-                ? '¡Pago realizado con éxito!' 
-                : '¡Compra a cuotas confirmada!');
-            
-            // Cerrar el modal
-            purchaseModal.style.display = 'none';
-            
-            // Actualizar el historial de compras si es necesario
-            updatePurchaseHistory(paymentData);
-        }, 1500);
-    }
-
-    // Función para actualizar el historial de compras
-    function updatePurchaseHistory(paymentData) {
-        // Aquí iría la lógica para actualizar el historial de compras
-        console.log('Actualizando historial de compras:', paymentData);
-    }
-}); 
+});

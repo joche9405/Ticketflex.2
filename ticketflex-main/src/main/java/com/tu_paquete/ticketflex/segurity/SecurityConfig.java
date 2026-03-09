@@ -26,10 +26,11 @@ public class SecurityConfig {
                 http
                                 .cors(cors -> cors.configurationSource(request -> {
                                         CorsConfiguration opt = new CorsConfiguration();
+                                        // En producción, es mejor listar los orígenes exactos (Render y Local)
                                         opt.setAllowedOriginPatterns(List.of("*"));
                                         opt.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                                         opt.setAllowedHeaders(List.of("*"));
-                                        opt.setExposedHeaders(List.of("Authorization")); // Exponer el header
+                                        opt.setExposedHeaders(List.of("Authorization"));
                                         opt.setAllowCredentials(true);
                                         return opt;
                                 }))
@@ -37,29 +38,34 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                // Prioridad máxima a las peticiones OPTIONS y al Login de SuperAdmin
                                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                                                 .permitAll()
+
+                                                // --- RUTAS PÚBLICAS DE PAGO ---
+                                                .requestMatchers("/api/pagos/confirmacion-payu").permitAll()
+
+                                                // Acceso a login y registro
                                                 .requestMatchers("/superadmin/login",
                                                                 "/api/superadmin/login-superadmin")
-                                                .permitAll() // filtros
+                                                .permitAll()
+                                                .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
+                                                                "/api/usuarios/logout")
+                                                .permitAll()
 
-                                                // Recursos públicos
+                                                // Recursos estáticos y vistas
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
                                                                 "/registro", "/registro.html", "/favicon.ico")
                                                 .permitAll()
                                                 .requestMatchers("/public/**", "/css/**", "/js/**", "/images/**",
                                                                 "/fonts/**")
                                                 .permitAll()
+
+                                                // APIs de consulta pública
                                                 .requestMatchers("/api/imagen/**", "/api/eventos/**", "/eventos/**",
                                                                 "/getimagen/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
-                                                                "/api/usuarios/logout")
-                                                .permitAll()
 
-                                                // Restricciones por Rol (Asegúrate de que el rol en DB sea
-                                                // "SuperAdmin")
+                                                // Restricciones de administración
                                                 .requestMatchers("/api/superadmin/**")
                                                 .hasAnyAuthority("ROLE_SuperAdmin", "SuperAdmin")
 
@@ -71,7 +77,9 @@ public class SecurityConfig {
 
         @Bean
         public WebSecurityCustomizer webSecurityCustomizer() {
-                return (web) -> web.ignoring().requestMatchers("/favicon.ico", "/css/**", "/js/**", "/images/**",
-                                "/static/**", "/resources/**");
+                // Ignorar recursos estáticos para que no pasen por ningún filtro de seguridad
+                return (web) -> web.ignoring().requestMatchers(
+                                "/favicon.ico", "/css/**", "/js/**", "/images/**", "/static/**", "/resources/**",
+                                "/fonts/**");
         }
 }
