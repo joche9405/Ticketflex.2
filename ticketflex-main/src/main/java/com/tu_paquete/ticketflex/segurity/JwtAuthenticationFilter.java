@@ -29,12 +29,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
+
         // Retornamos true para las rutas que NO deben ser filtradas (públicas)
+        // Mantenemos TODA tu lista original para asegurar compatibilidad
         return path.startsWith("/api/usuarios/login") ||
                 path.startsWith("/api/usuarios/registrar") ||
                 path.startsWith("/api/imagen") ||
                 path.startsWith("/getimagen") ||
-                path.startsWith("/api/eventos") ||
+                path.startsWith("/api/eventos") || // Esto libera /api/eventos/listar
                 path.startsWith("/eventos") ||
                 path.startsWith("/admin/forgot-password") ||
                 path.startsWith("/admin/reset-password") ||
@@ -45,14 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/js/") ||
                 path.startsWith("/api/pagos/confirmacion-payu") ||
                 path.startsWith("/favicon.ico") ||
-                path.equals("/superadmin/login") || // La ruta que definimos para el
-                path.equals("/api/superadmin/login-superadmin") ||
-                path.contains("login-superadmin") ||
-                path.startsWith("/api/superadmin/login-superadmin") ||
-                path.startsWith("/login-superadmin.html") ||
                 path.equals("/superadmin/login") ||
                 path.equals("/api/superadmin/login-superadmin") ||
-                path.startsWith("/images/");
+                path.contains("login-superadmin") ||
+                path.startsWith("/login-superadmin.html") ||
+                path.startsWith("/images/") ||
+                path.startsWith("/fonts/");
     }
 
     @Override
@@ -64,7 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         String method = request.getMethod();
 
-        System.out.println(">>> [JWT FILTER] Petición recibida en: " + path + " [" + method + "]");
+        // Log útil para depuración en Render
+        System.out.println(">>> [JWT FILTER] Procesando: " + path + " [" + method + "]");
 
         String token = null;
 
@@ -73,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             token = header.substring(7);
         }
-        // 2. Buscar en Cookies si no hay header
+        // 2. Si no hay header, buscar en las Cookies
         else if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("token".equals(cookie.getName())) {
@@ -87,37 +88,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 if (jwtUtil.validarToken(token)) {
-                    // EXTRACCIÓN DE DATOS
+                    // Extraemos los datos del token
                     String userId = jwtUtil.obtenerUserId(token);
                     String rol = jwtUtil.obtenerRol(token).trim();
 
-                    // --- CAMBIO CLAVE: Obtener el EMAIL para el PagoController ---
-                    // Si tu obtenerUserId ya devuelve el email, estamos bien.
-                    // Si devuelve el ID numérico/hex, necesitas un método obtenerEmail en jwtUtil.
-                    String email = jwtUtil.obtenerUserId(token); // O jwtUtil.obtenerEmail(token);
+                    // Importante: Usamos el email/userId como el 'Principal' para PagoController
+                    String email = userId;
 
-                    System.out.println(">>> [JWT FILTER] Autenticando email: " + email);
+                    System.out.println(">>> [JWT FILTER] Usuario autenticado: " + email);
 
+                    // Doble autoridad para evitar fallos de matching en SecurityConfig
                     List<SimpleGrantedAuthority> authorities = Arrays.asList(
                             new SimpleGrantedAuthority("ROLE_" + rol),
                             new SimpleGrantedAuthority(rol));
 
-                    // Guardamos el EMAIL como el "Name" de la autenticación
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             email, null, authorities);
 
+                    // Establecemos la autenticación en el contexto de Spring
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    // Guardamos atributos adicionales para uso interno en el Request
+                    // Atributos útiles para el objeto Request
                     request.setAttribute("userId", userId);
                     request.setAttribute("userEmail", email);
                     request.setAttribute("rol", rol);
 
                 } else {
-                    System.out.println(">>> [JWT FILTER] Token inválido");
+                    System.out.println(">>> [JWT FILTER] Token inválido o expirado");
                 }
             } catch (Exception e) {
-                System.out.println(">>> [JWT FILTER] ERROR: " + e.getMessage());
+                System.out.println(">>> [JWT FILTER] ERROR procesando token: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
         }

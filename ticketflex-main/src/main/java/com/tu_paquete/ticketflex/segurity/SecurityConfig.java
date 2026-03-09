@@ -26,7 +26,6 @@ public class SecurityConfig {
                 http
                                 .cors(cors -> cors.configurationSource(request -> {
                                         CorsConfiguration opt = new CorsConfiguration();
-                                        // En producción, es mejor listar los orígenes exactos (Render y Local)
                                         opt.setAllowedOriginPatterns(List.of("*"));
                                         opt.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                                         opt.setAllowedHeaders(List.of("*"));
@@ -38,21 +37,24 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                // 1. Preflight y Errores
                                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                                                 .permitAll()
+                                                .requestMatchers("/error").permitAll()
 
-                                                // --- RUTAS PÚBLICAS DE PAGO ---
+                                                // 2. Públicos: Pagos y Eventos (Crítico para que cargue el listar)
                                                 .requestMatchers("/api/pagos/confirmacion-payu").permitAll()
-
-                                                // Acceso a login y registro
-                                                .requestMatchers("/superadmin/login",
-                                                                "/api/superadmin/login-superadmin")
+                                                .requestMatchers("/api/eventos/**", "/eventos/**", "/api/imagen/**",
+                                                                "/getimagen/**")
                                                 .permitAll()
+
+                                                // 3. Autenticación y Vistas
                                                 .requestMatchers("/api/usuarios/login", "/api/usuarios/registrar",
                                                                 "/api/usuarios/logout")
                                                 .permitAll()
-
-                                                // Recursos estáticos y vistas
+                                                .requestMatchers("/superadmin/login",
+                                                                "/api/superadmin/login-superadmin")
+                                                .permitAll()
                                                 .requestMatchers("/", "/index", "/index.html", "/login", "/login.html",
                                                                 "/registro", "/registro.html", "/favicon.ico")
                                                 .permitAll()
@@ -60,15 +62,9 @@ public class SecurityConfig {
                                                                 "/fonts/**")
                                                 .permitAll()
 
-                                                // APIs de consulta pública
-                                                .requestMatchers("/api/imagen/**", "/api/eventos/**", "/eventos/**",
-                                                                "/getimagen/**")
-                                                .permitAll()
-
-                                                // Restricciones de administración
+                                                // 4. Privados
                                                 .requestMatchers("/api/superadmin/**")
                                                 .hasAnyAuthority("ROLE_SuperAdmin", "SuperAdmin")
-
                                                 .anyRequest().authenticated())
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -77,7 +73,6 @@ public class SecurityConfig {
 
         @Bean
         public WebSecurityCustomizer webSecurityCustomizer() {
-                // Ignorar recursos estáticos para que no pasen por ningún filtro de seguridad
                 return (web) -> web.ignoring().requestMatchers(
                                 "/favicon.ico", "/css/**", "/js/**", "/images/**", "/static/**", "/resources/**",
                                 "/fonts/**");
