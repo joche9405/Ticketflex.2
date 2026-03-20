@@ -53,51 +53,34 @@ public class EventoController {
 
             List<Map<String, Object>> response = eventos.stream().map(evento -> {
                 Map<String, Object> map = new HashMap<>();
-                // Usamos bloques try/catch individuales o validaciones de nulos para que un
-                // solo evento dañado no rompa toda la lista
                 map.put("id", evento.getId());
-                map.put("nombreEvento", evento.getNombreEvento() != null ? evento.getNombreEvento() : "Sin nombre");
-                map.put("artista", evento.getArtista() != null ? evento.getArtista() : "Varios");
+                map.put("nombreEvento", evento.getNombreEvento());
+                map.put("artista", evento.getArtista());
                 map.put("fecha", evento.getFecha() != null ? evento.getFecha().toString() : null);
                 map.put("lugar", evento.getLugar());
                 map.put("descripcion", evento.getDescripcion());
-
-                // Blindaje para BigDecimal
-                map.put("precioBase", (evento.getPrecioBase() != null) ? evento.getPrecioBase().toString() : "0");
-
                 map.put("disponibilidad", evento.getDisponibilidad());
-
-                // Imagen con fallback
-                String imagenId = evento.getImagen();
-                map.put("imagen", (imagenId != null && !imagenId.isEmpty()) ? "/api/imagen/" + imagenId
-                        : "/api/imagen/default.jpg");
-
                 map.put("categoria", evento.getCategoria());
 
-                // --- ESTO FALTABA: Mapear el Creador/Usuario para TicketFlex ---
+                // --- PROTECCIÓN CRÍTICA PARA EL PRECIO ---
+                Object precio = evento.getPrecioBase();
+                map.put("precioBase", precio != null ? precio.toString() : "0");
+
+                // Imagen
+                map.put("imagen", "/api/imagen/" + evento.getImagen());
+
+                // Creador (Email)
                 if (evento.getCreador() != null) {
                     map.put("creadorEmail", evento.getCreador().getEmail());
-                } else {
-                    map.put("creadorEmail", "No disponible");
                 }
 
                 return map;
             }).collect(Collectors.toList());
 
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(response);
-
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            // Log detallado en la consola de Render/Spring
-            System.err.println("CRITICAL ERROR in /listar: " + e.getMessage());
             e.printStackTrace();
-
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Error interno en el servidor al listar eventos.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(error);
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 
